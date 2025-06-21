@@ -11,13 +11,13 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
     margin: 15px;
-    background: #1e1e2f; /* خلفية غامقة */
-    color: #f1f1f1;
+    background: #202124; /* شبيه بتطبيق Keep */
+    color: #e8eaed;
   }
 
   h2 {
     text-align: center;
-    color: #58a6ff;
+    color: #8ab4f8;
     margin-bottom: 20px;
     font-weight: 700;
   }
@@ -27,8 +27,8 @@
     margin: 0 auto 25px auto;
     padding: 12px 30px;
     font-size: 16px;
-    background: #2d68d0;
-    color: white;
+    background: #3c4043;
+    color: #e8eaed;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -36,7 +36,7 @@
     transition: background-color 0.3s ease;
   }
   #backBtn:hover {
-    background: #1c4ca3;
+    background: #5f6368;
   }
 
   .table-wrapper {
@@ -44,7 +44,7 @@
     max-width: 100%;
     margin: 0 auto;
     border-radius: 10px;
-    background: #2a2a3d;
+    background: #292a2d;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
 
@@ -53,18 +53,18 @@
     border-collapse: collapse;
     min-width: 700px;
     font-size: 14px;
-    color: #f1f1f1;
+    color: #e8eaed;
   }
 
   thead {
-    background: #3b3b58;
+    background: #3c4043;
     color: #ffffff;
   }
 
   th, td {
     padding: 14px 12px;
     text-align: center;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid #555;
   }
 
   tr:last-child td {
@@ -78,20 +78,20 @@
     font-weight: 600;
     font-size: 14px;
     min-width: 80px;
-    background: #1e1e2f;
-    color: #fff;
+    background: #202124;
+    color: #e8eaed;
   }
 
   .result-جارية {
-    background-color: #4b4b1e !important; /* أصفر داكن */
+    background-color: #4f4f1f22 !important; /* أصفر باهت جدًا */
   }
 
   .result-ربح {
-    background-color: #1f3f1f !important; /* أخضر داكن */
+    background-color: #1f4f1f22 !important; /* أخضر باهت جدًا */
   }
 
   .result-خسارة {
-    background-color: #4b1e1e !important; /* أحمر داكن */
+    background-color: #4f1f1f22 !important; /* أحمر باهت جدًا */
   }
 
   @media (max-width: 720px) {
@@ -137,7 +137,7 @@
       transform: translateY(-50%);
       white-space: nowrap;
       font-weight: 700;
-      color: #ccc;
+      color: #aaa;
     }
     td:nth-of-type(1)::before { content: "#"; }
     td:nth-of-type(2)::before { content: "الزوج"; }
@@ -181,7 +181,6 @@
 
   function renderTrades() {
     tbody.innerHTML = "";
-
     const allTrades = [...savedTrades, ...pendingTrades];
 
     allTrades.forEach((trade, index) => {
