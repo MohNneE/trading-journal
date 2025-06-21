@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>سجل صفقات التداول - تصميم فلات مع زر عائم</title>
+  <title>سجل صفقات التداول - تصميم فلات متجاوب</title>
   <style>
     :root {
       --primary: #4a90e2;
-      --primary-dark: #357ABD;
-      --secondary: #f5f7fa;
+      --primary-dark: #357abd;
+      --secondary-bg: #f7f9fc;
       --text-primary: #2c3e50;
       --text-secondary: #7f8c8d;
+      --border: #ddd;
       --success: #27ae60;
       --error: #c0392b;
-      --border: #dcdcdc;
     }
     * {
       box-sizing: border-box;
@@ -22,17 +22,19 @@
     body {
       direction: rtl;
       margin: 0;
-      padding: 20px;
-      background-color: var(--secondary);
+      padding: 15px 10px;
+      background-color: var(--secondary-bg);
       color: var(--text-primary);
+      font-size: 16px;
       min-height: 100vh;
       position: relative;
     }
     h2 {
-      text-align: center;
+      font-size: 22px;
       margin-bottom: 20px;
-      font-weight: 700;
       color: var(--primary);
+      font-weight: 700;
+      text-align: center;
     }
     form {
       background: white;
@@ -46,19 +48,19 @@
       font-weight: 600;
       margin-top: 12px;
       display: block;
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: var(--text-primary);
     }
     input, select {
       width: 100%;
-      padding: 10px 12px;
-      font-size: 1rem;
+      padding: 12px 10px;
+      font-size: 16px;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       margin-top: 6px;
-      transition: border-color 0.3s ease;
-      background-color: white;
+      background: white;
       color: var(--text-primary);
+      transition: border-color 0.3s ease;
     }
     input:focus, select:focus {
       outline: none;
@@ -89,20 +91,22 @@
       font-size: 1.1rem;
       background-color: var(--primary);
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       color: white;
       font-weight: 700;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      margin-top: 10px;
+      margin-top: 15px;
     }
     button:hover:not(:disabled) {
       background-color: var(--primary-dark);
     }
     button:disabled {
-      background-color: #b0c4de;
+      background-color: #a0aec0;
       cursor: not-allowed;
     }
+
+    /* جدول متجاوب */
     table {
       width: 100%;
       max-width: 800px;
@@ -113,6 +117,7 @@
       border-radius: 8px;
       overflow: hidden;
       font-size: 0.95rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     thead {
       background-color: var(--primary);
@@ -135,13 +140,9 @@
       cursor: pointer;
       color: var(--text-primary);
     }
+
+    /* تصميم متجاوب للهواتف */
     @media (max-width: 600px) {
-      body {
-        padding: 15px 10px;
-      }
-      form {
-        padding: 15px;
-      }
       table, thead, tbody, th, td, tr {
         display: block;
       }
@@ -151,29 +152,35 @@
         left: -9999px;
       }
       tbody tr {
-        margin-bottom: 15px;
         border: 1px solid var(--border);
         border-radius: 8px;
-        padding: 15px 10px;
+        margin-bottom: 15px;
         background-color: white;
+        padding: 15px 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
       }
       tbody td {
         border: none;
         position: relative;
         padding-left: 50%;
         text-align: right;
+        font-size: 15px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        white-space: normal;
       }
       tbody td::before {
         position: absolute;
-        top: 12px;
+        top: 50%;
         right: 15px;
+        transform: translateY(-50%);
         width: 45%;
         white-space: nowrap;
         font-weight: 600;
         color: var(--text-secondary);
         content: attr(data-label);
-        font-size: 0.9rem;
         text-align: right;
+        font-size: 14px;
       }
       td select {
         width: 100%;
@@ -182,36 +189,33 @@
 
     /* زر عائم */
     #fab {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      background-color: var(--primary);
       width: 56px;
       height: 56px;
-      border-radius: 50%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      cursor: pointer;
-      color: white;
-      font-size: 30px;
+      font-size: 28px;
       line-height: 56px;
+      bottom: 25px;
+      right: 25px;
+      position: fixed;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
       text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      cursor: pointer;
+      z-index: 1000;
       user-select: none;
       transition: background-color 0.3s ease;
-      z-index: 1000;
     }
     #fab:hover {
       background-color: var(--primary-dark);
     }
-
-    /* قائمة زر عائم */
     #fabMenu {
       position: fixed;
       bottom: 85px;
       right: 25px;
       background-color: white;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
       display: none;
       flex-direction: column;
       min-width: 160px;
@@ -221,21 +225,21 @@
       display: flex;
     }
     #fabMenu a {
-      padding: 12px 16px;
+      padding: 14px 18px;
       text-decoration: none;
       color: var(--text-primary);
       font-weight: 600;
-      border-bottom: 1px solid var(--border);
-      transition: background-color 0.2s ease;
+      border-bottom: 1px solid #eee;
       cursor: pointer;
-      text-align: right;
       direction: rtl;
+      text-align: right;
+      transition: background-color 0.2s ease;
     }
     #fabMenu a:last-child {
       border-bottom: none;
     }
     #fabMenu a:hover {
-      background-color: var(--secondary);
+      background-color: var(--secondary-bg);
     }
   </style>
 </head>
@@ -295,7 +299,7 @@
   </table>
 
   <!-- زر عائم -->
-  <div id="fab">+</div>
+  <div id="fab" aria-label="فتح القائمة">+</div>
 
   <!-- قائمة زر عائم -->
   <div id="fabMenu" role="menu" aria-hidden="true">
@@ -325,7 +329,6 @@
     const row = document.createElement("tr");
 
     const resultCell = document.createElement("td");
-    resultCell.classList.add("result-cell");
     const resultSelect = document.createElement("select");
     resultSelect.innerHTML = `
       <option value="جارية">🔄 جارية</option>
@@ -375,7 +378,7 @@
     document.body.removeChild(link);
   }
 
-  // زر عائم - التحكم بفتح وإغلاق القائمة
+  // زر عائم - فتح/إغلاق القائمة
   const fab = document.getElementById('fab');
   const fabMenu = document.getElementById('fabMenu');
 
