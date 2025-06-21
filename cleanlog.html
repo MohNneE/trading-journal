@@ -4,21 +4,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>سجل الصفقات</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; background: #202124; color: #e8eaed; overflow: auto; min-height: 100vh; padding: 15px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; background: #202124; color: #e8eaed; overflow: auto; min-height: 100vh; padding: 15px; position: relative; }
 
 h2 { text-align: center; color: #e8eaed; margin-bottom: 20px; font-weight: 700; font-size: 22px; background: #3c4043; padding: 12px; border-radius: 12px; }
-
-#backBtn { display: block; margin: 0 auto 25px auto; padding: 12px 30px; font-size: 16px; background: #3c4043; color: #e8eaed; border: none; border-radius: 8px; cursor: pointer; max-width: 300px; transition: background-color 0.3s ease; } #backBtn:hover { background: #5f6368; }
 
 .table-wrapper { width: 100%; max-width: 500px; margin: auto; border-radius: 10px; background: #292a2d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
 table { width: 100%; border-collapse: collapse; font-size: 14px; color: #e8eaed; }
 
-thead { background: #3c4043; color: #ffffff; }
-
-th { padding: 14px 12px; text-align: center; font-size: 16px; background-color: #3c4043; border-bottom: 1px solid #444; }
-
-th::after { content: " ✦"; color: #8ab4f8; }
+thead { display: none; }
 
 tbody tr { background: #2d2f31; margin-bottom: 12px; display: flex; flex-direction: column; padding: 14px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: background 0.3s; }
 
@@ -32,19 +26,24 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
 
 .cell-ربح { background-color: #27ae60; color: #fff; }
 
-.cell-خسارة { background-color: #e74c3c; color: #fff; } </style>
+.cell-خسارة { background-color: #e74c3c; color: #fff; }
+
+#fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: #f39c12; color: white; font-size: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); cursor: pointer; z-index: 999; }
+
+#fabMenu { position: fixed; bottom: 90px; right: 20px; background: #2c2d30; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); padding: 10px 0; display: none; z-index: 998; }
+
+.fab-item { padding: 10px 20px; color: #e8eaed; text-align: right; cursor: pointer; white-space: nowrap; } .fab-item:hover { background: #444; } </style>
 
 </head>
 <body><h2>سجل الصفقات</h2>
-<button id="backBtn" onclick="goBack()">العودة للإضافة</button><div class="table-wrapper">
+<div class="table-wrapper">
   <table>
-    <thead>
-      <tr>
-        <th>تفاصيل الصفقات</th>
-      </tr>
-    </thead>
     <tbody id="tradesBody"></tbody>
   </table>
+</div><div id="fab" onclick="toggleFabMenu()">＋</div>
+<div id="fabMenu">
+  <div class="fab-item" onclick="goTo('index.html')">➕ إضافة صفقة</div>
+  <!-- يمكن لاحقًا إضافة المزيد من العناصر هنا -->
 </div><script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
@@ -97,8 +96,13 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
     renderTrades();
   }
 
-  function goBack() {
-    window.location.href = "index.html";
+  function goTo(link) {
+    window.location.href = link;
+  }
+
+  function toggleFabMenu() {
+    const menu = document.getElementById('fabMenu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
   }
 
   function addLongPressToDelete(row) {
