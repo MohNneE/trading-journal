@@ -1,71 +1,395 @@
-// تحميل الصفقات من التخزين عند بدء الصفحة
-window.onload = function() {
-  loadTradesFromStorage();
-};
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>سجل صفقات التداول</title>
+<style>
+  :root {
+    --primary: #4a90e2;
+    --primary-dark: #357abd;
+    --secondary-bg: #f7f9fc;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --border: #ddd;
+  }
+  * {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  html, body {
+    direction: rtl;
+    margin: 0;
+    padding: 15px 10px;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    font-size: 16px;
+    min-height: 100vh;
+    overflow-x: hidden; /* منع السحب الأفقي */
+  }
+  h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: var(--primary);
+    font-weight: 700;
+    text-align: center;
+  }
+  form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+  }
+  label {
+    font-weight: 600;
+    margin-top: 12px;
+    display: block;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+  input, select {
+    width: 100%;
+    padding: 12px 10px;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 6px;
+    background: white;
+    color: var(--text-primary);
+    transition: border-color 0.3s ease;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: #f0f8ff;
+  }
+  .checkbox-group {
+    margin-top: 12px;
+    margin-bottom: 16px;
+  }
+  .checkbox-group label {
+    font-weight: 400;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+  }
+  .checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    background-color: var(--primary);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+  }
+  button:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+  }
+  button:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+  }
 
-function saveTrade() {
-  // ... الكود القديم ...
-  
-  // حفظ في localStorage
-  saveTradeToStorage({
-    pair, type, entry, sl, tp,
-    result: "جارية",
-    conditionsMet: true,
-    timestamp: new Date().toISOString()
-  });
+  /* تصميم الجدول كقائمة عمودية */
+  table {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+  }
+  tbody tr {
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    display: block;
+    padding: 15px 20px;
+    position: relative;
+  }
+  tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border: none;
+    font-size: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  tbody td:last-child {
+    border-bottom: none;
+  }
+  tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  /* لخانة النتائج، نجمّل الselect */
+  tbody td select {
+    margin-left: 10px;
+    min-width: 100px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--text-primary);
+  }
+  /* إزالة رأس الجدول */
+  thead {
+    display: none;
+  }
 
-  // ... الكود القديم ...
-}
+  /* زر عائم */
+  #fab {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    line-height: 56px;
+    bottom: 25px;
+    right: 25px;
+    position: fixed;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 1000;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #fab:hover {
+    background-color: var(--primary-dark);
+  }
+  #fabMenu {
+    position: fixed;
+    bottom: 85px;
+    right: 25px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    min-width: 160px;
+    z-index: 1000;
+  }
+  #fabMenu.show {
+    display: flex;
+  }
+  #fabMenu a {
+    padding: 14px 18px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    direction: rtl;
+    text-align: right;
+    transition: background-color 0.2s ease;
+  }
+  #fabMenu a:last-child {
+    border-bottom: none;
+  }
+  #fabMenu a:hover {
+    background-color: var(--secondary-bg);
+  }
+</style>
+</head>
+<body>
 
-function saveTradeToStorage(trade) {
-  let trades = JSON.parse(localStorage.getItem("trades") || "[]");
-  trades.push(trade);
-  localStorage.setItem("trades", JSON.stringify(trades));
-}
+  <h2>📘 سجل صفقات التداول</h2>
 
-function loadTradesFromStorage() {
-  let trades = JSON.parse(localStorage.getItem("trades") || "[]");
-  trades.forEach(trade => addTradeToTable(trade));
-}
+  <form id="tradeForm">
+    <label for="pair">زوج التداول:</label>
+    <select id="pair" name="pair">
+      <option value="EUR/USD">EUR/USD</option>
+      <option value="XAU/USD">XAU/USD</option>
+      <option value="BTC/USD">BTC/USD</option>
+      <option value="USD/JPY">USD/JPY</option>
+    </select>
 
-function addTradeToTable(trade) {
-  tradeCount++;
+    <label for="type">نوع الصفقة:</label>
+    <select id="type" name="type">
+      <option value="شراء">شراء</option>
+      <option value="بيع">بيع</option>
+    </select>
 
-  const table = document.getElementById("tradesTable").querySelector("tbody");
-  const row = document.createElement("tr");
+    <label for="entry">سعر الدخول:</label>
+    <input type="number" step="0.0001" id="entry" name="entry" required />
 
-  const resultCell = document.createElement("td");
-  const resultSelect = document.createElement("select");
-  resultSelect.innerHTML = `
-    <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
-    <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
-    <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
-  `;
-  // عند تغيير النتيجة نحدث التخزين أيضاً
-  resultSelect.addEventListener("change", function() {
-    updateTradeResult(trade.timestamp, this.value);
-  });
-  resultCell.appendChild(resultSelect);
+    <label for="sl">وقف الخسارة:</label>
+    <input type="number" step="0.0001" id="sl" name="sl" required />
 
-  row.innerHTML = `
-    <td data-label="#">${tradeCount}</td>
-    <td data-label="الزوج">${trade.pair}</td>
-    <td data-label="النوع">${trade.type}</td>
-    <td data-label="دخول">${trade.entry}</td>
-    <td data-label="وقف">${trade.sl}</td>
-    <td data-label="هدف">${trade.tp}</td>
-  `;
-  row.appendChild(resultCell);
-  row.innerHTML += `<td data-label="الشروط">✅</td>`;
+    <label for="tp">الهدف:</label>
+    <input type="number" step="0.0001" id="tp" name="tp" required />
 
-  table.appendChild(row);
-}
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" id="allConditions" onchange="checkConditions()" />
+        تم توفر جميع الشروط
+      </label>
+    </div>
 
-function updateTradeResult(timestamp, newResult) {
-  let trades = JSON.parse(localStorage.getItem("trades") || "[]");
-  let index = trades.findIndex(t => t.timestamp === timestamp);
-  if (index !== -1) {
-    trades[index].result = newResult;
+    <button type="button" id="saveBtn" onclick="saveTrade()" disabled>💾 تسجيل الصفقة</button>
+  </form>
+
+  <table id="tradesTable" aria-label="جدول صفقات التداول">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الزوج</th>
+        <th>النوع</th>
+        <th>دخول</th>
+        <th>وقف</th>
+        <th>هدف</th>
+        <th>النتيجة</th>
+        <th>الشروط</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- زر عائم -->
+  <div id="fab" aria-label="فتح القائمة">+</div>
+
+  <!-- قائمة زر عائم -->
+  <div id="fabMenu" role="menu" aria-hidden="true">
+    <a href="cleanlog.html" role="menuitem">سجل الصفقات</a>
+    <a href="page2.html" role="menuitem">صفحة 2</a>
+    <a href="page3.html" role="menuitem">صفحة 3</a>
+  </div>
+
+<script>
+  let tradeCount = 0;
+
+  window.onload = function() {
+    loadTradesFromStorage();
+  };
+
+  function checkConditions() {
+    const checkbox = document.getElementById("allConditions");
+    document.getElementById("saveBtn").disabled = !checkbox.checked;
+  }
+
+  function saveTrade() {
+    const pair = document.getElementById("pair").value;
+    const type = document.getElementById("type").value;
+    const entry = document.getElementById("entry").value;
+    const sl = document.getElementById("sl").value;
+    const tp = document.getElementById("tp").value;
+
+    if(!pair || !type || !entry || !sl || !tp){
+      alert("يرجى ملء جميع الحقول.");
+      return;
+    }
+
+    const trade = {
+      pair,
+      type,
+      entry,
+      sl,
+      tp,
+      result: "جارية",
+      conditionsMet: true,
+      timestamp: new Date().toISOString()
+    };
+
+    addTradeToTable(trade);
+    saveTradeToStorage(trade);
+
+    document.getElementById("tradeForm").reset();
+    document.getElementById("saveBtn").disabled = true;
+  }
+
+  function addTradeToTable(trade) {
+    tradeCount++;
+
+    const table = document.getElementById("tradesTable").querySelector("tbody");
+    const row = document.createElement("tr");
+
+    const resultCell = document.createElement("td");
+    const resultSelect = document.createElement("select");
+    resultSelect.innerHTML = `
+      <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
+      <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
+      <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
+    `;
+    resultSelect.addEventListener("change", function() {
+      updateTradeResult(trade.timestamp, this.value);
+    });
+    resultCell.appendChild(resultSelect);
+
+    row.innerHTML = `
+      <td data-label="#">${tradeCount}</td>
+      <td data-label="الزوج">${trade.pair}</td>
+      <td data-label="النوع">${trade.type}</td>
+      <td data-label="دخول">${trade.entry}</td>
+      <td data-label="وقف">${trade.sl}</td>
+      <td data-label="هدف">${trade.tp}</td>
+    `;
+    row.appendChild(resultCell);
+    row.innerHTML += `<td data-label="الشروط">✅</td>`;
+
+    table.appendChild(row);
+  }
+
+  function saveTradeToStorage(trade) {
+    let trades = JSON.parse(localStorage.getItem("trades") || "[]");
+    trades.push(trade);
     localStorage.setItem("trades", JSON.stringify(trades));
   }
-}
+
+  function loadTradesFromStorage() {
+    let trades = JSON.parse(localStorage.getItem("trades") || "[]");
+    trades.forEach(trade => addTradeToTable(trade));
+  }
+
+  function updateTradeResult(timestamp, newResult) {
+    let trades = JSON.parse(localStorage.getItem("trades") || "[]");
+    let index = trades.findIndex(t => t.timestamp === timestamp);
+    if (index !== -1) {
+      trades[index].result = newResult;
+      localStorage.setItem("trades", JSON.stringify(trades));
+    }
+  }
+
+  // زر عائم - فتح/إغلاق القائمة
+  const fab = document.getElementById('fab');
+  const fabMenu = document.getElementById('fabMenu');
+
+  fab.addEventListener('click', () => {
+    const isShown = fabMenu.classList.contains('show');
+    if (isShown) {
+      fabMenu.classList.remove('show');
+      fabMenu.setAttribute('aria-hidden', 'true');
+    } else {
+      fabMenu.classList.add('show');
+      fabMenu.setAttribute('aria-hidden', 'false');
+    }
+  });
+
+  // إخفاء القائمة عند النقر خارجها
+  document.addEventListener('click', (e) => {
+    if (!fab.contains(e.target) && !fabMenu.contains(e.target)) {
+      fabMenu.classList.remove('show');
+      fabMenu.setAttribute('aria-hidden', 'true');
+    }
+  });
+</script>
+
+</body>
+</html>
