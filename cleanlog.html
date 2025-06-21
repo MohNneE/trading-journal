@@ -4,31 +4,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>سجل الصفقات</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; background: #202124; color: #e8eaed; overflow: hidden; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; background: #202124; color: #e8eaed; overflow: auto; min-height: 100vh; padding: 15px; }
 
 h2 { text-align: center; color: #8ab4f8; margin-bottom: 20px; font-weight: 700; }
 
 #backBtn { display: block; margin: 0 auto 25px auto; padding: 12px 30px; font-size: 16px; background: #3c4043; color: #e8eaed; border: none; border-radius: 8px; cursor: pointer; max-width: 300px; transition: background-color 0.3s ease; } #backBtn:hover { background: #5f6368; }
 
-.table-wrapper { flex-grow: 1; width: 100%; max-width: 1200px; border-radius: 10px; background: #292a2d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); overflow: hidden; }
+.table-wrapper { width: 100%; max-width: 500px; margin: auto; border-radius: 10px; background: #292a2d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 14px; color: #e8eaed; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; color: #e8eaed; }
 
 thead { background: #3c4043; color: #ffffff; }
 
-th { padding: 14px 12px; text-align: center; }
+th, td { padding: 12px 10px; text-align: right; border-bottom: 1px solid #444; }
 
-tbody tr { background: #2d2f31; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: background-color 0.3s; }
+tbody tr { background: #2d2f31; margin-bottom: 10px; display: flex; flex-direction: column; padding: 12px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
 
-tbody td { padding: 16px 12px; text-align: center; }
+td { padding: 6px 0; }
 
-select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weight: 600; font-size: 14px; min-width: 80px; background: #202124; color: #e8eaed; }
+select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #777; background: #202124; color: #e8eaed; font-weight: 600; }
 
-.cell-جارية { background-color: #f1c40f88; color: #000; font-weight: bold; border-radius: 50px; padding: 4px 8px; }
+.cell-جارية { background-color: #f1c40f88; color: #000; font-weight: bold; border-radius: 8px; padding: 4px 10px; display: inline-block; }
 
-.cell-ربح { background-color: #27ae6088; color: #fff; font-weight: bold; border-radius: 50px; padding: 4px 8px; }
+.cell-ربح { background-color: #27ae6088; color: #fff; font-weight: bold; border-radius: 8px; padding: 4px 10px; display: inline-block; }
 
-.cell-خسارة { background-color: #e74c3c88; color: #fff; font-weight: bold; border-radius: 50px; padding: 4px 8px; } </style>
+.cell-خسارة { background-color: #e74c3c88; color: #fff; font-weight: bold; border-radius: 8px; padding: 4px 10px; display: inline-block; } </style>
 
 </head>
 <body><h2>سجل الصفقات</h2>
@@ -36,14 +36,7 @@ select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weig
   <table>
     <thead>
       <tr>
-        <th>#</th>
-        <th>الزوج</th>
-        <th>النوع</th>
-        <th>دخول</th>
-        <th>وقف</th>
-        <th>هدف</th>
-        <th>النتيجة</th>
-        <th>الوقت</th>
+        <th>تفاصيل الصفقة</th>
       </tr>
     </thead>
     <tbody id="tradesBody"></tbody>
@@ -62,23 +55,25 @@ select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weig
       const tr = document.createElement('tr');
       const date = new Date(trade.timestamp);
       const resultClass = `cell-${trade.result || 'جارية'}`;
+      const indexText = `<strong class="${resultClass}">#${allTrades.length - trade.__originalIndex}</strong>`;
 
       tr.setAttribute("data-index", trade.__originalIndex);
       tr.innerHTML = `
-        <td class="${resultClass}">${allTrades.length - trade.__originalIndex}</td>
-        <td>${trade.pair}</td>
-        <td>${trade.type}</td>
-        <td>${trade.entry}</td>
-        <td>${trade.sl}</td>
-        <td>${trade.tp}</td>
         <td>
+          ${indexText}<br>
+          <strong>الزوج:</strong> ${trade.pair}<br>
+          <strong>النوع:</strong> ${trade.type}<br>
+          <strong>دخول:</strong> ${trade.entry}<br>
+          <strong>وقف:</strong> ${trade.sl}<br>
+          <strong>هدف:</strong> ${trade.tp}<br>
+          <strong>النتيجة:</strong>
           <select onchange="updateResult(${trade.__originalIndex}, this.value)">
             <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
             <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
             <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
-          </select>
+          </select><br>
+          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
         </td>
-        <td>${date.toLocaleString('ar-EG')}</td>
       `;
 
       addLongPressToDelete(tr);
@@ -106,7 +101,7 @@ select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weig
   function addLongPressToDelete(row) {
     let pressTimer;
 
-    row.addEventListener('touchstart', (e) => {
+    row.addEventListener('touchstart', () => {
       pressTimer = setTimeout(() => {
         if (confirm("هل تريد حذف هذه الصفقة؟")) {
           const index = parseInt(row.getAttribute("data-index"));
