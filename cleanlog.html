@@ -11,13 +11,13 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
     margin: 15px;
-    background: #f6fbff;
-    color: #34495e;
+    background: #1e1e2f; /* خلفية غامقة */
+    color: #f1f1f1;
   }
 
   h2 {
     text-align: center;
-    color: #2980b9;
+    color: #58a6ff;
     margin-bottom: 20px;
     font-weight: 700;
   }
@@ -27,7 +27,7 @@
     margin: 0 auto 25px auto;
     padding: 12px 30px;
     font-size: 16px;
-    background: #2980b9;
+    background: #2d68d0;
     color: white;
     border: none;
     border-radius: 8px;
@@ -36,7 +36,7 @@
     transition: background-color 0.3s ease;
   }
   #backBtn:hover {
-    background: #1c5980;
+    background: #1c4ca3;
   }
 
   .table-wrapper {
@@ -44,8 +44,8 @@
     max-width: 100%;
     margin: 0 auto;
     border-radius: 10px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #2a2a3d;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
 
   table {
@@ -53,17 +53,18 @@
     border-collapse: collapse;
     min-width: 700px;
     font-size: 14px;
+    color: #f1f1f1;
   }
 
   thead {
-    background: #2980b9;
-    color: white;
+    background: #3b3b58;
+    color: #ffffff;
   }
 
   th, td {
     padding: 14px 12px;
     text-align: center;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #444;
   }
 
   tr:last-child td {
@@ -73,23 +74,24 @@
   select {
     padding: 6px 8px;
     border-radius: 6px;
-    border: 1px solid #ccc;
+    border: 1px solid #777;
     font-weight: 600;
     font-size: 14px;
     min-width: 80px;
+    background: #1e1e2f;
+    color: #fff;
   }
 
-  /* ألوان خلفية للنتائج */
   .result-جارية {
-    background-color: #fffbd6;
+    background-color: #4b4b1e !important; /* أصفر داكن */
   }
 
   .result-ربح {
-    background-color: #e3fbe3;
+    background-color: #1f3f1f !important; /* أخضر داكن */
   }
 
   .result-خسارة {
-    background-color: #fde4e4;
+    background-color: #4b1e1e !important; /* أحمر داكن */
   }
 
   @media (max-width: 720px) {
@@ -123,7 +125,7 @@
       padding-left: 50%;
       position: relative;
       border: none;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #444;
     }
     td:last-child {
       border-bottom: none;
@@ -135,7 +137,7 @@
       transform: translateY(-50%);
       white-space: nowrap;
       font-weight: 700;
-      color: #555;
+      color: #ccc;
     }
     td:nth-of-type(1)::before { content: "#"; }
     td:nth-of-type(2)::before { content: "الزوج"; }
@@ -226,7 +228,7 @@
       sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
 
-    renderTrades(); // إعادة عرض الصفوف بالألوان الجديدة
+    renderTrades();
   }
 
   function goBack() {
