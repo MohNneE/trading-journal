@@ -322,6 +322,61 @@
   });
 
   renderPendingTrades();
+
+  // --------- سحب الزر العائم مع حفظ الموقع ----------
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  // تحميل الموقع المحفوظ من localStorage
+  const savedPosition = JSON.parse(localStorage.getItem('fabPosition'));
+  if (savedPosition) {
+    fabButton.style.bottom = 'unset';
+    fabButton.style.right = 'unset';
+    fabButton.style.top = savedPosition.top;
+    fabButton.style.left = savedPosition.left;
+  }
+
+  function startDrag(e) {
+    isDragging = true;
+    const rect = fabButton.getBoundingClientRect();
+    offsetX = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    offsetY = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', drag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+  }
+
+  function drag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - offsetX;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - offsetY;
+
+    fabButton.style.left = x + 'px';
+    fabButton.style.top = y + 'px';
+    fabButton.style.bottom = 'unset';
+    fabButton.style.right = 'unset';
+  }
+
+  function stopDrag() {
+    isDragging = false;
+    // حفظ الموقع
+    localStorage.setItem('fabPosition', JSON.stringify({
+      top: fabButton.style.top,
+      left: fabButton.style.left
+    }));
+
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchmove', drag);
+    document.removeEventListener('touchend', stopDrag);
+  }
+
+  fabButton.addEventListener('mousedown', startDrag);
+  fabButton.addEventListener('touchstart', startDrag, { passive: false });
 </script>
 
 </body>
