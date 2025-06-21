@@ -71,76 +71,29 @@
   }
   .cell-جارية { background-color: #f1c40f; color: #000; }
   .cell-ربح { background-color: #27ae60; color: #fff; }
-  .cell-خسارة { background-color: #e74c3c; color: #fff; }
-  #fab {
-    position: fixed;
-    width: 64px;
-    height: 64px;
-    background-color: #f39c12;
-    border-radius: 50%;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    cursor: pointer;
-    z-index: 999;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s ease;
-  }
-  #fabIcon {
-    width: 24px;
-    height: 24px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 2px;
-  }
-  .dot {
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-  }
-  .dot.white { background-color: #fff; }
-  #fabMenu {
-    position: fixed;
-    background: #2c2d30;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    padding: 10px 0;
-    display: none;
-    z-index: 998;
-    min-width: 180px;
-  }
-  .fab-item {
-    padding: 10px 20px;
-    color: #e8eaed;
-    text-align: right;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .fab-item:hover {
-    background: #444;
-  }
-</style>
+  .cell-خسارة { background-color: #e74c3c; color: #fff; }/* Bubble FAB */ #fab { position: fixed; width: 60px; height: 60px; background: linear-gradient(135deg, #ffa726, #fb8c00); border-radius: 50%; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); z-index: 1000; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: center; } #fabIcon { width: 28px; height: 28px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 2px; } .dot { width: 100%; height: 100%; background-color: #000; } .dot.white { background-color: #fff; } .fab-menu { position: fixed; display: none; z-index: 999; } .fab-menu-item { width: 120px; padding: 10px; background: #2d2f31; color: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin: 8px; text-align: center; white-space: nowrap; } </style>
+
 </head>
 <body><h2>سجل الصفقات</h2>
 <div class="table-wrapper">
   <table>
     <tbody id="tradesBody"></tbody>
   </table>
-</div><div id="fab" onclick="toggleFabMenu()">
+</div><div id="fab">
   <div id="fabIcon">
     <div class="dot"></div>
     <div class="dot white"></div>
     <div class="dot"></div>
     <div class="dot"></div>
   </div>
-</div><div id="fabMenu">
-  <div class="fab-item" onclick="goTo('index.html')">➕ إضافة صفقة</div>
+</div>
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-menu-item" onclick="goTo('index.html')">➕ إضافة صفقة</div>
 </div><script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
   const tbody = document.getElementById('tradesBody');
+
   function renderTrades() {
     tbody.innerHTML = "";
     const allTrades = [...savedTrades, ...pendingTrades];
@@ -171,6 +124,7 @@
       tbody.appendChild(tr);
     });
   }
+
   function updateResult(index, result) {
     const totalSaved = savedTrades.length;
     if (index < totalSaved) {
@@ -183,20 +137,27 @@
     }
     renderTrades();
   }
+
   function goTo(link) {
     window.location.href = link;
   }
+
   function toggleFabMenu() {
     const menu = document.getElementById('fabMenu');
-    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-    const pos = JSON.parse(localStorage.getItem('fabPositionGlobal'));
-    if (pos) {
-      menu.style.top = pos.top ? pos.top : 'unset';
-      menu.style.bottom = pos.bottom ? pos.bottom : 'unset';
-      menu.style.left = pos.left ? pos.left : 'unset';
-      menu.style.right = pos.right ? pos.right : 'unset';
-    }
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    positionMenuAroundFab();
   }
+
+  document.getElementById('fab').addEventListener('click', toggleFabMenu);
+
+  function positionMenuAroundFab() {
+    const fab = document.getElementById('fab');
+    const menu = document.getElementById('fabMenu');
+    const rect = fab.getBoundingClientRect();
+    menu.style.left = `${rect.left - 140}px`;
+    menu.style.top = `${rect.top - 10}px`;
+  }
+
   window.addEventListener('click', (e) => {
     const fab = document.getElementById('fab');
     const menu = document.getElementById('fabMenu');
@@ -204,6 +165,7 @@
       menu.style.display = 'none';
     }
   });
+
   function addLongPressToDelete(row) {
     let pressTimer;
     const confirmDelete = () => {
@@ -217,6 +179,7 @@
     row.addEventListener('mouseup', () => clearTimeout(pressTimer));
     row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
   }
+
   function deleteTradeByIndex(index) {
     const totalSaved = savedTrades.length;
     if (index < totalSaved) {
@@ -227,48 +190,51 @@
       sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
   }
-  function restoreFabPosition() {
-    const fab = document.getElementById('fab');
-    const pos = JSON.parse(localStorage.getItem('fabPositionGlobal'));
-    if (pos) {
-      fab.style.right = pos.right || '20px';
-      fab.style.left = pos.left || 'unset';
-      fab.style.top = pos.top || 'unset';
-      fab.style.bottom = pos.bottom || '20px';
-    } else {
-      fab.style.right = '20px';
-      fab.style.bottom = '20px';
-    }
-  }
+
   function makeFabDraggable() {
     const fab = document.getElementById('fab');
     let isDragging = false;
     let offsetX, offsetY;
+
     fab.addEventListener('mousedown', (e) => {
       isDragging = true;
       offsetX = e.clientX - fab.getBoundingClientRect().left;
       offsetY = e.clientY - fab.getBoundingClientRect().top;
     });
+
     window.addEventListener('mousemove', (e) => {
       if (isDragging) {
         fab.style.left = `${e.clientX - offsetX}px`;
         fab.style.top = `${e.clientY - offsetY}px`;
         fab.style.right = 'unset';
         fab.style.bottom = 'unset';
+        positionMenuAroundFab();
       }
     });
+
     window.addEventListener('mouseup', () => {
       if (isDragging) {
         isDragging = false;
-        localStorage.setItem('fabPositionGlobal', JSON.stringify({
+        localStorage.setItem('fabPosition_trades', JSON.stringify({
           left: fab.style.left,
-          top: fab.style.top,
-          right: fab.style.right,
-          bottom: fab.style.bottom
+          top: fab.style.top
         }));
       }
     });
   }
+
+  function restoreFabPosition() {
+    const fab = document.getElementById('fab');
+    const pos = JSON.parse(localStorage.getItem('fabPosition_trades'));
+    if (pos) {
+      fab.style.left = pos.left;
+      fab.style.top = pos.top;
+    } else {
+      fab.style.right = '20px';
+      fab.style.bottom = '20px';
+    }
+  }
+
   window.onload = () => {
     renderTrades();
     restoreFabPosition();
