@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>صفحة إضافة وأرشفة الصفقات</title>
+<title>إضافة الصفقات</title>
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%;
@@ -105,7 +105,7 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    table-layout: fixed; /* لتجنب اتساع الأعمدة */
+    table-layout: fixed;
     word-wrap: break-word;
   }
 
@@ -123,26 +123,23 @@
     border-bottom: none;
   }
 
-  .archiveBtn {
-    background: #27ae60;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
+  /* أيقونة أرشفة */
+  .archiveIcon {
     cursor: pointer;
-    font-weight: 700;
-    transition: background-color 0.3s ease;
-    font-size: 13px;
+    font-size: 22px;
+    color: #27ae60;
+    user-select: none;
+    transition: color 0.3s ease;
   }
-  .archiveBtn:hover {
-    background: #1e8449;
+  .archiveIcon:hover {
+    color: #1e8449;
   }
 
   /* زر عائم ثابت أسفل يمين الشاشة */
   #fabButton {
     position: fixed;
     bottom: 25px;
-    right: 25px; /* أسفل يمين */
+    right: 25px;
     width: 60px;
     height: 60px;
     background: #4a90e2;
@@ -161,7 +158,6 @@
     background: #357abd;
   }
 
-  /* استجابة للشاشات الصغيرة */
   @media (max-width: 650px) {
     form {
       padding: 15px 20px 25px;
@@ -179,7 +175,7 @@
 </head>
 <body>
 
-  <h2>إضافة وأرشفة الصفقات المؤقتة</h2>
+  <h2>إضافة الصفقات</h2>
 
   <form id="tradeForm">
     <label for="pair">زوج التداول:</label>
@@ -205,7 +201,6 @@
     <label for="tp">الهدف:</label>
     <input type="number" step="0.0001" id="tp" name="tp" required />
 
-    <!-- الجيك بوكس قبل الزر -->
     <div class="checkbox-container">
       <input type="checkbox" id="conditionsCheck" />
       <label for="conditionsCheck">تم توفر جميع الشروط</label>
@@ -223,7 +218,7 @@
         <th>دخول</th>
         <th>وقف</th>
         <th>هدف</th>
-        <th>إجراء</th>
+        <th>أرشفة</th>
       </tr>
     </thead>
     <tbody id="pendingTradesBody">
@@ -231,7 +226,6 @@
     </tbody>
   </table>
 
-  <!-- زر عائم ثابت أسفل يمين -->
   <div id="fabButton" title="سجل الصفقات" aria-label="سجل الصفقات" role="button" tabindex="0">&#128221;</div>
 
 <script>
@@ -244,7 +238,6 @@
   const addTradeBtn = document.getElementById('addTradeBtn');
   const fabButton = document.getElementById('fabButton');
 
-  // تفعيل زر الإضافة فقط عند تفعيل الجيك بوكس
   conditionsCheck.addEventListener('change', () => {
     addTradeBtn.disabled = !conditionsCheck.checked;
   });
@@ -260,7 +253,7 @@
         <td>${trade.entry}</td>
         <td>${trade.sl}</td>
         <td>${trade.tp}</td>
-        <td><button class="archiveBtn" onclick="archiveTrade(${index})">أرشفة</button></td>
+        <td><span class="archiveIcon" title="أرشفة الصفقة" onclick="archiveTrade(${index})">&#10003;</span></td>
       `;
       tbody.appendChild(tr);
     });
@@ -281,7 +274,7 @@
       sl: form.sl.value,
       tp: form.tp.value,
       timestamp: new Date().toISOString(),
-      result: 'جارية' // القيمة الافتراضية
+      result: 'جارية'
     };
 
     pendingTrades.push(newTrade);
@@ -306,7 +299,7 @@
   }
 
   fabButton.addEventListener('click', () => {
-    window.location.href = 'cleanlog.html'; // صفحة سجل الصفقات
+    window.location.href = 'cleanlog.html';
   });
 
   fabButton.addEventListener('keydown', (e) => {
