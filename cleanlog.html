@@ -6,7 +6,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; background: #202124; color: #e8eaed; overflow: auto; min-height: 100vh; padding: 15px; }
 
-h2 { text-align: center; color: #8ab4f8; margin-bottom: 20px; font-weight: 700; }
+h2 { text-align: center; color: #e8eaed; margin-bottom: 20px; font-weight: 700; font-size: 22px; background: #3c4043; padding: 12px; border-radius: 12px; }
 
 #backBtn { display: block; margin: 0 auto 25px auto; padding: 12px 30px; font-size: 16px; background: #3c4043; color: #e8eaed; border: none; border-radius: 8px; cursor: pointer; max-width: 300px; transition: background-color 0.3s ease; } #backBtn:hover { background: #5f6368; }
 
@@ -16,19 +16,23 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; color: #e8eaed;
 
 thead { background: #3c4043; color: #ffffff; }
 
-th, td { padding: 12px 10px; text-align: right; border-bottom: 1px solid #444; }
+th { padding: 14px 12px; text-align: center; font-size: 16px; background-color: #3c4043; border-bottom: 1px solid #444; }
 
-tbody tr { background: #2d2f31; margin-bottom: 10px; display: flex; flex-direction: column; padding: 12px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+th::after { content: " ✦"; color: #8ab4f8; }
 
-td { padding: 6px 0; }
+tbody tr { background: #2d2f31; margin-bottom: 12px; display: flex; flex-direction: column; padding: 14px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: background 0.3s; }
+
+td { padding: 6px 0; width: 100%; }
 
 select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #777; background: #202124; color: #e8eaed; font-weight: 600; }
 
-.cell-جارية { background-color: #f1c40f88; color: #000; font-weight: bold; border-radius: 8px; padding: 4px 10px; display: inline-block; }
+.cell-جارية, .cell-ربح, .cell-خسارة { display: block; width: 100%; padding: 8px 12px; border-radius: 12px; font-weight: bold; text-align: center; margin-bottom: 10px; }
 
-.cell-ربح { background-color: #27ae6088; color: #fff; font-weight: bold; border-radius: 8px; padding: 4px 10px; display: inline-block; }
+.cell-جارية { background-color: #f1c40f; color: #000; }
 
-.cell-خسارة { background-color: #e74c3c88; color: #fff; font-weight: bold; border-radius: 8px; padding: 4px 10px; display: inline-block; } </style>
+.cell-ربح { background-color: #27ae60; color: #fff; }
+
+.cell-خسارة { background-color: #e74c3c; color: #fff; } </style>
 
 </head>
 <body><h2>سجل الصفقات</h2>
@@ -36,7 +40,7 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
   <table>
     <thead>
       <tr>
-        <th>تفاصيل الصفقة</th>
+        <th>تفاصيل الصفقات</th>
       </tr>
     </thead>
     <tbody id="tradesBody"></tbody>
@@ -55,12 +59,11 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
       const tr = document.createElement('tr');
       const date = new Date(trade.timestamp);
       const resultClass = `cell-${trade.result || 'جارية'}`;
-      const indexText = `<strong class="${resultClass}">#${allTrades.length - trade.__originalIndex}</strong>`;
 
       tr.setAttribute("data-index", trade.__originalIndex);
       tr.innerHTML = `
         <td>
-          ${indexText}<br>
+          <span class="${resultClass}">#${allTrades.length - trade.__originalIndex} - ${trade.result || 'جارية'}</span>
           <strong>الزوج:</strong> ${trade.pair}<br>
           <strong>النوع:</strong> ${trade.type}<br>
           <strong>دخول:</strong> ${trade.entry}<br>
@@ -101,27 +104,63 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
   function addLongPressToDelete(row) {
     let pressTimer;
 
+    const confirmDelete = () => {
+      const confirmBox = document.createElement('div');
+      confirmBox.style.position = 'fixed';
+      confirmBox.style.top = '50%';
+      confirmBox.style.left = '50%';
+      confirmBox.style.transform = 'translate(-50%, -50%)';
+      confirmBox.style.background = '#2d2f31';
+      confirmBox.style.color = '#e8eaed';
+      confirmBox.style.padding = '20px';
+      confirmBox.style.borderRadius = '10px';
+      confirmBox.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+      confirmBox.style.zIndex = '9999';
+
+      const text = document.createElement('p');
+      text.textContent = 'هل تريد حذف هذه الصفقة؟';
+      text.style.marginBottom = '15px';
+
+      const yesBtn = document.createElement('button');
+      yesBtn.textContent = 'تأكيد الحذف';
+      yesBtn.style.marginLeft = '10px';
+      yesBtn.style.padding = '8px 16px';
+      yesBtn.style.border = 'none';
+      yesBtn.style.borderRadius = '6px';
+      yesBtn.style.background = '#e74c3c';
+      yesBtn.style.color = '#fff';
+      yesBtn.onclick = () => {
+        const index = parseInt(row.getAttribute("data-index"));
+        deleteTradeByIndex(index);
+        renderTrades();
+        document.body.removeChild(confirmBox);
+      };
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'إلغاء';
+      cancelBtn.style.padding = '8px 16px';
+      cancelBtn.style.border = 'none';
+      cancelBtn.style.borderRadius = '6px';
+      cancelBtn.style.background = '#3c4043';
+      cancelBtn.style.color = '#e8eaed';
+      cancelBtn.onclick = () => document.body.removeChild(confirmBox);
+
+      confirmBox.appendChild(text);
+      confirmBox.appendChild(yesBtn);
+      confirmBox.appendChild(cancelBtn);
+
+      document.body.appendChild(confirmBox);
+    };
+
     row.addEventListener('touchstart', () => {
-      pressTimer = setTimeout(() => {
-        if (confirm("هل تريد حذف هذه الصفقة؟")) {
-          const index = parseInt(row.getAttribute("data-index"));
-          deleteTradeByIndex(index);
-          renderTrades();
-        }
-      }, 600);
+      pressTimer = setTimeout(confirmDelete, 600);
     });
 
     row.addEventListener('touchend', () => clearTimeout(pressTimer));
     row.addEventListener('touchmove', () => clearTimeout(pressTimer));
 
     row.addEventListener('mousedown', () => {
-      pressTimer = setTimeout(() => {
-        if (confirm("هل تريد حذف هذه الصفقة؟")) {
-          const index = parseInt(row.getAttribute("data-index"));
-          deleteTradeByIndex(index);
-          renderTrades();
-        }
-      }, 600);
+      pressTimer = setTimeout(confirmDelete, 600);
     });
 
     row.addEventListener('mouseup', () => clearTimeout(pressTimer));
