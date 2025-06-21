@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>صفحة إضافة الصفقات المؤقتة</title>
+<title>صفحة إضافة وأرشفة الصفقات</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -77,11 +77,24 @@
   tr:last-child td {
     border-bottom: none;
   }
+  .archiveBtn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+  }
+  .archiveBtn:hover {
+    background: #1e8449;
+  }
 </style>
 </head>
 <body>
 
-  <h2>إضافة صفقات مؤقتة</h2>
+  <h2>إضافة وأرشفة الصفقات المؤقتة</h2>
 
   <form id="tradeForm">
     <label for="pair">زوج التداول:</label>
@@ -119,6 +132,7 @@
         <th>دخول</th>
         <th>وقف</th>
         <th>هدف</th>
+        <th>إجراء</th>
       </tr>
     </thead>
     <tbody id="pendingTradesBody">
@@ -128,6 +142,7 @@
 
   <script>
     let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
+    let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
 
     const tbody = document.getElementById('pendingTradesBody');
     const form = document.getElementById('tradeForm');
@@ -143,6 +158,7 @@
           <td>${trade.entry}</td>
           <td>${trade.sl}</td>
           <td>${trade.tp}</td>
+          <td><button class="archiveBtn" onclick="archiveTrade(${index})">أرشفة</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -157,7 +173,8 @@
         entry: form.entry.value,
         sl: form.sl.value,
         tp: form.tp.value,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        result: 'جارية' // القيمة الافتراضية
       };
 
       pendingTrades.push(newTrade);
@@ -166,6 +183,24 @@
       renderPendingTrades();
       form.reset();
     });
+
+    function archiveTrade(index) {
+      // خذ الصفقة من المؤقتة
+      const trade = pendingTrades[index];
+
+      // أضفها للسجلات المحفوظة (localStorage) مع الحالة الحالية
+      savedTrades.push(trade);
+
+      // احذفها من المؤقتة
+      pendingTrades.splice(index, 1);
+
+      // حدث التخزين
+      sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
+      localStorage.setItem('trades', JSON.stringify(savedTrades));
+
+      renderPendingTrades();
+      alert('تم أرشفة الصفقة بنجاح.');
+    }
 
     renderPendingTrades();
   </script>
