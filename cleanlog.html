@@ -4,33 +4,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>سجل الصفقات</title>
 <style>
-  * { box-sizing: border-box; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; margin: 15px; background: #202124; color: #e8eaed; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; background: #202124; color: #e8eaed; overflow: hidden; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
 
 h2 { text-align: center; color: #8ab4f8; margin-bottom: 20px; font-weight: 700; }
 
 #backBtn { display: block; margin: 0 auto 25px auto; padding: 12px 30px; font-size: 16px; background: #3c4043; color: #e8eaed; border: none; border-radius: 8px; cursor: pointer; max-width: 300px; transition: background-color 0.3s ease; } #backBtn:hover { background: #5f6368; }
 
-.table-wrapper { overflow-x: auto; max-width: 100%; margin: 0 auto; border-radius: 10px; background: #292a2d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.table-wrapper { flex-grow: 1; width: 100%; max-width: 1200px; border-radius: 10px; background: #292a2d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); overflow: hidden; }
 
-table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 14px; color: #e8eaed; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 14px; color: #e8eaed; }
 
 thead { background: #3c4043; color: #ffffff; }
 
-th, td { padding: 14px 12px; text-align: center; border-bottom: 1px solid #555; }
+th { padding: 14px 12px; text-align: center; }
 
-tr:last-child td { border-bottom: none; }
+tbody tr { background: #2d2f31; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: background-color 0.3s; }
+
+tbody td { padding: 16px 12px; text-align: center; }
 
 select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weight: 600; font-size: 14px; min-width: 80px; background: #202124; color: #e8eaed; }
 
-.result-جارية { background-color: #4f4f1f22 !important; } .result-ربح { background-color: #1f4f1f22 !important; } .result-خسارة { background-color: #4f1f1f22 !important; }
+.cell-جارية { background-color: #f1c40f88; color: #000; font-weight: bold; border-radius: 50px; padding: 4px 8px; }
 
-.cell-جارية { background-color: #f1c40f88 !important; color: #000; font-weight: bold; border-radius: 50px; }
+.cell-ربح { background-color: #27ae6088; color: #fff; font-weight: bold; border-radius: 50px; padding: 4px 8px; }
 
-.cell-ربح { background-color: #27ae6088 !important; color: #fff; font-weight: bold; border-radius: 50px; }
-
-.cell-خسارة { background-color: #e74c3c88 !important; color: #fff; font-weight: bold; border-radius: 50px; }
-
-@media (max-width: 720px) { table { min-width: unset; font-size: 13px; } th, td { padding: 10px 8px; } } </style>
+.cell-خسارة { background-color: #e74c3c88; color: #fff; font-weight: bold; border-radius: 50px; padding: 4px 8px; } </style>
 
 </head>
 <body><h2>سجل الصفقات</h2>
@@ -62,7 +60,6 @@ select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weig
 
     reversed.forEach((trade, viewIndex) => {
       const tr = document.createElement('tr');
-      tr.classList.add(`result-${trade.result || 'جارية'}`);
       const date = new Date(trade.timestamp);
       const resultClass = `cell-${trade.result || 'جارية'}`;
 
@@ -84,7 +81,7 @@ select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weig
         <td>${date.toLocaleString('ar-EG')}</td>
       `;
 
-      addSwipeToDelete(tr);
+      addLongPressToDelete(tr);
       tbody.appendChild(tr);
     });
   }
@@ -106,49 +103,34 @@ select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weig
     window.location.href = "index.html";
   }
 
-  window.onload = renderTrades;
-
-  function addSwipeToDelete(row) {
-    let startX = 0, currentX = 0;
-    let longPressTimeout;
-    let isDragging = false;
+  function addLongPressToDelete(row) {
+    let pressTimer;
 
     row.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
-      longPressTimeout = setTimeout(() => {
-        isDragging = true;
-        row.style.transition = 'none';
-      }, 400);
+      pressTimer = setTimeout(() => {
+        if (confirm("هل تريد حذف هذه الصفقة؟")) {
+          const index = parseInt(row.getAttribute("data-index"));
+          deleteTradeByIndex(index);
+          renderTrades();
+        }
+      }, 600);
     });
 
-    row.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      currentX = e.touches[0].clientX;
-      const deltaX = currentX - startX;
-      row.style.transform = `translateX(${deltaX}px)`;
+    row.addEventListener('touchend', () => clearTimeout(pressTimer));
+    row.addEventListener('touchmove', () => clearTimeout(pressTimer));
+
+    row.addEventListener('mousedown', () => {
+      pressTimer = setTimeout(() => {
+        if (confirm("هل تريد حذف هذه الصفقة؟")) {
+          const index = parseInt(row.getAttribute("data-index"));
+          deleteTradeByIndex(index);
+          renderTrades();
+        }
+      }, 600);
     });
 
-    row.addEventListener('touchend', () => {
-      clearTimeout(longPressTimeout);
-      if (!isDragging) return;
-      row.style.transition = 'transform 0.3s ease';
-      const deltaX = currentX - startX;
-      if (Math.abs(deltaX) > 100) {
-        const index = parseInt(row.getAttribute("data-index"));
-        deleteTradeByIndex(index);
-        row.style.transform = `translateX(${deltaX > 0 ? '100%' : '-100%'})`;
-        setTimeout(() => row.remove(), 300);
-      } else {
-        row.style.transform = 'translateX(0)';
-      }
-      isDragging = false;
-    });
-
-    row.addEventListener('touchcancel', () => {
-      clearTimeout(longPressTimeout);
-      row.style.transform = 'translateX(0)';
-      isDragging = false;
-    });
+    row.addEventListener('mouseup', () => clearTimeout(pressTimer));
+    row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
   }
 
   function deleteTradeByIndex(index) {
@@ -161,5 +143,7 @@ select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weig
       sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
   }
+
+  window.onload = renderTrades;
 </script></body>
 </html>
