@@ -11,7 +11,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
     margin: 15px;
-    background: #202124; /* شبيه بتطبيق Keep */
+    background: #202124;
     color: #e8eaed;
   }
 
@@ -83,15 +83,33 @@
   }
 
   .result-جارية {
-    background-color: #4f4f1f22 !important; /* أصفر باهت جدًا */
+    background-color: #4f4f1f22 !important;
   }
 
   .result-ربح {
-    background-color: #1f4f1f22 !important; /* أخضر باهت جدًا */
+    background-color: #1f4f1f22 !important;
   }
 
   .result-خسارة {
-    background-color: #4f1f1f22 !important; /* أحمر باهت جدًا */
+    background-color: #4f1f1f22 !important;
+  }
+
+  .cell-جارية {
+    background-color: #f1c40f !important;
+    color: #000;
+    font-weight: bold;
+  }
+
+  .cell-ربح {
+    background-color: #27ae60 !important;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .cell-خسارة {
+    background-color: #e74c3c !important;
+    color: #fff;
+    font-weight: bold;
   }
 
   @media (max-width: 720px) {
@@ -189,8 +207,10 @@
 
       const date = new Date(trade.timestamp);
 
+      const resultClass = `cell-${trade.result || 'جارية'}`;
+
       tr.innerHTML = `
-        <td>${index + 1}</td>
+        <td class="${resultClass}">${index + 1}</td>
         <td>${trade.pair}</td>
         <td>${trade.type}</td>
         <td>${trade.entry}</td>
