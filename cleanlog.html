@@ -71,7 +71,7 @@
   }
   .cell-جارية { background-color: #f1c40f; color: #000; }
   .cell-ربح { background-color: #27ae60; color: #fff; }
-  .cell-خسارة { background-color: #e74c3c; color: #fff; }/* Bubble FAB */ #fab { position: fixed; width: 60px; height: 60px; background: linear-gradient(135deg, #ffa726, #fb8c00); border-radius: 50%; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); z-index: 1000; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: center; } #fabIcon { width: 28px; height: 28px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 2px; } .dot { width: 100%; height: 100%; background-color: #000; } .dot.white { background-color: #fff; } .fab-menu { position: fixed; display: none; z-index: 999; } .fab-menu-item { width: 120px; padding: 10px; background: #2d2f31; color: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin: 8px; text-align: center; white-space: nowrap; } </style>
+  .cell-خسارة { background-color: #e74c3c; color: #fff; }/* Bubble FAB */ #fab-trades { position: fixed; width: 60px; height: 60px; background: linear-gradient(135deg, #ffa726, #fb8c00); border-radius: 50%; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); z-index: 1000; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: center; } #fabIcon { width: 28px; height: 28px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 2px; } .dot { width: 100%; height: 100%; background-color: #000; } .dot.white { background-color: #fff; } .fab-menu { position: fixed; display: none; z-index: 999; } .fab-menu-item { width: 120px; padding: 10px; background: #2d2f31; color: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin: 8px; text-align: center; white-space: nowrap; } </style>
 
 </head>
 <body><h2>سجل الصفقات</h2>
@@ -79,7 +79,7 @@
   <table>
     <tbody id="tradesBody"></tbody>
   </table>
-</div><div id="fab">
+</div><div id="fab-trades">
   <div id="fabIcon">
     <div class="dot"></div>
     <div class="dot white"></div>
@@ -148,10 +148,10 @@
     positionMenuAroundFab();
   }
 
-  document.getElementById('fab').addEventListener('click', toggleFabMenu);
+  document.getElementById('fab-trades').addEventListener('click', toggleFabMenu);
 
   function positionMenuAroundFab() {
-    const fab = document.getElementById('fab');
+    const fab = document.getElementById('fab-trades');
     const menu = document.getElementById('fabMenu');
     const rect = fab.getBoundingClientRect();
     menu.style.left = `${rect.left - 140}px`;
@@ -159,7 +159,7 @@
   }
 
   window.addEventListener('click', (e) => {
-    const fab = document.getElementById('fab');
+    const fab = document.getElementById('fab-trades');
     const menu = document.getElementById('fabMenu');
     if (!fab.contains(e.target) && !menu.contains(e.target)) {
       menu.style.display = 'none';
@@ -192,7 +192,7 @@
   }
 
   function makeFabDraggable() {
-    const fab = document.getElementById('fab');
+    const fab = document.getElementById('fab-trades');
     let isDragging = false;
     let offsetX, offsetY;
 
@@ -224,7 +224,7 @@
   }
 
   function restoreFabPosition() {
-    const fab = document.getElementById('fab');
+    const fab = document.getElementById('fab-trades');
     const pos = JSON.parse(localStorage.getItem('fabPosition_trades'));
     if (pos) {
       fab.style.left = pos.left;
