@@ -22,15 +22,11 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
 
 .cell-جارية, .cell-ربح, .cell-خسارة { display: block; width: 100%; padding: 8px 12px; border-radius: 12px; font-weight: bold; text-align: center; margin-bottom: 10px; }
 
-.cell-جارية { background-color: #f1c40f; color: #000; }
+.cell-جارية { background-color: #f1c40f; color: #000; } .cell-ربح { background-color: #27ae60; color: #fff; } .cell-خسارة { background-color: #e74c3c; color: #fff; }
 
-.cell-ربح { background-color: #27ae60; color: #fff; }
+#fab { position: fixed; bottom: 20px; right: 20px; width: 64px; height: 64px; background-color: #f39c12; color: white; font-size: 20px; font-weight: bold; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); cursor: pointer; z-index: 999; user-select: none; touch-action: none; transition: background-color 0.3s ease; } #fab:hover { background-color: #e67e22; }
 
-.cell-خسارة { background-color: #e74c3c; color: #fff; }
-
-#fab { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: #f39c12; color: white; font-size: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); cursor: pointer; z-index: 999; }
-
-#fabMenu { position: fixed; bottom: 90px; right: 20px; background: #2c2d30; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); padding: 10px 0; display: none; z-index: 998; }
+#fabMenu { position: fixed; background: #2c2d30; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); padding: 10px 0; display: none; z-index: 998; bottom: 90px; right: 20px; min-width: 180px; }
 
 .fab-item { padding: 10px 20px; color: #e8eaed; text-align: right; cursor: pointer; white-space: nowrap; } .fab-item:hover { background: #444; } </style>
 
@@ -40,10 +36,9 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
   <table>
     <tbody id="tradesBody"></tbody>
   </table>
-</div><div id="fab" onclick="toggleFabMenu()">＋</div>
+</div><div id="fab" onclick="toggleFabMenu()">الواجهة</div>
 <div id="fabMenu">
   <div class="fab-item" onclick="goTo('index.html')">➕ إضافة صفقة</div>
-  <!-- يمكن لاحقًا إضافة المزيد من العناصر هنا -->
 </div><script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
@@ -53,12 +48,10 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
     tbody.innerHTML = "";
     const allTrades = [...savedTrades, ...pendingTrades];
     const reversed = allTrades.map((t, i) => ({...t, __originalIndex: i})).reverse();
-
     reversed.forEach((trade, viewIndex) => {
       const tr = document.createElement('tr');
       const date = new Date(trade.timestamp);
       const resultClass = `cell-${trade.result || 'جارية'}`;
-
       tr.setAttribute("data-index", trade.__originalIndex);
       tr.innerHTML = `
         <td>
@@ -77,7 +70,6 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
           <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
         </td>
       `;
-
       addLongPressToDelete(tr);
       tbody.appendChild(tr);
     });
@@ -102,12 +94,19 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
 
   function toggleFabMenu() {
     const menu = document.getElementById('fabMenu');
-    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
   }
+
+  window.addEventListener('click', (e) => {
+    const fab = document.getElementById('fab');
+    const menu = document.getElementById('fabMenu');
+    if (!fab.contains(e.target) && !menu.contains(e.target)) {
+      menu.style.display = 'none';
+    }
+  });
 
   function addLongPressToDelete(row) {
     let pressTimer;
-
     const confirmDelete = () => {
       const confirmBox = document.createElement('div');
       confirmBox.style.position = 'fixed';
@@ -120,53 +119,23 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
       confirmBox.style.borderRadius = '10px';
       confirmBox.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
       confirmBox.style.zIndex = '9999';
-
       const text = document.createElement('p');
       text.textContent = 'هل تريد حذف هذه الصفقة؟';
-      text.style.marginBottom = '15px';
-
       const yesBtn = document.createElement('button');
       yesBtn.textContent = 'تأكيد الحذف';
-      yesBtn.style.marginLeft = '10px';
-      yesBtn.style.padding = '8px 16px';
-      yesBtn.style.border = 'none';
-      yesBtn.style.borderRadius = '6px';
-      yesBtn.style.background = '#e74c3c';
-      yesBtn.style.color = '#fff';
       yesBtn.onclick = () => {
         const index = parseInt(row.getAttribute("data-index"));
         deleteTradeByIndex(index);
         renderTrades();
         document.body.removeChild(confirmBox);
       };
-
       const cancelBtn = document.createElement('button');
       cancelBtn.textContent = 'إلغاء';
-      cancelBtn.style.padding = '8px 16px';
-      cancelBtn.style.border = 'none';
-      cancelBtn.style.borderRadius = '6px';
-      cancelBtn.style.background = '#3c4043';
-      cancelBtn.style.color = '#e8eaed';
       cancelBtn.onclick = () => document.body.removeChild(confirmBox);
-
-      confirmBox.appendChild(text);
-      confirmBox.appendChild(yesBtn);
-      confirmBox.appendChild(cancelBtn);
-
+      confirmBox.append(text, yesBtn, cancelBtn);
       document.body.appendChild(confirmBox);
     };
-
-    row.addEventListener('touchstart', () => {
-      pressTimer = setTimeout(confirmDelete, 600);
-    });
-
-    row.addEventListener('touchend', () => clearTimeout(pressTimer));
-    row.addEventListener('touchmove', () => clearTimeout(pressTimer));
-
-    row.addEventListener('mousedown', () => {
-      pressTimer = setTimeout(confirmDelete, 600);
-    });
-
+    row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
     row.addEventListener('mouseup', () => clearTimeout(pressTimer));
     row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
   }
@@ -182,6 +151,50 @@ select { width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #
     }
   }
 
-  window.onload = renderTrades;
+  function restoreFabPosition() {
+    const fab = document.getElementById('fab');
+    const pos = JSON.parse(localStorage.getItem('fabPosition'));
+    if (pos) {
+      fab.style.right = 'unset';
+      fab.style.left = pos.left;
+      fab.style.top = pos.top;
+    }
+  }
+
+  function makeFabDraggable() {
+    const fab = document.getElementById('fab');
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    fab.addEventListener('mousedown', e => {
+      isDragging = true;
+      offsetX = e.clientX - fab.getBoundingClientRect().left;
+      offsetY = e.clientY - fab.getBoundingClientRect().top;
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (isDragging) {
+        fab.style.top = (e.clientY - offsetY) + 'px';
+        fab.style.left = (e.clientX - offsetX) + 'px';
+        fab.style.right = 'unset';
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        localStorage.setItem('fabPosition', JSON.stringify({
+          left: fab.style.left,
+          top: fab.style.top
+        }));
+      }
+    });
+  }
+
+  window.onload = () => {
+    renderTrades();
+    restoreFabPosition();
+    makeFabDraggable();
+  };
 </script></body>
 </html>
