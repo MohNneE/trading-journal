@@ -1,247 +1,215 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>سجل صفقات التداول - تصميم فلات متجاوب</title>
-  <style>
-    :root {
-      --primary: #4a90e2;
-      --primary-dark: #357abd;
-      --secondary-bg: #f7f9fc;
-      --text-primary: #2c3e50;
-      --text-secondary: #7f8c8d;
-      --border: #ddd;
-      --success: #27ae60;
-      --error: #c0392b;
-    }
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      direction: rtl;
-      margin: 0;
-      padding: 15px 10px;
-      background-color: var(--secondary-bg);
-      color: var(--text-primary);
-      font-size: 16px;
-      min-height: 100vh;
-      position: relative;
-    }
-    h2 {
-      font-size: 22px;
-      margin-bottom: 20px;
-      color: var(--primary);
-      font-weight: 700;
-      text-align: center;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      max-width: 600px;
-      margin: 0 auto 30px auto;
-    }
-    label {
-      font-weight: 600;
-      margin-top: 12px;
-      display: block;
-      font-size: 1rem;
-      color: var(--text-primary);
-    }
-    input, select {
-      width: 100%;
-      padding: 12px 10px;
-      font-size: 16px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-top: 6px;
-      background: white;
-      color: var(--text-primary);
-      transition: border-color 0.3s ease;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-      background-color: #f0f8ff;
-    }
-    .checkbox-group {
-      margin-top: 12px;
-      margin-bottom: 16px;
-    }
-    .checkbox-group label {
-      font-weight: 400;
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1rem;
-    }
-    .checkbox-group input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      font-size: 1.1rem;
-      background-color: var(--primary);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      margin-top: 15px;
-    }
-    button:hover:not(:disabled) {
-      background-color: var(--primary-dark);
-    }
-    button:disabled {
-      background-color: #a0aec0;
-      cursor: not-allowed;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>سجل صفقات التداول - جدول عمودي بدون سكرول</title>
+<style>
+  :root {
+    --primary: #4a90e2;
+    --primary-dark: #357abd;
+    --secondary-bg: #f7f9fc;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --border: #ddd;
+    --success: #27ae60;
+    --error: #c0392b;
+  }
+  * {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  html, body {
+    direction: rtl;
+    margin: 0;
+    padding: 15px 10px;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    font-size: 16px;
+    min-height: 100vh;
+    overflow-x: hidden; /* منع السحب الأفقي */
+  }
+  h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: var(--primary);
+    font-weight: 700;
+    text-align: center;
+  }
+  form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+  }
+  label {
+    font-weight: 600;
+    margin-top: 12px;
+    display: block;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+  input, select {
+    width: 100%;
+    padding: 12px 10px;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 6px;
+    background: white;
+    color: var(--text-primary);
+    transition: border-color 0.3s ease;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: #f0f8ff;
+  }
+  .checkbox-group {
+    margin-top: 12px;
+    margin-bottom: 16px;
+  }
+  .checkbox-group label {
+    font-weight: 400;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+  }
+  .checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    background-color: var(--primary);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 15px;
+  }
+  button:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+  }
+  button:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+  }
 
-    /* جدول متجاوب */
-    table {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      border-collapse: collapse;
-      background-color: white;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      font-size: 0.95rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    thead {
-      background-color: var(--primary);
-      color: white;
-    }
-    th, td {
-      padding: 12px 10px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
-    td select {
-      width: 100px;
-      padding: 6px 8px;
-      border-radius: 5px;
-      border: 1px solid var(--border);
-      font-size: 0.9rem;
-      cursor: pointer;
-      color: var(--text-primary);
-    }
+  /* تصميم الجدول كقائمة عمودية على كل الشاشات */
+  table {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+  }
+  tbody tr {
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    display: block;
+    padding: 15px 20px;
+    position: relative;
+  }
+  tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border: none;
+    font-size: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  tbody td:last-child {
+    border-bottom: none;
+  }
+  tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  /* لخانة النتائج، نجمّل الselect */
+  tbody td select {
+    margin-left: 10px;
+    min-width: 100px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--text-primary);
+  }
+  /* إزالة رأس الجدول لأننا عارضين بشكل عمودي */
+  thead {
+    display: none;
+  }
 
-    /* تصميم متجاوب للهواتف */
-    @media (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-      }
-      tbody tr {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        margin-bottom: 15px;
-        background-color: white;
-        padding: 15px 10px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-      }
-      tbody td {
-        border: none;
-        position: relative;
-        padding-left: 50%;
-        text-align: right;
-        font-size: 15px;
-        padding-top: 10px;
-        padding-bottom: 10px;
-        white-space: normal;
-      }
-      tbody td::before {
-        position: absolute;
-        top: 50%;
-        right: 15px;
-        transform: translateY(-50%);
-        width: 45%;
-        white-space: nowrap;
-        font-weight: 600;
-        color: var(--text-secondary);
-        content: attr(data-label);
-        text-align: right;
-        font-size: 14px;
-      }
-      td select {
-        width: 100%;
-      }
-    }
-
-    /* زر عائم */
-    #fab {
-      width: 56px;
-      height: 56px;
-      font-size: 28px;
-      line-height: 56px;
-      bottom: 25px;
-      right: 25px;
-      position: fixed;
-      background: var(--primary);
-      color: white;
-      border-radius: 50%;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      cursor: pointer;
-      z-index: 1000;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    #fab:hover {
-      background-color: var(--primary-dark);
-    }
-    #fabMenu {
-      position: fixed;
-      bottom: 85px;
-      right: 25px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      display: none;
-      flex-direction: column;
-      min-width: 160px;
-      z-index: 1000;
-    }
-    #fabMenu.show {
-      display: flex;
-    }
-    #fabMenu a {
-      padding: 14px 18px;
-      text-decoration: none;
-      color: var(--text-primary);
-      font-weight: 600;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-      direction: rtl;
-      text-align: right;
-      transition: background-color 0.2s ease;
-    }
-    #fabMenu a:last-child {
-      border-bottom: none;
-    }
-    #fabMenu a:hover {
-      background-color: var(--secondary-bg);
-    }
-  </style>
+  /* زر عائم */
+  #fab {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    line-height: 56px;
+    bottom: 25px;
+    right: 25px;
+    position: fixed;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 1000;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  #fab:hover {
+    background-color: var(--primary-dark);
+  }
+  #fabMenu {
+    position: fixed;
+    bottom: 85px;
+    right: 25px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    min-width: 160px;
+    z-index: 1000;
+  }
+  #fabMenu.show {
+    display: flex;
+  }
+  #fabMenu a {
+    padding: 14px 18px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    direction: rtl;
+    text-align: right;
+    transition: background-color 0.2s ease;
+  }
+  #fabMenu a:last-child {
+    border-bottom: none;
+  }
+  #fabMenu a:hover {
+    background-color: var(--secondary-bg);
+  }
+</style>
 </head>
 <body>
 
