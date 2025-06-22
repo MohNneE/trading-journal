@@ -2,23 +2,28 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2b2b2b" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
   <title>سجل الصفقات</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       direction: rtl;
-      background: #2b2b2b;
+      background: #202124;
       color: #e8eaed;
-      overflow-y: auto;
+      overflow: hidden;
       min-height: 100vh;
       padding: 15px;
     }
 
     h2 {
       text-align: center;
-      color: #fff;
+      color: #ffffff;
       margin-bottom: 20px;
       font-weight: 700;
       font-size: 22px;
@@ -31,8 +36,10 @@
       width: 100%;
       max-width: 500px;
       margin: auto;
+      overflow-y: auto;
+      max-height: calc(100vh - 130px);
       border-radius: 10px;
-      background: #323232;
+      background: #292a2d;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
@@ -46,7 +53,7 @@
     thead { display: none; }
 
     tbody tr {
-      background: #383838;
+      background: #2d2f31;
       margin-bottom: 12px;
       display: flex;
       flex-direction: column;
@@ -56,17 +63,14 @@
       transition: background 0.3s;
     }
 
-    td {
-      padding: 6px 0;
-      width: 100%;
-    }
+    td { padding: 6px 0; width: 100%; }
 
     select {
       width: 100%;
       padding: 6px 10px;
       border-radius: 6px;
       border: 1px solid #777;
-      background: #2c2c2c;
+      background: #202124;
       color: #e8eaed;
       font-weight: 600;
     }
@@ -74,7 +78,7 @@
     .cell-جارية, .cell-ربح, .cell-خسارة {
       display: block;
       width: 100%;
-      padding: 8px 12px;
+      padding: 10px;
       border-radius: 12px;
       font-weight: bold;
       text-align: center;
@@ -85,120 +89,124 @@
     .cell-ربح { background-color: #27ae60; color: #fff; }
     .cell-خسارة { background-color: #e74c3c; color: #fff; }
 
-    .back-button {
+    /* زر العودة */
+    #backBtn {
       display: block;
-      margin: 20px auto 0 auto;
+      margin: 20px auto 0;
       padding: 14px 28px;
       font-size: 16px;
       background: #ff9800;
-      color: #fff;
+      color: white;
       border: none;
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       transition: background 0.3s ease;
     }
 
-    .back-button:hover {
-      background: #e68900;
+    #backBtn:hover {
+      background: #f57c00;
+    }
+
+    @media (max-width: 600px) {
+      .table-wrapper { max-height: calc(100vh - 160px); }
     }
   </style>
 </head>
 <body>
 
-  <h2>سجل الصفقات</h2>
+<h2>سجل الصفقات</h2>
 
-  <div class="table-wrapper">
-    <table>
-      <tbody id="tradesBody"></tbody>
-    </table>
-  </div>
+<div class="table-wrapper">
+  <table>
+    <tbody id="tradesBody"></tbody>
+  </table>
+</div>
 
-  <button class="back-button" onclick="goBack()">🔙 العودة للإضافة</button>
+<button id="backBtn" onclick="goBack()">العودة إلى الإضافة</button>
 
-  <script>
-    let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
-    let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
-    const tbody = document.getElementById('tradesBody');
+<script>
+  let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
+  let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
+  const tbody = document.getElementById('tradesBody');
 
-    function renderTrades() {
-      tbody.innerHTML = "";
-      const allTrades = [...savedTrades, ...pendingTrades];
-      const reversed = allTrades.map((t, i) => ({ ...t, __originalIndex: i })).reverse();
+  function renderTrades() {
+    tbody.innerHTML = "";
+    const allTrades = [...savedTrades, ...pendingTrades];
+    const reversed = allTrades.map((t, i) => ({...t, __originalIndex: i})).reverse();
 
-      reversed.forEach((trade, viewIndex) => {
-        const tr = document.createElement('tr');
-        const date = new Date(trade.timestamp);
-        const resultClass = `cell-${trade.result || 'جارية'}`;
+    reversed.forEach((trade, i) => {
+      const tr = document.createElement('tr');
+      const date = new Date(trade.timestamp);
+      const resultClass = `cell-${trade.result || 'جارية'}`;
+      tr.setAttribute("data-index", trade.__originalIndex);
+      tr.innerHTML = `
+        <td>
+          <span class="${resultClass}">#${allTrades.length - trade.__originalIndex} - ${trade.result || 'جارية'}</span>
+          <strong>الزوج:</strong> ${trade.pair}<br>
+          <strong>النوع:</strong> ${trade.type}<br>
+          <strong>دخول:</strong> ${trade.entry}<br>
+          <strong>وقف:</strong> ${trade.sl}<br>
+          <strong>هدف:</strong> ${trade.tp}<br>
+          <strong>النتيجة:</strong>
+          <select onchange="updateResult(${trade.__originalIndex}, this.value)">
+            <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
+            <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
+            <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
+          </select><br>
+          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
+        </td>
+      `;
+      addLongPressToDelete(tr);
+      tbody.appendChild(tr);
+    });
+  }
 
-        tr.setAttribute("data-index", trade.__originalIndex);
-        tr.innerHTML = `
-          <td>
-            <span class="${resultClass}">#${allTrades.length - trade.__originalIndex} - ${trade.result || 'جارية'}</span>
-            <strong>الزوج:</strong> ${trade.pair}<br>
-            <strong>النوع:</strong> ${trade.type}<br>
-            <strong>دخول:</strong> ${trade.entry}<br>
-            <strong>وقف:</strong> ${trade.sl}<br>
-            <strong>هدف:</strong> ${trade.tp}<br>
-            <strong>النتيجة:</strong>
-            <select onchange="updateResult(${trade.__originalIndex}, this.value)">
-              <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
-              <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
-              <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
-            </select><br>
-            <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
-          </td>
-        `;
-        addLongPressToDelete(tr);
-        tbody.appendChild(tr);
-      });
+  function updateResult(index, result) {
+    const totalSaved = savedTrades.length;
+    if (index < totalSaved) {
+      savedTrades[index].result = result;
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
+    } else {
+      const pendingIndex = index - totalSaved;
+      pendingTrades[pendingIndex].result = result;
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
+    renderTrades();
+  }
 
-    function updateResult(index, result) {
-      const totalSaved = savedTrades.length;
-      if (index < totalSaved) {
-        savedTrades[index].result = result;
-        localStorage.setItem("trades", JSON.stringify(savedTrades));
-      } else {
-        const pendingIndex = index - totalSaved;
-        pendingTrades[pendingIndex].result = result;
-        sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
+  function goBack() {
+    window.location.href = "index.html";
+  }
+
+  function addLongPressToDelete(row) {
+    let pressTimer;
+    const confirmDelete = () => {
+      if (confirm('هل تريد حذف هذه الصفقة؟')) {
+        const index = parseInt(row.getAttribute("data-index"));
+        deleteTradeByIndex(index);
+        renderTrades();
       }
-      renderTrades();
-    }
+    };
+    row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
+    row.addEventListener('mouseup', () => clearTimeout(pressTimer));
+    row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+  }
 
-    function goBack() {
-      window.location.href = "index.html";
+  function deleteTradeByIndex(index) {
+    const totalSaved = savedTrades.length;
+    if (index < totalSaved) {
+      savedTrades.splice(index, 1);
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
+    } else {
+      pendingTrades.splice(index - totalSaved, 1);
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
+  }
 
-    function addLongPressToDelete(row) {
-      let pressTimer;
-      const confirmDelete = () => {
-        if (confirm('هل تريد حذف هذه الصفقة؟')) {
-          const index = parseInt(row.getAttribute("data-index"));
-          deleteTradeByIndex(index);
-          renderTrades();
-        }
-      };
-      row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
-      row.addEventListener('mouseup', () => clearTimeout(pressTimer));
-      row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-    }
-
-    function deleteTradeByIndex(index) {
-      const totalSaved = savedTrades.length;
-      if (index < totalSaved) {
-        savedTrades.splice(index, 1);
-        localStorage.setItem("trades", JSON.stringify(savedTrades));
-      } else {
-        pendingTrades.splice(index - totalSaved, 1);
-        sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
-      }
-    }
-
-    window.onload = renderTrades;
-  </script>
+  window.onload = renderTrades;
+</script>
 
 </body>
 </html>
