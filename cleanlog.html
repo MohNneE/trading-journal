@@ -1,29 +1,25 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#2b2b2b" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#202124">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json" />
   <title>سجل الصفقات</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       direction: rtl;
       background: #202124;
       color: #e8eaed;
-      overflow: hidden;
       min-height: 100vh;
       padding: 15px;
     }
-
     h2 {
       text-align: center;
-      color: #ffffff;
+      color: #e8eaed;
       margin-bottom: 20px;
       font-weight: 700;
       font-size: 22px;
@@ -31,27 +27,19 @@
       padding: 12px;
       border-radius: 12px;
     }
-
     .table-wrapper {
       width: 100%;
       max-width: 500px;
       margin: auto;
-      overflow-y: auto;
-      max-height: calc(100vh - 130px);
       border-radius: 10px;
       background: #292a2d;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      color: #e8eaed;
     }
-
-    thead { display: none; }
-
     tbody tr {
       background: #2d2f31;
       margin-bottom: 12px;
@@ -60,11 +48,8 @@
       padding: 14px;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-      transition: background 0.3s;
     }
-
     td { padding: 6px 0; width: 100%; }
-
     select {
       width: 100%;
       padding: 6px 10px;
@@ -74,57 +59,43 @@
       color: #e8eaed;
       font-weight: 600;
     }
-
     .cell-جارية, .cell-ربح, .cell-خسارة {
       display: block;
       width: 100%;
-      padding: 10px;
+      padding: 8px 12px;
       border-radius: 12px;
       font-weight: bold;
       text-align: center;
       margin-bottom: 10px;
     }
-
     .cell-جارية { background-color: #f1c40f; color: #000; }
     .cell-ربح { background-color: #27ae60; color: #fff; }
-    .cell-خسارة { background-color: #e74c3c; color: #fff; }
+    .cell-خسارة { background-color: #e74c3c; color: #fff; }.back-button {
+  display: block;
+  margin: 30px auto 0;
+  padding: 14px 30px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  transition: background 0.3s ease;
+}
+.back-button:hover {
+  background: #fb8c00;
+}
 
-    /* زر العودة */
-    #backBtn {
-      display: block;
-      margin: 20px auto 0;
-      padding: 14px 28px;
-      font-size: 16px;
-      background: #ff9800;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s ease;
-    }
-
-    #backBtn:hover {
-      background: #f57c00;
-    }
-
-    @media (max-width: 600px) {
-      .table-wrapper { max-height: calc(100vh - 160px); }
-    }
   </style>
 </head>
-<body>
-
-<h2>سجل الصفقات</h2>
-
+<body><h2>سجل الصفقات</h2>
 <div class="table-wrapper">
   <table>
     <tbody id="tradesBody"></tbody>
   </table>
-</div>
-
-<button id="backBtn" onclick="goBack()">العودة إلى الإضافة</button>
+</div><button class="back-button" onclick="goTo('index.html')">العودة للإضافة</button>
 
 <script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
@@ -135,8 +106,7 @@
     tbody.innerHTML = "";
     const allTrades = [...savedTrades, ...pendingTrades];
     const reversed = allTrades.map((t, i) => ({...t, __originalIndex: i})).reverse();
-
-    reversed.forEach((trade, i) => {
+    reversed.forEach((trade, viewIndex) => {
       const tr = document.createElement('tr');
       const date = new Date(trade.timestamp);
       const resultClass = `cell-${trade.result || 'جارية'}`;
@@ -176,8 +146,8 @@
     renderTrades();
   }
 
-  function goBack() {
-    window.location.href = "index.html";
+  function goTo(link) {
+    window.location.href = link;
   }
 
   function addLongPressToDelete(row) {
@@ -206,7 +176,5 @@
   }
 
   window.onload = renderTrades;
-</script>
-
-</body>
+</script></body>
 </html>
