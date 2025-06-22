@@ -1,136 +1,124 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>إضافة صفقة</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>سجل الصفقات</title>
+<style>
+  * { box-sizing: border-box; }body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; margin: 15px; background: #202124; color: #e8eaed; }
 
-  <!-- دعم PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#202124">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="apple-touch-icon" href="icon-192.png">
+h2 { text-align: center; color: #8ab4f8; margin-bottom: 20px; font-weight: 700; }
 
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      direction: rtl;
-      background: #202124;
-      color: #e8eaed;
-      padding: 20px;
-      margin: 0;
-    }
+#backBtn { display: block; margin: 0 auto 25px auto; padding: 12px 30px; font-size: 16px; background: #3c4043; color: #e8eaed; border: none; border-radius: 8px; cursor: pointer; max-width: 300px; transition: background-color 0.3s ease; } #backBtn:hover { background: #5f6368; }
 
-    h1 {
-      text-align: center;
-      background: #3c4043;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
+.table-wrapper { overflow-x: auto; max-width: 100%; margin: 0 auto; border-radius: 10px; background: #292a2d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
-    form {
-      max-width: 500px;
-      margin: auto;
-      background: #2d2f31;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
+table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 14px; color: #e8eaed; }
 
-    label {
-      display: block;
-      margin-top: 12px;
-      margin-bottom: 4px;
-      font-weight: bold;
-    }
+thead { background: #3c4043; color: #ffffff; }
 
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #3c4043;
-      color: #fff;
-      margin-bottom: 10px;
-    }
+th, td { padding: 14px 12px; text-align: center; border-bottom: 1px solid #555; }
 
-    button {
-      background: #ff9800;
-      color: white;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+tr:last-child td { border-bottom: none; }
 
-    a {
-      display: block;
-      text-align: center;
-      margin-top: 20px;
-      color: #8ab4f8;
-      text-decoration: none;
-    }
-  </style>
+select { padding: 6px 8px; border-radius: 6px; border: 1px solid #777; font-weight: 600; font-size: 14px; min-width: 80px; background: #202124; color: #e8eaed; }
+
+.result-جارية { background-color: #4f4f1f22 !important; }
+
+.result-ربح { background-color: #1f4f1f22 !important; }
+
+.result-خسارة { background-color: #4f1f1f22 !important; }
+
+.cell-جارية { background-color: #f1c40f88 !important; color: #000; font-weight: bold; border-radius: 50px; }
+
+.cell-ربح { background-color: #27ae6088 !important; color: #fff; font-weight: bold; border-radius: 50px; }
+
+.cell-خسارة { background-color: #e74c3c88 !important; color: #fff; font-weight: bold; border-radius: 50px; }
+
+@media (max-width: 720px) { table { min-width: unset; font-size: 13px; } th, td { padding: 10px 8px; } }
+
+@media (max-width: 480px) { .table-wrapper { box-shadow: none; } table, thead, tbody, th, td, tr { display: block; width: 100%; } thead tr { display: none; } tr { margin-bottom: 15px; border-radius: 10px; padding: 12px 16px; } td { text-align: right; padding-left: 50%; position: relative; border: none; border-bottom: 1px solid #444; } td:last-child { border-bottom: none; } td::before { position: absolute; top: 50%; left: 15px; transform: translateY(-50%); white-space: nowrap; font-weight: 700; color: #aaa; } td:nth-of-type(1)::before { content: "#"; } td:nth-of-type(2)::before { content: "الزوج"; } td:nth-of-type(3)::before { content: "النوع"; } td:nth-of-type(4)::before { content: "دخول"; } td:nth-of-type(5)::before { content: "وقف"; } td:nth-of-type(6)::before { content: "هدف"; } td:nth-of-type(7)::before { content: "النتيجة"; } td:nth-of-type(8)::before { content: "الوقت"; } } </style>
+
 </head>
-<body>
+<body><h2>سجل الصفقات</h2>
+<button id="backBtn" onclick="goBack()">العودة للإضافة</button><div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الزوج</th>
+        <th>النوع</th>
+        <th>دخول</th>
+        <th>وقف</th>
+        <th>هدف</th>
+        <th>النتيجة</th>
+        <th>الوقت</th>
+      </tr>
+    </thead>
+    <tbody id="tradesBody"></tbody>
+  </table>
+</div><script>
+  let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
+  let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
 
-<h1>إضافة صفقة</h1>
+  const tbody = document.getElementById('tradesBody');
 
-<form onsubmit="addTrade(event)">
-  <label>الزوج:</label>
-  <input type="text" id="pair" required />
+  function renderTrades() {
+    tbody.innerHTML = "";
+    const allTrades = [...savedTrades, ...pendingTrades];
 
-  <label>النوع:</label>
-  <select id="type">
-    <option value="شراء">شراء</option>
-    <option value="بيع">بيع</option>
-  </select>
+    allTrades.forEach((trade, index) => {
+      const tr = document.createElement('tr');
+      tr.classList.add(`result-${trade.result || 'جارية'}`);
 
-  <label>دخول:</label>
-  <input type="number" id="entry" required />
+      const date = new Date(trade.timestamp);
 
-  <label>وقف:</label>
-  <input type="number" id="sl" required />
+      const resultClass = `cell-${trade.result || 'جارية'}`;
 
-  <label>هدف:</label>
-  <input type="number" id="tp" required />
+      tr.innerHTML = `
+        <td class="${resultClass}">${index + 1}</td>
+        <td>${trade.pair}</td>
+        <td>${trade.type}</td>
+        <td>${trade.entry}</td>
+        <td>${trade.sl}</td>
+        <td>${trade.tp}</td>
+        <td>
+          <select onchange="updateResult(${index}, this.value)">
+            <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
+            <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
+            <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
+          </select>
+        </td>
+        <td>${date.toLocaleString('ar-EG')}</td>
+      `;
 
-  <button type="submit">➕ إضافة</button>
-</form>
-
-<a href="cleanlog.html">📋 سجل الصفقات</a>
-
-<script>
-  function addTrade(e) {
-    e.preventDefault();
-
-    const trade = {
-      pair: document.getElementById('pair').value,
-      type: document.getElementById('type').value,
-      entry: document.getElementById('entry').value,
-      sl: document.getElementById('sl').value,
-      tp: document.getElementById('tp').value,
-      result: "جارية",
-      timestamp: new Date().toISOString()
-    };
-
-    const savedTrades = JSON.parse(localStorage.getItem("trades") || "[]");
-    savedTrades.push(trade);
-    localStorage.setItem("trades", JSON.stringify(savedTrades));
-
-    alert("✅ تم إضافة الصفقة");
-    e.target.reset();
+      tbody.appendChild(tr);
+    });
   }
 
-  // تسجيل service worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(console.error);
+  function updateResult(index, result) {
+    const totalSaved = savedTrades.length;
+
+    let trade;
+    if (index < totalSaved) {
+      trade = savedTrades[index];
+      trade.result = result;
+      savedTrades[index] = trade;
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
+    } else {
+      const pendingIndex = index - totalSaved;
+      trade = pendingTrades[pendingIndex];
+      trade.result = result;
+      pendingTrades[pendingIndex] = trade;
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
+    }
+
+    renderTrades();
   }
-</script>
-</body>
+
+  function goBack() {
+    window.location.href = "index.html";
+  }
+
+  window.onload = renderTrades;
+</script></body>
 </html>
