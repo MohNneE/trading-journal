@@ -1,113 +1,196 @@
-<!DOCTYPE html><html lang="ar">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>سجل الصفقات</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      direction: rtl;
-      background-color: #f4f6f9;
-      color: #333;
-    }header {
-  background-color: #2c3e50;
-  padding: 20px;
-  text-align: center;
-  color: white;
-  font-size: 20px;
-}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>سجل الصفقات</title>
+<style>
+  * { box-sizing: border-box; }
 
-.container {
-  max-width: 800px;
-  margin: 20px auto;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 20px;
-}
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    margin: 15px;
+    background: #202124;
+    color: #e8eaed;
+  }
 
-.trade-entry {
-  background-color: #ecf0f1;
-  padding: 16px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+  h2 {
+    text-align: center;
+    color: #8ab4f8;
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
 
-.trade-entry span {
-  font-weight: bold;
-}
+  #backBtn {
+    display: block;
+    margin: 0 auto 25px auto;
+    padding: 12px 30px;
+    font-size: 16px;
+    background: #f57c00;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    max-width: 300px;
+    transition: background-color 0.3s ease;
+  }
+  #backBtn:hover {
+    background: #ef6c00;
+  }
 
-.result {
-  padding: 8px 12px;
-  border-radius: 20px;
-  text-align: center;
-  font-weight: bold;
-  width: fit-content;
-}
+  .table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 0 auto;
+    border-radius: 10px;
+    background: #292a2d;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
 
-.جارية {
-  background-color: #f1c40f;
-  color: #fff;
-}
-.ربح {
-  background-color: #27ae60;
-  color: #fff;
-}
-.خسارة {
-  background-color: #e74c3c;
-  color: #fff;
-}
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+    font-size: 14px;
+    color: #e8eaed;
+  }
 
-.return-btn {
-  display: block;
-  width: 200px;
-  margin: 30px auto 0;
-  text-align: center;
-  background-color: #2980b9;
-  color: white;
-  text-decoration: none;
-  padding: 12px;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: background 0.3s;
-}
+  thead {
+    background: #3c4043;
+    color: #ffffff;
+  }
 
-.return-btn:hover {
-  background-color: #1c5980;
-}
+  th, td {
+    padding: 14px 12px;
+    text-align: center;
+    border-bottom: 1px solid #555;
+  }
 
-  </style>
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  select {
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #777;
+    font-weight: 600;
+    font-size: 14px;
+    min-width: 80px;
+    background: #202124;
+    color: #e8eaed;
+  }
+
+  .cell-جارية {
+    background-color: #f1c40f88 !important;
+    color: #000;
+    font-weight: bold;
+    border-radius: 50px;
+  }
+
+  .cell-ربح {
+    background-color: #27ae6088 !important;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 50px;
+  }
+
+  .cell-خسارة {
+    background-color: #e74c3c88 !important;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 50px;
+  }
+
+  @media (max-width: 720px) {
+    table {
+      min-width: unset;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 8px;
+    }
+  }
+</style>
 </head>
 <body>
-  <header>سجل الصفقات</header>
-  <div class="container" id="tradesContainer">
-    <!-- الصفقات تدرج هنا -->
-  </div>
-  <a href="index.html" class="return-btn">العودة للإضافة</a>  <script>
-    const savedTrades = JSON.parse(localStorage.getItem("trades") || "[]");
-    const pendingTrades = JSON.parse(sessionStorage.getItem("pendingTrades") || "[]");
-    const container = document.getElementById("tradesContainer");
 
-    const allTrades = [...savedTrades, ...pendingTrades].reverse();
+<h2>سجل الصفقات</h2>
+<button id="backBtn" onclick="goBack()">العودة للإضافة</button>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الزوج</th>
+        <th>النوع</th>
+        <th>دخول</th>
+        <th>وقف</th>
+        <th>هدف</th>
+        <th>النتيجة</th>
+        <th>الوقت</th>
+      </tr>
+    </thead>
+    <tbody id="tradesBody"></tbody>
+  </table>
+</div>
+
+<script>
+  let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
+  let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
+
+  const tbody = document.getElementById('tradesBody');
+
+  function renderTrades() {
+    tbody.innerHTML = "";
+    const allTrades = [...savedTrades, ...pendingTrades];
 
     allTrades.forEach((trade, index) => {
-      const div = document.createElement("div");
-      div.className = "trade-entry";
-      div.innerHTML = `
-        <div><span>#${allTrades.length - index}</span></div>
-        <div>الزوج: ${trade.pair}</div>
-        <div>النوع: ${trade.type}</div>
-        <div>سعر الدخول: ${trade.entry}</div>
-        <div>وقف الخسارة: ${trade.sl}</div>
-        <div>الهدف: ${trade.tp}</div>
-        <div class="result ${trade.result || 'جارية'}">${trade.result || 'جارية'}</div>
-        <div>الوقت: ${new Date(trade.timestamp).toLocaleString('ar-EG')}</div>
+      const tr = document.createElement('tr');
+      const date = new Date(trade.timestamp);
+      const resultClass = `cell-${trade.result || 'جارية'}`;
+      tr.innerHTML = `
+        <td class="${resultClass}">${index + 1}</td>
+        <td>${trade.pair}</td>
+        <td>${trade.type}</td>
+        <td>${trade.entry}</td>
+        <td>${trade.sl}</td>
+        <td>${trade.tp}</td>
+        <td>
+          <select onchange="updateResult(${index}, this.value)">
+            <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
+            <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
+            <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
+          </select>
+        </td>
+        <td>${date.toLocaleString('ar-EG')}</td>
       `;
-      container.appendChild(div);
+      tbody.appendChild(tr);
     });
-  </script></body>
+  }
+
+  function updateResult(index, result) {
+    const totalSaved = savedTrades.length;
+    if (index < totalSaved) {
+      savedTrades[index].result = result;
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
+    } else {
+      const pendingIndex = index - totalSaved;
+      pendingTrades[pendingIndex].result = result;
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
+    }
+
+    renderTrades();
+  }
+
+  function goBack() {
+    window.location.href = "index.html";
+  }
+
+  window.onload = renderTrades;
+</script>
+
+</body>
 </html>
