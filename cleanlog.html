@@ -5,450 +5,195 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>سجل الصفقات</title>
 <style>
-  html, body {
-    margin: 0; padding: 0; height: 100%;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
-    background: #202124;
-    color: #e8eaed;
-    overflow-x: hidden;
-  }
-  body {
+    background: #2c2f33;
+    color: #c1c1c1;
+    overflow: auto;
+    min-height: 100vh;
     padding: 15px;
-    box-sizing: border-box;
+    position: relative;
   }
   h2 {
     text-align: center;
-    color: #8ab4f8;
-    margin-bottom: 20px;
+    color: #ff8c00;
+    margin-bottom: 15px;
     font-weight: 700;
-    font-size: 24px;
+    font-size: 26px;
+    background: transparent;
+    padding: 0;
+    user-select: none;
+  }
+  #backBtn {
+    display: block;
+    margin: 10px auto 25px auto;
+    padding: 12px 30px;
+    font-size: 16px;
+    background: #ff8c00;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    max-width: 300px;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    box-shadow: 0 3px 8px rgba(255, 140, 0, 0.6);
+  }
+  #backBtn:hover {
+    background: #e67600;
   }
   .table-wrapper {
-    max-width: 100%;
-    margin: 0 auto;
+    width: 100%;
+    max-width: 520px;
+    margin: auto;
+    border-radius: 10px;
+    background: #393c41;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   }
   table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 12px;
+    border-collapse: collapse;
+    font-size: 14px;
+    color: #c1c1c1;
   }
-  thead {
-    display: none;
-  }
+  thead { display: none; }
   tbody tr {
-    background: #292a2d;
-    border-radius: 15px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+    background: #44484d;
+    margin-bottom: 12px;
     display: flex;
     flex-direction: column;
-    padding: 18px 20px;
-    color: #e8eaed;
-    user-select: none;
-    margin-bottom: 12px;
-  }
-  tbody td {
-    padding: 6px 0;
-    width: 100%;
-    font-size: 16px;
-  }
-  tbody select {
-    width: 100%;
-    margin-top: 6px;
-    background: #202124;
-    color: #e8eaed;
+    padding: 14px;
     border-radius: 12px;
-    border: 1px solid #555;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    transition: background 0.3s;
+    user-select: none;
+  }
+  td { padding: 6px 0; width: 100%; }
+  select {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #666;
+    background: #2c2f33;
+    color: #c1c1c1;
     font-weight: 600;
   }
-  .cell-جارية {
-    background-color: #f1c40f;
-    color: #000;
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  .cell-ربح {
-    background-color: #27ae60;
-    color: #fff;
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  .cell-خسارة {
-    background-color: #e74c3c;
-    color: #fff;
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  /* زر عائم bubble */
-  #fab-trades {
-    position: fixed;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #ffa726, #fb8c00);
-    border-radius: 50%;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    cursor: grab;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    right: 20px;
-    bottom: 20px;
-  }
-  #fab-trades:active {
-    cursor: grabbing;
-  }
-  #fabIcon {
-    width: 28px;
-    height: 28px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 3px;
-  }
-  .dot {
+  .cell-جارية, .cell-ربح, .cell-خسارة {
+    display: block;
     width: 100%;
-    height: 100%;
-    background-color: #000;
-    border-radius: 5px;
-  }
-  .dot.white { background-color: #fff; }
-  /* قائمة زر العائم */
-  .fab-menu {
-    position: fixed;
-    display: none;
-    z-index: 999;
-    background: #292a2d;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-    border-radius: 14px;
-    padding: 8px 0;
-  }
-  .fab-menu-item {
-    width: 160px;
-    padding: 12px 20px;
-    color: #e8eaed;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    transition: background-color 0.25s ease;
-    border-radius: 10px;
-  }
-  .fab-menu-item:hover {
-    background: #fb8c00;
-    color: #202124;
-  }
-  /* رسائل الحذف */
-  #confirmDelete {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #292a2d;
+    padding: 8px 12px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.7);
-    padding: 20px 30px;
-    z-index: 2000;
-    display: none;
-    color: #e8eaed;
+    font-weight: bold;
     text-align: center;
+    margin-bottom: 10px;
+    user-select: none;
   }
-  #confirmDelete button {
-    margin: 10px 15px 0 15px;
-    padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  #confirmDelete .yes {
-    background: #e74c3c;
-    color: #fff;
-  }
-  #confirmDelete .no {
-    background: #555;
-    color: #eee;
-  }
+  .cell-جارية { background-color: #f1c40f; color: #000; }
+  .cell-ربح { background-color: #27ae60; color: #fff; }
+  .cell-خسارة { background-color: #e74c3c; color: #fff; }
 </style>
 </head>
 <body>
 
 <h2>سجل الصفقات</h2>
+<button id="backBtn" onclick="goBack()">العودة للإضافة</button>
 
 <div class="table-wrapper">
-  <table aria-label="جدول سجل الصفقات">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>الزوج</th>
-        <th>النوع</th>
-        <th>دخول</th>
-        <th>وقف</th>
-        <th>هدف</th>
-        <th>النتيجة</th>
-        <th>الوقت</th>
-      </tr>
-    </thead>
-    <tbody id="tradesBody">
-      <!-- هنا سيتم عرض الصفقات -->
-    </tbody>
+  <table>
+    <tbody id="tradesBody"></tbody>
   </table>
-</div>
-
-<!-- زر عائم bubble -->
-<div id="fab-trades" title="القائمة">
-  <div id="fabIcon">
-    <div class="dot"></div>
-    <div class="dot"></div>
-    <div class="dot white"></div>
-    <div class="dot"></div>
-  </div>
-</div>
-
-<div class="fab-menu" id="fabMenu">
-  <div class="fab-menu-item" onclick="goTo('index.html')">➕ إضافة صفقة</div>
-  <div class="fab-menu-item" onclick="alert('أنت في سجل الصفقات')">📋 سجل الصفقات</div>
-  <div class="fab-menu-item" onclick="alert('سيتم الإضافة قريباً')">⚙️ الإعدادات</div>
-</div>
-
-<!-- نافذة تأكيد الحذف -->
-<div id="confirmDelete">
-  <p>هل تريد حذف هذه الصفقة؟</p>
-  <button class="yes">نعم</button>
-  <button class="no">إلغاء</button>
 </div>
 
 <script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
-
   const tbody = document.getElementById('tradesBody');
-  const fab = document.getElementById('fab-trades');
-  const fabMenu = document.getElementById('fabMenu');
-  const confirmDeleteBox = document.getElementById('confirmDelete');
-  let deleteIndex = null;
 
-  // عرض الصفقات مع الأحدث في الأعلى
   function renderTrades() {
-    tbody.innerHTML = '';
+    tbody.innerHTML = "";
     const allTrades = [...savedTrades, ...pendingTrades];
-    allTrades.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // عرض الأحدث أولاً
+    const reversed = allTrades.map((t, i) => ({...t, __originalIndex: i})).reverse();
 
-    allTrades.forEach((trade, index) => {
+    reversed.forEach((trade, viewIndex) => {
       const tr = document.createElement('tr');
-      tr.classList.add(`cell-${trade.result || 'جارية'}`);
-
       const date = new Date(trade.timestamp);
-      const dateStr = date.toLocaleString('ar-EG');
-
+      const resultClass = `cell-${trade.result || 'جارية'}`;
+      tr.setAttribute("data-index", trade.__originalIndex);
       tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${trade.pair}</td>
-        <td>${trade.type}</td>
-        <td>${trade.entry}</td>
-        <td>${trade.sl}</td>
-        <td>${trade.tp}</td>
         <td>
-          <select onchange="updateResult(${index}, this.value)">
+          <span class="${resultClass}">#${allTrades.length - trade.__originalIndex} - ${trade.result || 'جارية'}</span>
+          <strong>الزوج:</strong> ${trade.pair}<br>
+          <strong>النوع:</strong> ${trade.type}<br>
+          <strong>دخول:</strong> ${trade.entry}<br>
+          <strong>وقف:</strong> ${trade.sl}<br>
+          <strong>هدف:</strong> ${trade.tp}<br>
+          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
+          <br><br>
+          <strong>النتيجة:</strong>
+          <select onchange="updateResult(${trade.__originalIndex}, this.value)">
             <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
             <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
             <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
           </select>
         </td>
-        <td>${dateStr}</td>
       `;
-
-      // إضافة حدث ضغط مطول للحذف مع تأكيد
-      let pressTimer;
-      tr.addEventListener('mousedown', (e) => {
-        pressTimer = setTimeout(() => {
-          deleteIndex = index;
-          confirmDeleteBox.style.display = 'block';
-        }, 800);
-      });
-      tr.addEventListener('mouseup', () => clearTimeout(pressTimer));
-      tr.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-
+      addLongPressToDelete(tr);
       tbody.appendChild(tr);
     });
   }
 
-  // تحديث نتيجة الصفقة
   function updateResult(index, result) {
-    const allTrades = [...savedTrades, ...pendingTrades];
-    allTrades.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-    const trade = allTrades[index];
-
-    // تحديث في المكان الصحيح (saved أو pending)
-    let savedCount = savedTrades.length;
-    let pendingCount = pendingTrades.length;
-
-    // ايجاد المؤشر الحقيقي في saved أو pending
-    // الطريقة: نعيد ترتيب ونجمع لنسهل التحديث
-    const combinedSorted = [...savedTrades, ...pendingTrades].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    // ابحث في saved
-    let found = false;
-    for (let i=0; i<savedTrades.length; i++) {
-      if (savedTrades[i].timestamp === trade.timestamp) {
-        savedTrades[i].result = result;
-        localStorage.setItem('trades', JSON.stringify(savedTrades));
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      for (let i=0; i<pendingTrades.length; i++) {
-        if (pendingTrades[i].timestamp === trade.timestamp) {
-          pendingTrades[i].result = result;
-          sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-          break;
-        }
-      }
+    const totalSaved = savedTrades.length;
+    if (index < totalSaved) {
+      savedTrades[index].result = result;
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
+    } else {
+      const pendingIndex = index - totalSaved;
+      pendingTrades[pendingIndex].result = result;
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
     renderTrades();
   }
 
-  // حذف الصفقة المؤكدة
-  confirmDeleteBox.querySelector('.yes').addEventListener('click', () => {
-    if (deleteIndex === null) return;
-    const allTrades = [...savedTrades, ...pendingTrades];
-    allTrades.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-    const trade = allTrades[deleteIndex];
-
-    // حذف من saved أو pending حسب المكان
-    let found = false;
-    for (let i=0; i<savedTrades.length; i++) {
-      if (savedTrades[i].timestamp === trade.timestamp) {
-        savedTrades.splice(i,1);
-        localStorage.setItem('trades', JSON.stringify(savedTrades));
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      for (let i=0; i<pendingTrades.length; i++) {
-        if (pendingTrades[i].timestamp === trade.timestamp) {
-          pendingTrades.splice(i,1);
-          sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-          break;
-        }
-      }
-    }
-
-    confirmDeleteBox.style.display = 'none';
-    deleteIndex = null;
-    renderTrades();
-    alert('تم حذف الصفقة بنجاح.');
-  });
-  confirmDeleteBox.querySelector('.no').addEventListener('click', () => {
-    confirmDeleteBox.style.display = 'none';
-    deleteIndex = null;
-  });
-
-  // زر عائم bubble
-  // إعادة استخدام نفس تصميم زر الصفحة الرئيسية مع تحريك وحفظ الموقع وقائمة
-  function makeFabDraggable() {
-    let isDragging = false;
-    let offsetX, offsetY;
-
-    fab.addEventListener('mousedown', e => {
-      isDragging = true;
-      offsetX = e.clientX - fab.getBoundingClientRect().left;
-      offsetY = e.clientY - fab.getBoundingClientRect().top;
-      fab.style.transition = 'none';
-    });
-
-    window.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      let left = e.clientX - offsetX;
-      let top = e.clientY - offsetY;
-
-      const maxLeft = window.innerWidth - fab.offsetWidth;
-      const maxTop = window.innerHeight - fab.offsetHeight;
-      if (left < 0) left = 0;
-      if (top < 0) top = 0;
-      if (left > maxLeft) left = maxLeft;
-      if (top > maxTop) top = maxTop;
-
-      fab.style.left = left + 'px';
-      fab.style.top = top + 'px';
-      fab.style.right = 'unset';
-      fab.style.bottom = 'unset';
-
-      positionMenuAroundFab();
-    });
-
-    window.addEventListener('mouseup', e => {
-      if (isDragging) {
-        isDragging = false;
-        fab.style.transition = '';
-        localStorage.setItem('fabPosition_log', JSON.stringify({
-          left: fab.style.left,
-          top: fab.style.top
-        }));
-      }
-    });
+  function goBack() {
+    window.location.href = "index.html";
   }
 
-  function restoreFabPosition() {
-    const pos = JSON.parse(localStorage.getItem('fabPosition_log'));
-    if (pos) {
-      fab.style.left = pos.left;
-      fab.style.top = pos.top;
-      fab.style.right = 'unset';
-      fab.style.bottom = 'unset';
+  function addLongPressToDelete(row) {
+    let pressTimer;
+    const confirmDelete = () => {
+      if (confirm('هل تريد حذف هذه الصفقة؟')) {
+        const index = parseInt(row.getAttribute("data-index"));
+        deleteTradeByIndex(index);
+        renderTrades();
+      }
+    };
+    row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
+    row.addEventListener('mouseup', () => clearTimeout(pressTimer));
+    row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+    // لدعم اللمس في الموبايل
+    row.addEventListener('touchstart', () => pressTimer = setTimeout(confirmDelete, 600));
+    row.addEventListener('touchend', () => clearTimeout(pressTimer));
+    row.addEventListener('touchcancel', () => clearTimeout(pressTimer));
+  }
+
+  function deleteTradeByIndex(index) {
+    const totalSaved = savedTrades.length;
+    if (index < totalSaved) {
+      savedTrades.splice(index, 1);
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
     } else {
-      fab.style.right = '20px';
-      fab.style.bottom = '20px';
+      pendingTrades.splice(index - totalSaved, 1);
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
   }
 
-  // القائمة
-  function toggleFabMenu() {
-    if (fabMenu.style.display === 'block') {
-      fabMenu.style.display = 'none';
-    } else {
-      fabMenu.style.display = 'block';
-      positionMenuAroundFab();
-    }
-  }
-  fab.addEventListener('click', toggleFabMenu);
-
-  window.addEventListener('click', e => {
-    if (!fab.contains(e.target) && !fabMenu.contains(e.target)) {
-      fabMenu.style.display = 'none';
-    }
-  });
-
-  function positionMenuAroundFab() {
-    const rect = fab.getBoundingClientRect();
-    fabMenu.style.left = (rect.left - 180) + 'px';
-    fabMenu.style.top = (rect.top - 10) + 'px';
-  }
-
-  // عند تحميل الصفحة
   window.onload = () => {
     renderTrades();
-    restoreFabPosition();
-    makeFabDraggable();
   };
-
-  // التنقل للصفحات
-  function goTo(link) {
-    fabMenu.style.display = 'none';
-    window.location.href = link;
-  }
 </script>
 
 </body>
