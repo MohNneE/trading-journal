@@ -1,477 +1,172 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>إضافة الصفقات</title>
-<style>
-  html, body {
-    margin: 0; padding: 0; height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    direction: rtl;
-    background: #202124;
-    color: #e8eaed;
-    overflow-x: hidden;
-  }
-  body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px 15px 80px;
-    box-sizing: border-box;
-  }
-  h2 {
-    color: #8ab4f8;
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 24px;
-  }
-  form {
-    max-width: 600px;
-    width: 100%;
-    background: #292a2d;
-    padding: 20px 25px 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    box-sizing: border-box;
-  }
-  label {
-    font-weight: 600;
-    margin-top: 12px;
-    display: block;
-  }
-  input, select {
-    width: 100%;
-    padding: 12px 14px;
-    margin-top: 6px;
-    border-radius: 10px;
-    border: 1px solid #555;
-    font-size: 16px;
-    background: #202124;
-    color: #e8eaed;
-    box-sizing: border-box;
-  }
-  input::placeholder {
-    color: #999;
-  }
-  /* الجيك بوكس */
-  .checkbox-container {
-    display: flex;
-    align-items: center;
-    margin-top: 20px;
-    user-select: none;
-  }
-  .checkbox-container input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-left: 10px;
-    cursor: pointer;
-  }
-  .checkbox-container label {
-    cursor: pointer;
-    font-weight: 700;
-    color: #e8eaed;
-  }
-  button {
-    margin-top: 20px;
-    padding: 16px;
-    width: 100%;
-    background: #fb8c00;
-    border: none;
-    border-radius: 50px;
-    color: white;
-    font-weight: 700;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    user-select: none;
-  }
-  button:disabled {
-    background: #a0aec0;
-    cursor: not-allowed;
-  }
-  button:hover:not(:disabled) {
-    background: #e67e22;
-  }
-  /* جدول الصفقات */
-  table {
-    width: 100%;
-    max-width: 700px;
-    margin: 25px auto 0;
-    border-collapse: separate;
-    border-spacing: 0 12px;
-    background: transparent;
-    box-sizing: border-box;
-  }
-  thead {
-    display: none; /* نخفي العناوين لتناسب الموبايل */
-  }
-  tbody tr {
-    background: #292a2d;
-    border-radius: 15px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    padding: 18px 20px;
-    color: #e8eaed;
-    user-select: none;
-  }
-  tbody tr:not(:last-child) {
-    margin-bottom: 12px;
-  }
-  tbody td {
-    padding: 6px 0;
-    width: 100%;
-    font-size: 16px;
-  }
-  tbody select {
-    width: 100%;
-    margin-top: 6px;
-    background: #202124;
-    color: #e8eaed;
-    border-radius: 12px;
-    border: 1px solid #555;
-    font-weight: 600;
-  }
-  .cell-جارية {
-    background-color: #f1c40f;
-    color: #000;
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  .cell-ربح {
-    background-color: #27ae60;
-    color: #fff;
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  .cell-خسارة {
-    background-color: #e74c3c;
-    color: #fff;
-    font-weight: bold;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    text-align: center;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إضافة صفقة</title>
+  <style>
+    :root {
+      --green: #2fbf71;
+      --gray: #f1f1f1;
+      --dark: #2c3e50;
+      --light: #ffffff;
+    }body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--gray);
+  color: var(--dark);
+  direction: rtl;
+}
 
-  /* زر عائم bubble */
-  #fab-trades {
-    position: fixed;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #ffa726, #fb8c00);
-    border-radius: 50%;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    cursor: grab;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    right: 20px;
-    bottom: 20px;
-  }
-  #fab-trades:active {
-    cursor: grabbing;
-  }
-  #fabIcon {
-    width: 28px;
-    height: 28px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 3px;
-  }
-  .dot {
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    border-radius: 5px;
-  }
-  .dot.white { background-color: #fff; }
-  /* قائمة زر العائم */
-  .fab-menu {
-    position: fixed;
-    display: none;
-    z-index: 999;
-    background: #292a2d;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-    border-radius: 14px;
-    padding: 8px 0;
-  }
-  .fab-menu-item {
-    width: 160px;
-    padding: 12px 20px;
-    color: #e8eaed;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    transition: background-color 0.25s ease;
-    border-radius: 10px;
-  }
-  .fab-menu-item:hover {
-    background: #fb8c00;
-    color: #202124;
-  }
+header {
+  background-color: var(--light);
+  padding: 20px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  border-bottom: 2px solid #ddd;
+}
 
-  @media (max-width: 650px) {
-    form {
-      padding: 15px 20px 25px;
-    }
-    tbody td {
-      font-size: 14px;
-    }
-    button {
-      font-size: 16px;
-      padding: 14px;
-    }
-  }
-</style>
+main {
+  max-width: 500px;
+  margin: 30px auto;
+  background: var(--light);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+select, input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+}
+
+button {
+  background-color: var(--green);
+  color: white;
+  border: none;
+  padding: 14px;
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #28a25f;
+}
+
+.footer-link {
+  text-align: center;
+  margin-top: 20px;
+}
+.footer-link a {
+  text-decoration: none;
+  color: var(--green);
+  font-weight: bold;
+}
+
+  </style>
 </head>
 <body>
-
-<h2>إضافة الصفقات</h2>
-
-<form id="tradeForm">
-  <label for="pair">زوج التداول:</label>
-  <select id="pair" name="pair" required>
-    <option value="EUR/USD">EUR/USD</option>
-    <option value="XAU/USD">XAU/USD</option>
-    <option value="BTC/USD">BTC/USD</option>
-    <option value="USD/JPY">USD/JPY</option>
-  </select>
-
-  <label for="type">نوع الصفقة:</label>
-  <select id="type" name="type" required>
+  <header>
+    إضافة صفقة جديدة
+  </header>  <main>
+    <form id="tradeForm">
+      <label for="pair">زوج التداول</label>
+      <select id="pair" required>
+        <option value="">اختر الزوج</option>
+        <option value="EUR/USD">EUR/USD</option>
+        <option value="XAU/USD">XAU/USD</option>
+        <option value="BTC/USD">BTC/USD</option>
+        <option value="USD/JPY">USD/JPY</option>
+      </select><label for="type">نوع الصفقة</label>
+  <select id="type" required>
+    <option value="">اختر النوع</option>
     <option value="شراء">شراء</option>
     <option value="بيع">بيع</option>
   </select>
 
-  <label for="entry">سعر الدخول:</label>
-  <input type="number" step="0.0001" id="entry" name="entry" placeholder="مثال: 1.2345" required />
+  <label for="entry">سعر الدخول</label>
+  <input type="number" id="entry" step="0.0001" required />
 
-  <label for="sl">وقف الخسارة:</label>
-  <input type="number" step="0.0001" id="sl" name="sl" placeholder="مثال: 1.2300" required />
+  <label for="sl">وقف الخسارة</label>
+  <input type="number" id="sl" step="0.0001" required />
 
-  <label for="tp">الهدف:</label>
-  <input type="number" step="0.0001" id="tp" name="tp" placeholder="مثال: 1.2400" required />
+  <label for="tp">الهدف</label>
+  <input type="number" id="tp" step="0.0001" required />
 
-  <div class="checkbox-container">
+  <div class="checkbox">
     <input type="checkbox" id="conditionsCheck" />
-    <label for="conditionsCheck">تم توفر جميع الشروط</label>
+    <label for="conditionsCheck">تم تحقق جميع الشروط</label>
   </div>
 
-  <button type="submit" id="addTradeBtn" disabled>إضافة الصفقة مؤقتًا</button>
+  <button type="submit" id="addBtn" disabled>إضافة الصفقة</button>
 </form>
 
-<table aria-label="جدول الصفقات المؤقتة">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>الزوج</th>
-      <th>النوع</th>
-      <th>دخول</th>
-      <th>وقف</th>
-      <th>هدف</th>
-      <th>أرشفة</th>
-    </tr>
-  </thead>
-  <tbody id="pendingTradesBody">
-    <!-- الصفقات المؤقتة تظهر هنا -->
-  </tbody>
-</table>
-
-<!-- زر عائم bubble -->
-<div id="fab-trades" title="القائمة"></div>
-<div class="fab-menu" id="fabMenu">
-  <div class="fab-menu-item" onclick="goTo('index.html')">➕ إضافة صفقة</div>
-  <div class="fab-menu-item" onclick="goTo('cleanlog.html')">📋 سجل الصفقات</div>
-  <div class="fab-menu-item" onclick="alert('سيتم الإضافة قريباً')">⚙️ الإعدادات</div>
+<div class="footer-link">
+  <a href="cleanlog.html">الانتقال إلى سجل الصفقات</a>
 </div>
 
-<script>
-  // بيانات الصفقات المخزنة
-  let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
-  let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
+  </main>  <script>
+    const form = document.getElementById('tradeForm');
+    const checkbox = document.getElementById('conditionsCheck');
+    const addBtn = document.getElementById('addBtn');
 
-  const tbody = document.getElementById('pendingTradesBody');
-  const form = document.getElementById('tradeForm');
-  const conditionsCheck = document.getElementById('conditionsCheck');
-  const addTradeBtn = document.getElementById('addTradeBtn');
-  const fab = document.getElementById('fab-trades');
-  const fabMenu = document.getElementById('fabMenu');
-
-  // تفعيل زر الإضافة فقط إذا تم تفعيل الشروط
-  conditionsCheck.addEventListener('change', () => {
-    addTradeBtn.disabled = !conditionsCheck.checked;
-  });
-
-  // عرض الصفقات المؤقتة
-  function renderPendingTrades() {
-    tbody.innerHTML = '';
-    pendingTrades.forEach((trade, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${trade.pair}</td>
-        <td>${trade.type}</td>
-        <td>${trade.entry}</td>
-        <td>${trade.sl}</td>
-        <td>${trade.tp}</td>
-        <td><span class="archiveIcon" title="أرشفة الصفقة" style="cursor:pointer;color:#27ae60;font-weight:bold;" onclick="archiveTrade(${index})">&#10003;</span></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // إضافة صفقة مؤقتة
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-
-    if (!conditionsCheck.checked) {
-      alert("يجب تفعيل 'تم توفر جميع الشروط' قبل إضافة الصفقة.");
-      return;
-    }
-
-    const newTrade = {
-      pair: form.pair.value,
-      type: form.type.value,
-      entry: form.entry.value,
-      sl: form.sl.value,
-      tp: form.tp.value,
-      timestamp: new Date().toISOString(),
-      result: 'جارية'
-    };
-
-    pendingTrades.push(newTrade);
-    sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-
-    renderPendingTrades();
-    form.reset();
-    addTradeBtn.disabled = true;
-    conditionsCheck.checked = false;
-  });
-
-  // أرشفة الصفقة (نقلها من المؤقتة إلى المحفوظة)
-  function archiveTrade(index) {
-    const trade = pendingTrades[index];
-    savedTrades.push(trade);
-    pendingTrades.splice(index, 1);
-
-    sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-    localStorage.setItem('trades', JSON.stringify(savedTrades));
-
-    renderPendingTrades();
-    alert('تم أرشفة الصفقة بنجاح.');
-  }
-
-  // تنقل بين الصفحات
-  function goTo(link) {
-    fabMenu.style.display = 'none';
-    window.location.href = link;
-  }
-
-  // قائمة الزر العائم (إظهار/إخفاء)
-  function toggleFabMenu() {
-    if (fabMenu.style.display === 'block') {
-      fabMenu.style.display = 'none';
-    } else {
-      fabMenu.style.display = 'block';
-      positionMenuAroundFab();
-    }
-  }
-  fab.addEventListener('click', toggleFabMenu);
-
-  // إخفاء القائمة بالنقر خارجها
-  window.addEventListener('click', e => {
-    if (!fab.contains(e.target) && !fabMenu.contains(e.target)) {
-      fabMenu.style.display = 'none';
-    }
-  });
-
-  // تحديد مكان القائمة بالنسبة للزر العائم
-  function positionMenuAroundFab() {
-    const rect = fab.getBoundingClientRect();
-    fabMenu.style.left = (rect.left - 180) + 'px';
-    fabMenu.style.top = (rect.top - 10) + 'px';
-  }
-
-  // جعل الزر العائم قابل للسحب مع حفظ موقعه
-  function makeFabDraggable() {
-    let isDragging = false;
-    let offsetX, offsetY;
-
-    fab.addEventListener('mousedown', e => {
-      isDragging = true;
-      offsetX = e.clientX - fab.getBoundingClientRect().left;
-      offsetY = e.clientY - fab.getBoundingClientRect().top;
-      fab.style.transition = 'none'; // إزالة الانتقال أثناء السحب
+    checkbox.addEventListener('change', () => {
+      addBtn.disabled = !checkbox.checked;
     });
 
-    window.addEventListener('mousemove', e => {
-      if (!isDragging) return;
-      let left = e.clientX - offsetX;
-      let top = e.clientY - offsetY;
+    form.addEventListener('submit', e => {
+      e.preventDefault();
 
-      // ضمن حدود الشاشة
-      const maxLeft = window.innerWidth - fab.offsetWidth;
-      const maxTop = window.innerHeight - fab.offsetHeight;
-      if (left < 0) left = 0;
-      if (top < 0) top = 0;
-      if (left > maxLeft) left = maxLeft;
-      if (top > maxTop) top = maxTop;
+      const trade = {
+        pair: form.pair.value,
+        type: form.type.value,
+        entry: form.entry.value,
+        sl: form.sl.value,
+        tp: form.tp.value,
+        result: "جارية",
+        timestamp: new Date().toISOString(),
+      };
 
-      fab.style.left = left + 'px';
-      fab.style.top = top + 'px';
-      fab.style.right = 'unset';
-      fab.style.bottom = 'unset';
+      const current = JSON.parse(sessionStorage.getItem("pendingTrades") || "[]");
+      current.push(trade);
+      sessionStorage.setItem("pendingTrades", JSON.stringify(current));
 
-      positionMenuAroundFab();
+      form.reset();
+      addBtn.disabled = true;
+      alert("تمت إضافة الصفقة مؤقتاً بنجاح");
     });
-
-    window.addEventListener('mouseup', e => {
-      if (isDragging) {
-        isDragging = false;
-        fab.style.transition = ''; // إعادة الانتقال
-        localStorage.setItem('fabPosition_add', JSON.stringify({
-          left: fab.style.left,
-          top: fab.style.top
-        }));
-      }
-    });
-  }
-
-  // استعادة موقع الزر عند تحميل الصفحة
-  function restoreFabPosition() {
-    const pos = JSON.parse(localStorage.getItem('fabPosition_add'));
-    if (pos) {
-      fab.style.left = pos.left;
-      fab.style.top = pos.top;
-      fab.style.right = 'unset';
-      fab.style.bottom = 'unset';
-    } else {
-      fab.style.right = '20px';
-      fab.style.bottom = '20px';
-    }
-  }
-
-  // تنفيذ عند تحميل الصفحة
-  window.onload = () => {
-    renderPendingTrades();
-    restoreFabPosition();
-    makeFabDraggable();
-  };
-</script>
-
-</body>
+  </script></body>
 </html>
