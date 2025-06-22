@@ -1,110 +1,112 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>سجل الصفقات</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    direction: rtl;
-    background: #2c2f33;
-    color: #c1c1c1;
-    overflow: auto;
-    min-height: 100vh;
-    padding: 15px;
-    position: relative;
-  }
-  h2 {
-    text-align: center;
-    color: #ff8c00;
-    margin-bottom: 15px;
-    font-weight: 700;
-    font-size: 26px;
-    background: transparent;
-    padding: 0;
-    user-select: none;
-  }
-  #backBtn {
-    display: block;
-    margin: 10px auto 25px auto;
-    padding: 12px 30px;
-    font-size: 16px;
-    background: #ff8c00;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    max-width: 300px;
-    transition: background-color 0.3s ease;
-    user-select: none;
-    box-shadow: 0 3px 8px rgba(255, 140, 0, 0.6);
-  }
-  #backBtn:hover {
-    background: #e67600;
-  }
-  .table-wrapper {
-    width: 100%;
-    max-width: 520px;
-    margin: auto;
-    border-radius: 10px;
-    background: #393c41;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    color: #c1c1c1;
-  }
-  thead { display: none; }
-  tbody tr {
-    background: #44484d;
-    margin-bottom: 12px;
-    display: flex;
-    flex-direction: column;
-    padding: 14px;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.7);
-    transition: background 0.3s;
-    user-select: none;
-  }
-  td { padding: 6px 0; width: 100%; }
-  select {
-    width: 100%;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #666;
-    background: #2c2f33;
-    color: #c1c1c1;
-    font-weight: 600;
-  }
-  .cell-جارية, .cell-ربح, .cell-خسارة {
-    display: block;
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 12px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
-    user-select: none;
-  }
-  .cell-جارية { background-color: #f1c40f; color: #000; }
-  .cell-ربح { background-color: #27ae60; color: #fff; }
-  .cell-خسارة { background-color: #e74c3c; color: #fff; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>سجل الصفقات</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      background: #202124;
+      color: #e8eaed;
+      overflow: hidden;
+      min-height: 100vh;
+      padding: 15px;
+    }
+    h2 {
+      text-align: center;
+      color: #e8eaed;
+      margin-bottom: 20px;
+      font-weight: 700;
+      font-size: 22px;
+      background: #3c4043;
+      padding: 12px;
+      border-radius: 12px;
+    }
+    .table-wrapper {
+      width: 100%;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 10px;
+      background: #292a2d;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      color: #e8eaed;
+    }
+    thead { display: none; }
+    tbody tr {
+      background: #2d2f31;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      transition: background 0.3s;
+    }
+    td { padding: 6px 0; width: 100%; }
+
+    select {
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #777;
+      background: #202124;
+      color: #e8eaed;
+      font-weight: 600;
+    }
+
+    .cell-جارية, .cell-ربح, .cell-خسارة {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .cell-جارية { background-color: #f1c40f; color: #000; }
+    .cell-ربح { background-color: #27ae60; color: #fff; }
+    .cell-خسارة { background-color: #e74c3c; color: #fff; }
+
+    #backBtn {
+      display: block;
+      margin: 20px auto 0;
+      padding: 12px 30px;
+      font-size: 16px;
+      background: #fb8c00;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      max-width: 300px;
+      transition: background-color 0.3s ease;
+    }
+    #backBtn:hover {
+      background: #e67e00;
+    }
+  </style>
 </head>
 <body>
 
 <h2>سجل الصفقات</h2>
-<button id="backBtn" onclick="goBack()">العودة للإضافة</button>
 
 <div class="table-wrapper">
   <table>
     <tbody id="tradesBody"></tbody>
   </table>
 </div>
+
+<button id="backBtn" onclick="goBack()">العودة للإضافة</button>
 
 <script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
@@ -113,31 +115,28 @@
 
   function renderTrades() {
     tbody.innerHTML = "";
-    const allTrades = [...savedTrades, ...pendingTrades];
-    // عرض الأحدث أولاً
-    const reversed = allTrades.map((t, i) => ({...t, __originalIndex: i})).reverse();
+    const allTrades = [...savedTrades, ...pendingTrades].map((t, i) => ({...t, __index: i})).reverse();
 
-    reversed.forEach((trade, viewIndex) => {
+    allTrades.forEach((trade, viewIndex) => {
       const tr = document.createElement('tr');
       const date = new Date(trade.timestamp);
       const resultClass = `cell-${trade.result || 'جارية'}`;
-      tr.setAttribute("data-index", trade.__originalIndex);
+      tr.setAttribute("data-index", trade.__index);
       tr.innerHTML = `
         <td>
-          <span class="${resultClass}">#${allTrades.length - trade.__originalIndex} - ${trade.result || 'جارية'}</span>
+          <span class="${resultClass}">#${savedTrades.length + pendingTrades.length - trade.__index} - ${trade.result || 'جارية'}</span>
           <strong>الزوج:</strong> ${trade.pair}<br>
           <strong>النوع:</strong> ${trade.type}<br>
           <strong>دخول:</strong> ${trade.entry}<br>
           <strong>وقف:</strong> ${trade.sl}<br>
           <strong>هدف:</strong> ${trade.tp}<br>
-          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
-          <br><br>
           <strong>النتيجة:</strong>
-          <select onchange="updateResult(${trade.__originalIndex}, this.value)">
+          <select onchange="updateResult(${trade.__index}, this.value)">
             <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
             <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
             <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
-          </select>
+          </select><br>
+          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
         </td>
       `;
       addLongPressToDelete(tr);
@@ -165,7 +164,7 @@
   function addLongPressToDelete(row) {
     let pressTimer;
     const confirmDelete = () => {
-      if (confirm('هل تريد حذف هذه الصفقة؟')) {
+      if (confirm("هل تريد حذف هذه الصفقة؟")) {
         const index = parseInt(row.getAttribute("data-index"));
         deleteTradeByIndex(index);
         renderTrades();
@@ -174,10 +173,6 @@
     row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
     row.addEventListener('mouseup', () => clearTimeout(pressTimer));
     row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-    // لدعم اللمس في الموبايل
-    row.addEventListener('touchstart', () => pressTimer = setTimeout(confirmDelete, 600));
-    row.addEventListener('touchend', () => clearTimeout(pressTimer));
-    row.addEventListener('touchcancel', () => clearTimeout(pressTimer));
   }
 
   function deleteTradeByIndex(index) {
@@ -191,9 +186,7 @@
     }
   }
 
-  window.onload = () => {
-    renderTrades();
-  };
+  window.onload = renderTrades;
 </script>
 
 </body>
