@@ -4,8 +4,7 @@
   "start_url": "cleanlog.html",
   "display": "standalone",
   "background_color": "#202124",
-  "theme_color": "#ff9800",
-  "orientation": "portrait",
+  "theme_color": "#202124",
   "icons": [
     {
       "src": "icon.png",
