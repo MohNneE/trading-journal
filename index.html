@@ -23,7 +23,6 @@
     box-sizing: border-box;
   }
 
-  /* القائمة الجانبية */
   .sidebar-toggle {
     position: fixed;
     top: 15px;
@@ -51,7 +50,6 @@
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .sidebar.open {
@@ -62,11 +60,12 @@
     padding: 15px;
     border-bottom: 1px solid #555;
     background: #202124;
+    text-align: center;
   }
 
   .sidebar-header h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     color: #fbbc04;
   }
 
@@ -74,14 +73,14 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    text-align: center;
   }
 
   .sidebar-menu li {
-    padding: 15px;
+    padding: 16px 10px;
     border-bottom: 1px solid #444;
     cursor: pointer;
-    transition: background 0.2s;
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .sidebar-menu li:hover {
@@ -138,9 +137,8 @@
     box-sizing: border-box;
   }
 
-  input:focus, select:focus {
-    outline: none;
-    border-color: #fbbc04;
+  input[type="file"] {
+    padding: 6px 8px;
   }
 
   .checkbox-container {
@@ -213,10 +211,6 @@
     color: #e8eaed;
   }
 
-  tr:last-child td {
-    border-bottom: none;
-  }
-
   .archiveIcon {
     cursor: pointer;
     font-size: 22px;
@@ -286,6 +280,9 @@
   <label for="tp">الهدف:</label>
   <input type="number" step="0.0001" id="tp" name="tp" required />
 
+  <label for="image">صورة توضيحية (اختياري):</label>
+  <input type="file" id="image" accept="image/*" />
+
   <div class="checkbox-container">
     <input type="checkbox" id="conditionsCheck" />
     <label for="conditionsCheck">تم توفر جميع الشروط</label>
@@ -317,6 +314,7 @@
   const form = document.getElementById('tradeForm');
   const conditionsCheck = document.getElementById('conditionsCheck');
   const addTradeBtn = document.getElementById('addTradeBtn');
+  const imageInput = document.getElementById('image');
 
   conditionsCheck.addEventListener('change', () => {
     addTradeBtn.disabled = !conditionsCheck.checked;
@@ -333,7 +331,7 @@
         <td>${trade.entry}</td>
         <td>${trade.sl}</td>
         <td>${trade.tp}</td>
-        <td><span class="archiveIcon" title="أرشفة الصفقة" onclick="archiveTrade(${index})">&#10003;</span></td>
+        <td><span class="archiveIcon" onclick="archiveTrade(${index})">&#10003;</span></td>
       `;
       tbody.appendChild(tr);
     });
@@ -347,33 +345,46 @@
       return;
     }
 
-    const newTrade = {
-      pair: form.pair.value,
-      type: form.type.value,
-      entry: form.entry.value,
-      sl: form.sl.value,
-      tp: form.tp.value,
-      timestamp: new Date().toISOString(),
-      result: 'جارية'
+    const reader = new FileReader();
+    const file = imageInput.files[0];
+
+    const addTrade = (imageData) => {
+      const newTrade = {
+        pair: form.pair.value,
+        type: form.type.value,
+        entry: form.entry.value,
+        sl: form.sl.value,
+        tp: form.tp.value,
+        image: imageData || null,
+        timestamp: new Date().toISOString(),
+        result: 'جارية'
+      };
+
+      pendingTrades.push(newTrade);
+      sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
+
+      renderPendingTrades();
+      form.reset();
+      addTradeBtn.disabled = true;
+      conditionsCheck.checked = false;
     };
 
-    pendingTrades.push(newTrade);
-    sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-
-    renderPendingTrades();
-    form.reset();
-    addTradeBtn.disabled = true;
-    conditionsCheck.checked = false;
+    if (file) {
+      reader.onload = function(e) {
+        addTrade(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      addTrade(null);
+    }
   });
 
   function archiveTrade(index) {
     const trade = pendingTrades[index];
     savedTrades.push(trade);
     pendingTrades.splice(index, 1);
-
     sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
     localStorage.setItem('trades', JSON.stringify(savedTrades));
-
     renderPendingTrades();
     alert('تم أرشفة الصفقة بنجاح.');
   }
