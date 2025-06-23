@@ -1,209 +1,196 @@
 <!DOCTYPE html><html lang="ar">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>إضافة الصفقات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>سجل الصفقات</title>
 <style>
-  /* نفس التنسيقات الموجودة بدون تغيير */
-  /* ... تم الإبقاء على جميع التنسيقات كما هي في كودك السابق ... */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    background: #2c2f33;
+    color: #c1c1c1;
+    overflow: auto;
+    min-height: 100vh;
+    padding: 15px;
+    position: relative;
+  }
+  h2 {
+    text-align: center;
+    color: #ff8c00;
+    margin-bottom: 15px;
+    font-weight: 700;
+    font-size: 26px;
+    background: transparent;
+    padding: 0;
+    user-select: none;
+  }
+  #backBtn {
+    display: block;
+    margin: 10px auto 25px auto;
+    padding: 12px 30px;
+    font-size: 16px;
+    background: #ff8c00;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    max-width: 300px;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    box-shadow: 0 3px 8px rgba(255, 140, 0, 0.6);
+  }
+  #backBtn:hover {
+    background: #e67600;
+  }
+  .table-wrapper {
+    width: 100%;
+    max-width: 520px;
+    margin: auto;
+    border-radius: 10px;
+    background: #393c41;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    color: #c1c1c1;
+  }
+  thead { display: none; }
+  tbody tr {
+    background: #44484d;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    transition: background 0.3s;
+    user-select: none;
+  }
+  td { padding: 6px 0; width: 100%; }
+  select {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #666;
+    background: #2c2f33;
+    color: #c1c1c1;
+    font-weight: 600;
+  }
+  .cell-جارية, .cell-ربح, .cell-خسارة {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    user-select: none;
+  }
+  .cell-جارية { background-color: #f1c40f; color: #000; }
+  .cell-ربح { background-color: #27ae60; color: #fff; }
+  .cell-خسارة { background-color: #e74c3c; color: #fff; }
+  img.trade-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
 </style>
 </head>
-<body>  <h2>إضافة الصفقات</h2>  <form id="tradeForm">
-    <label for="pair">زوج التداول:</label>
-    <select id="pair" name="pair" required>
-      <option value="EUR/USD">EUR/USD</option>
-      <option value="XAU/USD">XAU/USD</option>
-      <option value="BTC/USD">BTC/USD</option>
-      <option value="USD/JPY">USD/JPY</option>
-    </select><label for="type">نوع الصفقة:</label>
-<select id="type" name="type" required>
-  <option value="شراء">شراء</option>
-  <option value="بيع">بيع</option>
-</select>
-
-<label for="entry">سعر الدخول:</label>
-<input type="number" step="0.0001" id="entry" name="entry" required />
-
-<label for="sl">وقف الخسارة:</label>
-<input type="number" step="0.0001" id="sl" name="sl" required />
-
-<label for="tp">الهدف:</label>
-<input type="number" step="0.0001" id="tp" name="tp" required />
-
-<label for="image">صورة الصفقة (اختياري):</label>
-<input type="file" id="image" accept="image/*" />
-
-<div class="checkbox-container">
-  <input type="checkbox" id="conditionsCheck" />
-  <label for="conditionsCheck">تم توفر جميع الشروط</label>
-</div>
-
-<button type="submit" id="addTradeBtn" disabled>إضافة الصفقة مؤقتًا</button>
-
-  </form>  <table aria-label="جدول الصفقات المؤقتة">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>الزوج</th>
-        <th>النوع</th>
-        <th>دخول</th>
-        <th>وقف</th>
-        <th>هدف</th>
-        <th>أرشفة</th>
-      </tr>
-    </thead>
-    <tbody id="pendingTradesBody">
-      <!-- الصفقات المؤقتة تظهر هنا -->
-    </tbody>
-  </table>  <div id="fabButton" title="سجل الصفقات" aria-label="سجل الصفقات" role="button" tabindex="0">📅</div><script>
+<body><h2>سجل الصفقات</h2>
+<button id="backBtn" onclick="goBack()">العودة للإضافة</button><div class="table-wrapper">
+  <table>
+    <tbody id="tradesBody"></tbody>
+  </table>
+</div><script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
+  const tbody = document.getElementById('tradesBody');
 
-  const tbody = document.getElementById('pendingTradesBody');
-  const form = document.getElementById('tradeForm');
-  const imageInput = document.getElementById('image');
-  const conditionsCheck = document.getElementById('conditionsCheck');
-  const addTradeBtn = document.getElementById('addTradeBtn');
-  const fabButton = document.getElementById('fabButton');
+  function renderTrades() {
+    tbody.innerHTML = "";
+    const allTrades = [...savedTrades, ...pendingTrades];
+    const reversed = allTrades.map((t, i) => ({...t, __originalIndex: i})).reverse();
 
-  conditionsCheck.addEventListener('change', () => {
-    addTradeBtn.disabled = !conditionsCheck.checked;
-  });
-
-  function renderPendingTrades() {
-    tbody.innerHTML = '';
-    pendingTrades.forEach((trade, index) => {
+    reversed.forEach((trade, viewIndex) => {
       const tr = document.createElement('tr');
+      const date = new Date(trade.timestamp);
+      const resultClass = `cell-${trade.result || 'جارية'}`;
+      tr.setAttribute("data-index", trade.__originalIndex);
       tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${trade.pair}</td>
-        <td>${trade.type}</td>
-        <td>${trade.entry}</td>
-        <td>${trade.sl}</td>
-        <td>${trade.tp}</td>
-        <td><span class="archiveIcon" title="أرشفة الصفقة" onclick="archiveTrade(${index})">✓</span></td>
+        <td>
+          <span class="${resultClass}">#${allTrades.length - trade.__originalIndex} - ${trade.result || 'جارية'}</span>
+          <strong>الزوج:</strong> ${trade.pair}<br>
+          <strong>النوع:</strong> ${trade.type}<br>
+          <strong>دخول:</strong> ${trade.entry}<br>
+          <strong>وقف:</strong> ${trade.sl}<br>
+          <strong>هدف:</strong> ${trade.tp}<br>
+          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}<br><br>
+          <strong>النتيجة:</strong>
+          <select onchange="updateResult(${trade.__originalIndex}, this.value)">
+            <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
+            <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
+            <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
+          </select>
+          ${trade.image ? `<br><br><strong>📷 صورة:</strong><br><img class="trade-image" src="${trade.image}" alt="صورة الصفقة">` : ''}
+        </td>
       `;
+      addLongPressToDelete(tr);
       tbody.appendChild(tr);
     });
   }
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-
-    if (!conditionsCheck.checked) {
-      alert("يجب تفعيل 'تم توفر جميع الشروط' قبل إضافة الصفقة.");
-      return;
-    }
-
-    const file = imageInput.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        saveTrade(evt.target.result); // Base64 URL للصورة
-      };
-      reader.readAsDataURL(file);
+  function updateResult(index, result) {
+    const totalSaved = savedTrades.length;
+    if (index < totalSaved) {
+      savedTrades[index].result = result;
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
     } else {
-      saveTrade(null);
+      const pendingIndex = index - totalSaved;
+      pendingTrades[pendingIndex].result = result;
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
-  });
+    renderTrades();
+  }
 
-  function saveTrade(imageData) {
-    const newTrade = {
-      pair: form.pair.value,
-      type: form.type.value,
-      entry: form.entry.value,
-      sl: form.sl.value,
-      tp: form.tp.value,
-      timestamp: new Date().toISOString(),
-      result: 'جارية',
-      image: imageData // Base64 or null
+  function goBack() {
+    window.location.href = "index.html";
+  }
+
+  function addLongPressToDelete(row) {
+    let pressTimer;
+    const confirmDelete = () => {
+      if (confirm('هل تريد حذف هذه الصفقة؟')) {
+        const index = parseInt(row.getAttribute("data-index"));
+        deleteTradeByIndex(index);
+        renderTrades();
+      }
     };
-
-    pendingTrades.push(newTrade);
-    sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-
-    renderPendingTrades();
-    form.reset();
-    addTradeBtn.disabled = true;
-    conditionsCheck.checked = false;
+    row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
+    row.addEventListener('mouseup', () => clearTimeout(pressTimer));
+    row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+    row.addEventListener('touchstart', () => pressTimer = setTimeout(confirmDelete, 600));
+    row.addEventListener('touchend', () => clearTimeout(pressTimer));
+    row.addEventListener('touchcancel', () => clearTimeout(pressTimer));
   }
 
-  function archiveTrade(index) {
-    const trade = pendingTrades[index];
-    savedTrades.push(trade);
-    pendingTrades.splice(index, 1);
-
-    sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-    localStorage.setItem('trades', JSON.stringify(savedTrades));
-
-    renderPendingTrades();
-    alert('تم أرشفة الصفقة بنجاح.');
-  }
-
-  fabButton.addEventListener('click', () => {
-    window.location.href = 'cleanlog.html';
-  });
-
-  fabButton.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      fabButton.click();
+  function deleteTradeByIndex(index) {
+    const totalSaved = savedTrades.length;
+    if (index < totalSaved) {
+      savedTrades.splice(index, 1);
+      localStorage.setItem("trades", JSON.stringify(savedTrades));
+    } else {
+      pendingTrades.splice(index - totalSaved, 1);
+      sessionStorage.setItem("pendingTrades", JSON.stringify(pendingTrades));
     }
-  });
-
-  renderPendingTrades();
-
-  // --------- سحب الزر العائم مع حفظ الموقع ----------
-  let isDragging = false;
-  let offsetX, offsetY;
-
-  const savedPosition = JSON.parse(localStorage.getItem('fabPosition'));
-  if (savedPosition) {
-    fabButton.style.bottom = 'unset';
-    fabButton.style.right = 'unset';
-    fabButton.style.top = savedPosition.top;
-    fabButton.style.left = savedPosition.left;
   }
 
-  function startDrag(e) {
-    isDragging = true;
-    const rect = fabButton.getBoundingClientRect();
-    offsetX = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    offsetY = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', stopDrag);
-    document.addEventListener('touchmove', drag, { passive: false });
-    document.addEventListener('touchend', stopDrag);
-  }
-
-  function drag(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - offsetX;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - offsetY;
-
-    fabButton.style.left = x + 'px';
-    fabButton.style.top = y + 'px';
-    fabButton.style.bottom = 'unset';
-    fabButton.style.right = 'unset';
-  }
-
-  function stopDrag() {
-    isDragging = false;
-    localStorage.setItem('fabPosition', JSON.stringify({
-      top: fabButton.style.top,
-      left: fabButton.style.left
-    }));
-
-    document.removeEventListener('mousemove', drag);
-    document.removeEventListener('mouseup', stopDrag);
-    document.removeEventListener('touchmove', drag);
-    document.removeEventListener('touchend', stopDrag);
-  }
-
-  fabButton.addEventListener('mousedown', startDrag);
-  fabButton.addEventListener('touchstart', startDrag, { passive: false });
+  window.onload = () => {
+    renderTrades();
+  };
 </script></body>
 </html>
