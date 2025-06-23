@@ -1,6 +1,4 @@
-
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -94,20 +92,21 @@
   .cell-جارية { background-color: #f1c40f; color: #000; }
   .cell-ربح { background-color: #27ae60; color: #fff; }
   .cell-خسارة { background-color: #e74c3c; color: #fff; }
+  img.trade-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
 </style>
 </head>
-<body>
-
-<h2>سجل الصفقات</h2>
-<button id="backBtn" onclick="goBack()">العودة للإضافة</button>
-
-<div class="table-wrapper">
+<body><h2>سجل الصفقات</h2>
+<button id="backBtn" onclick="goBack()">العودة للإضافة</button><div class="table-wrapper">
   <table>
     <tbody id="tradesBody"></tbody>
   </table>
-</div>
-
-<script>
+</div><script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
   const tbody = document.getElementById('tradesBody');
@@ -115,7 +114,6 @@
   function renderTrades() {
     tbody.innerHTML = "";
     const allTrades = [...savedTrades, ...pendingTrades];
-    // عرض الأحدث أولاً
     const reversed = allTrades.map((t, i) => ({...t, __originalIndex: i})).reverse();
 
     reversed.forEach((trade, viewIndex) => {
@@ -131,14 +129,14 @@
           <strong>دخول:</strong> ${trade.entry}<br>
           <strong>وقف:</strong> ${trade.sl}<br>
           <strong>هدف:</strong> ${trade.tp}<br>
-          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
-          <br><br>
+          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}<br><br>
           <strong>النتيجة:</strong>
           <select onchange="updateResult(${trade.__originalIndex}, this.value)">
             <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
             <option value="ربح" ${trade.result === "ربح" ? "selected" : ""}>✅ ربح</option>
             <option value="خسارة" ${trade.result === "خسارة" ? "selected" : ""}>❌ خسارة</option>
           </select>
+          ${trade.image ? `<br><br><strong>📷 صورة:</strong><br><img class="trade-image" src="${trade.image}" alt="صورة الصفقة">` : ''}
         </td>
       `;
       addLongPressToDelete(tr);
@@ -175,7 +173,6 @@
     row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
     row.addEventListener('mouseup', () => clearTimeout(pressTimer));
     row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-    // لدعم اللمس في الموبايل
     row.addEventListener('touchstart', () => pressTimer = setTimeout(confirmDelete, 600));
     row.addEventListener('touchend', () => clearTimeout(pressTimer));
     row.addEventListener('touchcancel', () => clearTimeout(pressTimer));
@@ -195,7 +192,5 @@
   window.onload = () => {
     renderTrades();
   };
-</script>
-
-</body>
+</script></body>
 </html>
