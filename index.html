@@ -23,7 +23,7 @@
     box-sizing: border-box;
   }
 
-  /* زر القائمة الجانبية */
+  /* القائمة الجانبية */
   .sidebar-toggle {
     position: fixed;
     top: 15px;
@@ -51,6 +51,7 @@
     z-index: 1000;
     display: flex;
     flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   .sidebar.open {
@@ -58,9 +59,6 @@
   }
 
   .sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding: 15px;
     border-bottom: 1px solid #555;
     background: #202124;
@@ -68,13 +66,8 @@
 
   .sidebar-header h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     color: #fbbc04;
-  }
-
-  .close-btn {
-    font-size: 22px;
-    cursor: pointer;
   }
 
   .sidebar-menu {
@@ -88,10 +81,26 @@
     border-bottom: 1px solid #444;
     cursor: pointer;
     transition: background 0.2s;
+    font-size: 16px;
   }
 
   .sidebar-menu li:hover {
     background: #444;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.2);
+    display: none;
+    z-index: 999;
+  }
+
+  .overlay.active {
+    display: block;
   }
 
   h2 {
@@ -244,12 +253,12 @@
 <div id="sidebar" class="sidebar">
   <div class="sidebar-header">
     <h3>القائمة</h3>
-    <span class="close-btn" onclick="toggleSidebar()">&times;</span>
   </div>
   <ul class="sidebar-menu">
     <li onclick="goToLog()">📄 سجل الصفقات</li>
   </ul>
 </div>
+<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
 <h2>إضافة الصفقات</h2>
 
@@ -374,7 +383,16 @@
   }
 
   function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const isOpen = sidebar.classList.contains('open');
+    if (isOpen) {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    } else {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+    }
   }
 
   renderPendingTrades();
