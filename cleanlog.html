@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="ar">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,10 +11,8 @@
     direction: rtl;
     background: #2c2f33;
     color: #c1c1c1;
-    overflow: auto;
     min-height: 100vh;
     padding: 15px;
-    position: relative;
   }
   h2 {
     text-align: center;
@@ -21,9 +20,6 @@
     margin-bottom: 15px;
     font-weight: 700;
     font-size: 26px;
-    background: transparent;
-    padding: 0;
-    user-select: none;
   }
   #backBtn {
     display: block;
@@ -36,12 +32,6 @@
     border-radius: 8px;
     cursor: pointer;
     max-width: 300px;
-    transition: background-color 0.3s ease;
-    user-select: none;
-    box-shadow: 0 3px 8px rgba(255, 140, 0, 0.6);
-  }
-  #backBtn:hover {
-    background: #e67600;
   }
   .table-wrapper {
     width: 100%;
@@ -51,12 +41,7 @@
     background: #393c41;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    color: #c1c1c1;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
   thead { display: none; }
   tbody tr {
     background: #44484d;
@@ -65,9 +50,6 @@
     flex-direction: column;
     padding: 14px;
     border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.7);
-    transition: background 0.3s;
-    user-select: none;
   }
   td { padding: 6px 0; width: 100%; }
   select {
@@ -87,26 +69,31 @@
     font-weight: bold;
     text-align: center;
     margin-bottom: 10px;
-    user-select: none;
   }
   .cell-جارية { background-color: #f1c40f; color: #000; }
   .cell-ربح { background-color: #27ae60; color: #fff; }
   .cell-خسارة { background-color: #e74c3c; color: #fff; }
   img.trade-image {
     width: 100%;
-    max-height: 300px;
+    max-height: 250px;
     object-fit: cover;
     border-radius: 10px;
     margin-top: 10px;
   }
 </style>
 </head>
-<body><h2>سجل الصفقات</h2>
-<button id="backBtn" onclick="goBack()">العودة للإضافة</button><div class="table-wrapper">
+<body>
+
+<h2>سجل الصفقات</h2>
+<button id="backBtn" onclick="goBack()">العودة للإضافة</button>
+
+<div class="table-wrapper">
   <table>
     <tbody id="tradesBody"></tbody>
   </table>
-</div><script>
+</div>
+
+<script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
   const tbody = document.getElementById('tradesBody');
@@ -129,7 +116,8 @@
           <strong>دخول:</strong> ${trade.entry}<br>
           <strong>وقف:</strong> ${trade.sl}<br>
           <strong>هدف:</strong> ${trade.tp}<br>
-          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}<br><br>
+          <strong>الوقت:</strong> ${date.toLocaleString('ar-EG')}
+          <br><br>
           <strong>النتيجة:</strong>
           <select onchange="updateResult(${trade.__originalIndex}, this.value)">
             <option value="جارية" ${trade.result === "جارية" ? "selected" : ""}>🔄 جارية</option>
@@ -189,8 +177,8 @@
     }
   }
 
-  window.onload = () => {
-    renderTrades();
-  };
-</script></body>
+  window.onload = renderTrades;
+</script>
+
+</body>
 </html>
