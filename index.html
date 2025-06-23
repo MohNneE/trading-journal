@@ -1,270 +1,383 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>إضافة الصفقات</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      direction: rtl;
-      background: #202124;
-      color: #e8eaed;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>إضافة الصفقات</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    background: #202124;
+    color: #e8eaed;
+    overflow-x: hidden;
+  }
 
-    .container {
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px 15px 80px;
+    box-sizing: border-box;
+  }
 
-    h2 {
-      color: #fbbc04;
-      text-align: center;
-      margin-bottom: 20px;
-    }
+  /* زر القائمة الجانبية */
+  .sidebar-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    font-size: 26px;
+    background: #fbbc04;
+    color: #202124;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  }
 
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background: #303134;
+    color: #fff;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar.open {
+    right: 0;
+  }
+
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #555;
+    background: #202124;
+  }
+
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #fbbc04;
+  }
+
+  .close-btn {
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-menu li {
+    padding: 15px;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .sidebar-menu li:hover {
+    background: #444;
+  }
+
+  h2 {
+    color: #fbbc04;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  form {
+    max-width: 600px;
+    width: 100%;
+    background: #303134;
+    padding: 20px 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    box-sizing: border-box;
+  }
+
+  label {
+    font-weight: 600;
+    margin-top: 12px;
+    display: block;
+    color: #e8eaed;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border-radius: 6px;
+    background: #202124;
+    color: #e8eaed;
+    border: 1px solid #5f6368;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: #fbbc04;
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    user-select: none;
+  }
+
+  .checkbox-container input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  .checkbox-container label {
+    cursor: pointer;
+    font-weight: 700;
+    color: #e8eaed;
+  }
+
+  button {
+    margin-top: 20px;
+    padding: 14px;
+    width: 100%;
+    background: #fbbc04;
+    border: none;
+    border-radius: 8px;
+    color: #202124;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:disabled {
+    background: #5f6368;
+    color: #9aa0a6;
+    cursor: not-allowed;
+  }
+
+  button:hover:not(:disabled) {
+    background: #e3aa00;
+  }
+
+  table {
+    width: 100%;
+    max-width: 700px;
+    margin: 25px auto 0;
+    border-collapse: collapse;
+    background: #303134;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    table-layout: fixed;
+    word-wrap: break-word;
+  }
+
+  thead {
+    background: #fbbc04;
+    color: #202124;
+  }
+
+  th, td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #5f6368;
+    font-size: 14px;
+    color: #e8eaed;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .archiveIcon {
+    cursor: pointer;
+    font-size: 22px;
+    color: #81c995;
+    user-select: none;
+    transition: color 0.3s ease;
+  }
+
+  .archiveIcon:hover {
+    color: #66bb6a;
+  }
+
+  @media (max-width: 650px) {
     form {
-      background: #303134;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      padding: 15px 20px 25px;
     }
-
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
+    th, td {
+      font-size: 12px;
+      padding: 10px 8px;
     }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #5f6368;
-      background: #202124;
-      color: #e8eaed;
-      font-size: 16px;
-    }
-
-    input:focus, select:focus {
-      border-color: #fbbc04;
-      outline: none;
-    }
-
-    .checkbox-container {
-      display: flex;
-      align-items: center;
-      margin-top: 15px;
-    }
-
-    .checkbox-container input {
-      margin-left: 10px;
-    }
-
     button {
-      margin-top: 20px;
-      width: 100%;
+      font-size: 14px;
       padding: 12px;
-      font-size: 16px;
-      background: #fbbc04;
-      border: none;
-      border-radius: 8px;
-      color: #202124;
-      font-weight: bold;
-      cursor: pointer;
     }
-
-    button:disabled {
-      background: #5f6368;
-      color: #9aa0a6;
-      cursor: not-allowed;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: -250px;
-      width: 250px;
-      height: 100%;
-      background-color: #303134;
-      box-shadow: -3px 0 8px rgba(0,0,0,0.4);
-      padding-top: 60px;
-      transition: right 0.3s ease;
-      z-index: 1001;
-    }
-
-    .sidebar.open {
-      right: 0;
-    }
-
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      text-align: center;
-    }
-
-    .sidebar li {
-      padding: 20px 0;
-      font-size: 18px;
-      border-bottom: 1px solid #5f6368;
-      cursor: pointer;
-    }
-
-    .sidebar li:hover {
-      background-color: #444;
-    }
-
-    /* Sidebar trigger */
-    #menuIcon {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      font-size: 30px;
-      background: #fbbc04;
-      color: #202124;
-      padding: 10px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      z-index: 1002;
-    }
-
-    /* Overlay */
-    .overlay {
-      position: fixed;
-      top: 0; right: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      z-index: 1000;
-    }
-
-    .overlay.show {
-      display: block;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
-<div id="menuIcon">&#9776;</div>
+<!-- زر القائمة -->
+<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-<div class="overlay" id="overlay"></div>
-
-<div class="sidebar" id="sidebar">
-  <ul>
-    <li onclick="goToLog()">📋 سجل الصفقات</li>
+<!-- القائمة الجانبية -->
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <h3>القائمة</h3>
+    <span class="close-btn" onclick="toggleSidebar()">&times;</span>
+  </div>
+  <ul class="sidebar-menu">
+    <li onclick="goToLog()">📄 سجل الصفقات</li>
   </ul>
 </div>
 
-<div class="container">
-  <h2>إضافة الصفقات</h2>
-  <form id="tradeForm">
-    <label for="pair">زوج التداول:</label>
-    <select id="pair" required>
-      <option value="EUR/USD">EUR/USD</option>
-      <option value="XAU/USD">XAU/USD</option>
-      <option value="BTC/USD">BTC/USD</option>
-      <option value="USD/JPY">USD/JPY</option>
-    </select>
+<h2>إضافة الصفقات</h2>
 
-    <label for="type">نوع الصفقة:</label>
-    <select id="type" required>
-      <option value="شراء">شراء</option>
-      <option value="بيع">بيع</option>
-    </select>
+<form id="tradeForm">
+  <label for="pair">زوج التداول:</label>
+  <select id="pair" name="pair" required>
+    <option value="EUR/USD">EUR/USD</option>
+    <option value="XAU/USD">XAU/USD</option>
+    <option value="BTC/USD">BTC/USD</option>
+    <option value="USD/JPY">USD/JPY</option>
+  </select>
 
-    <label for="entry">سعر الدخول:</label>
-    <input type="number" id="entry" step="0.0001" required />
+  <label for="type">نوع الصفقة:</label>
+  <select id="type" name="type" required>
+    <option value="شراء">شراء</option>
+    <option value="بيع">بيع</option>
+  </select>
 
-    <label for="sl">وقف الخسارة:</label>
-    <input type="number" id="sl" step="0.0001" required />
+  <label for="entry">سعر الدخول:</label>
+  <input type="number" step="0.0001" id="entry" name="entry" required />
 
-    <label for="tp">الهدف:</label>
-    <input type="number" id="tp" step="0.0001" required />
+  <label for="sl">وقف الخسارة:</label>
+  <input type="number" step="0.0001" id="sl" name="sl" required />
 
-    <label for="image">إرفاق صورة (اختياري):</label>
-    <input type="file" id="image" accept="image/*" />
+  <label for="tp">الهدف:</label>
+  <input type="number" step="0.0001" id="tp" name="tp" required />
 
-    <div class="checkbox-container">
-      <input type="checkbox" id="conditionsCheck" />
-      <label for="conditionsCheck">تم توفر جميع الشروط</label>
-    </div>
+  <div class="checkbox-container">
+    <input type="checkbox" id="conditionsCheck" />
+    <label for="conditionsCheck">تم توفر جميع الشروط</label>
+  </div>
 
-    <button type="submit" id="addTradeBtn" disabled>إضافة الصفقة مؤقتًا</button>
-  </form>
-</div>
+  <button type="submit" id="addTradeBtn" disabled>إضافة الصفقة مؤقتًا</button>
+</form>
+
+<table aria-label="جدول الصفقات المؤقتة">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>الزوج</th>
+      <th>النوع</th>
+      <th>دخول</th>
+      <th>وقف</th>
+      <th>هدف</th>
+      <th>أرشفة</th>
+    </tr>
+  </thead>
+  <tbody id="pendingTradesBody"></tbody>
+</table>
 
 <script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
 
+  const tbody = document.getElementById('pendingTradesBody');
   const form = document.getElementById('tradeForm');
+  const conditionsCheck = document.getElementById('conditionsCheck');
   const addTradeBtn = document.getElementById('addTradeBtn');
-  const checkbox = document.getElementById('conditionsCheck');
 
-  checkbox.addEventListener('change', () => {
-    addTradeBtn.disabled = !checkbox.checked;
+  conditionsCheck.addEventListener('change', () => {
+    addTradeBtn.disabled = !conditionsCheck.checked;
   });
+
+  function renderPendingTrades() {
+    tbody.innerHTML = '';
+    pendingTrades.forEach((trade, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${trade.pair}</td>
+        <td>${trade.type}</td>
+        <td>${trade.entry}</td>
+        <td>${trade.sl}</td>
+        <td>${trade.tp}</td>
+        <td><span class="archiveIcon" title="أرشفة الصفقة" onclick="archiveTrade(${index})">&#10003;</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const fileInput = document.getElementById('image');
-    const file = fileInput.files[0];
 
-    const trade = {
+    if (!conditionsCheck.checked) {
+      alert("يجب تفعيل 'تم توفر جميع الشروط' قبل إضافة الصفقة.");
+      return;
+    }
+
+    const newTrade = {
       pair: form.pair.value,
       type: form.type.value,
       entry: form.entry.value,
       sl: form.sl.value,
       tp: form.tp.value,
       timestamp: new Date().toISOString(),
-      result: 'جارية',
-      image: null
+      result: 'جارية'
     };
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        trade.image = reader.result;
-        saveTrade(trade);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      saveTrade(trade);
-    }
-  });
-
-  function saveTrade(trade) {
-    pendingTrades.push(trade);
+    pendingTrades.push(newTrade);
     sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-    alert("تمت إضافة الصفقة مؤقتًا.");
+
+    renderPendingTrades();
     form.reset();
     addTradeBtn.disabled = true;
-    checkbox.checked = false;
+    conditionsCheck.checked = false;
+  });
+
+  function archiveTrade(index) {
+    const trade = pendingTrades[index];
+    savedTrades.push(trade);
+    pendingTrades.splice(index, 1);
+
+    sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
+    localStorage.setItem('trades', JSON.stringify(savedTrades));
+
+    renderPendingTrades();
+    alert('تم أرشفة الصفقة بنجاح.');
   }
-
-  // القائمة الجانبية
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
-  const menuIcon = document.getElementById('menuIcon');
-
-  menuIcon.onclick = () => {
-    sidebar.classList.add('open');
-    overlay.classList.add('show');
-  };
-
-  overlay.onclick = () => {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('show');
-  };
 
   function goToLog() {
     window.location.href = 'cleanlog.html';
   }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  renderPendingTrades();
 </script>
 
 </body>
