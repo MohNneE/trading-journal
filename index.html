@@ -11,23 +11,39 @@
       direction: rtl;
       background: #202124;
       color: #e8eaed;
-      padding: 0;
-      margin: 0;
+      overflow-x: hidden;
     }
 
-    .container {
-      display: flex;
-      min-height: 100vh;
+    /* القائمة الجانبية */
+    .menu-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: #fbbc04;
+      border: none;
+      color: #202124;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
     }
 
     .sidebar {
+      position: fixed;
+      top: 0;
+      right: -250px;
       width: 220px;
+      height: 100%;
       background-color: #303134;
-      padding: 20px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+      padding: 30px 15px;
+      box-shadow: -3px 0 10px rgba(0,0,0,0.5);
+      transition: right 0.3s ease;
+      z-index: 1000;
+    }
+
+    .sidebar.open {
+      right: 0;
     }
 
     .sidebar button {
@@ -36,6 +52,8 @@
       color: #fbbc04;
       font-size: 18px;
       font-weight: bold;
+      margin-bottom: 25px;
+      width: 100%;
       text-align: center;
       cursor: pointer;
       transition: color 0.3s ease;
@@ -45,9 +63,25 @@
       color: #ffffff;
     }
 
-    .main {
-      flex-grow: 1;
-      padding: 30px 20px;
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .content {
+      padding: 80px 20px 30px;
+      max-width: 600px;
+      margin: auto;
     }
 
     h2 {
@@ -57,8 +91,6 @@
     }
 
     form {
-      max-width: 600px;
-      margin: auto;
       background: #303134;
       padding: 25px;
       border-radius: 12px;
@@ -66,9 +98,9 @@
     }
 
     label {
+      font-weight: 600;
       display: block;
       margin-top: 12px;
-      font-weight: 600;
     }
 
     input, select {
@@ -94,13 +126,7 @@
     }
 
     .checkbox-container input {
-      width: 18px;
-      height: 18px;
       margin-left: 10px;
-    }
-
-    .checkbox-container label {
-      font-weight: bold;
     }
 
     button[type="submit"] {
@@ -152,7 +178,7 @@
       background-color: rgba(0,0,0,0.6);
       justify-content: center;
       align-items: center;
-      z-index: 999;
+      z-index: 2000;
     }
 
     .modal-content {
@@ -171,16 +197,10 @@
       text-align: center;
     }
 
-    .modal-content label {
-      font-weight: 600;
-      display: block;
-      margin-top: 10px;
-    }
-
     .modal-content input, .modal-content select {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
+      margin-top: 6px;
       border-radius: 6px;
       background: #202124;
       border: 1px solid #5f6368;
@@ -222,199 +242,216 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="sidebar">
-      <button onclick="goToLog()">📘 سجل الصفقات</button>
-      <button onclick="openModal()">📊 حاسبة التداول</button>
+
+<!-- زر القائمة -->
+<button class="menu-toggle" onclick="toggleMenu()">☰ القائمة</button>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar" id="sidebar">
+  <button onclick="goToLog()">📘 سجل الصفقات</button>
+  <button onclick="openModal()">📊 حاسبة التداول</button>
+</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<!-- المحتوى الرئيسي -->
+<div class="content">
+  <h2>إضافة الصفقات</h2>
+  <form id="tradeForm">
+    <label for="pair">زوج التداول:</label>
+    <select id="pair" required>
+      <option value="EUR/USD">EUR/USD</option>
+      <option value="XAU/USD">XAU/USD</option>
+      <option value="BTC/USD">BTC/USD</option>
+    </select>
+
+    <label for="type">نوع الصفقة:</label>
+    <select id="type" required>
+      <option value="شراء">شراء</option>
+      <option value="بيع">بيع</option>
+    </select>
+
+    <label for="entry">سعر الدخول:</label>
+    <input type="number" id="entry" required />
+
+    <label for="sl">وقف الخسارة:</label>
+    <input type="number" id="sl" required />
+
+    <label for="tp">الهدف:</label>
+    <input type="number" id="tp" required />
+
+    <label for="image">إرفاق صورة (اختياري):</label>
+    <input type="file" id="image" accept="image/*" />
+
+    <div class="checkbox-container">
+      <input type="checkbox" id="conditionsCheck" />
+      <label for="conditionsCheck">تم توفر جميع الشروط</label>
     </div>
-    <div class="main">
-      <h2>إضافة الصفقات</h2>
-      <form id="tradeForm">
-        <label for="pair">زوج التداول:</label>
-        <select id="pair" required>
-          <option value="EUR/USD">EUR/USD</option>
-          <option value="XAU/USD">XAU/USD</option>
-          <option value="BTC/USD">BTC/USD</option>
-        </select>
 
-        <label for="type">نوع الصفقة:</label>
-        <select id="type" required>
-          <option value="شراء">شراء</option>
-          <option value="بيع">بيع</option>
-        </select>
+    <button type="submit" id="addTradeBtn" disabled>إضافة الصفقة</button>
+  </form>
 
-        <label for="entry">سعر الدخول:</label>
-        <input type="number" id="entry" required />
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الزوج</th>
+        <th>النوع</th>
+        <th>دخول</th>
+        <th>وقف</th>
+        <th>هدف</th>
+        <th>أرشفة</th>
+      </tr>
+    </thead>
+    <tbody id="pendingTradesBody"></tbody>
+  </table>
+</div>
 
-        <label for="sl">وقف الخسارة:</label>
-        <input type="number" id="sl" required />
+<!-- نافذة حاسبة التداول -->
+<div class="modal-overlay" id="calcModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">×</button>
+    <h3>حاسبة التداول</h3>
+    <label>زوج التداول:</label>
+    <select id="calcPair">
+      <option value="XAU/USD">XAU/USD</option>
+      <option value="EUR/USD">EUR/USD</option>
+      <option value="BTC/USD">BTC/USD</option>
+    </select>
 
-        <label for="tp">الهدف:</label>
-        <input type="number" id="tp" required />
+    <label>حجم اللوت:</label>
+    <input type="number" id="lotSize" />
 
-        <label for="image">إرفاق صورة (اختياري):</label>
-        <input type="file" id="image" accept="image/*" />
+    <label>عدد النقاط:</label>
+    <input type="number" id="pips" />
 
-        <div class="checkbox-container">
-          <input type="checkbox" id="conditionsCheck" />
-          <label for="conditionsCheck">تم توفر جميع الشروط</label>
-        </div>
+    <button onclick="calculate()">احسب</button>
 
-        <button type="submit" id="addTradeBtn" disabled>إضافة الصفقة</button>
-      </form>
-
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>الزوج</th>
-            <th>النوع</th>
-            <th>دخول</th>
-            <th>وقف</th>
-            <th>هدف</th>
-            <th>أرشفة</th>
-          </tr>
-        </thead>
-        <tbody id="pendingTradesBody"></tbody>
-      </table>
-    </div>
+    <div id="calcResult"></div>
   </div>
+</div>
 
-  <!-- نافذة حاسبة التداول -->
-  <div class="modal-overlay" id="calcModal">
-    <div class="modal-content">
-      <button class="close-btn" onclick="closeModal()">×</button>
-      <h3>حاسبة التداول</h3>
-      <label>زوج التداول:</label>
-      <select id="calcPair">
-        <option value="XAU/USD">XAU/USD</option>
-        <option value="EUR/USD">EUR/USD</option>
-        <option value="BTC/USD">BTC/USD</option>
-      </select>
+<script>
+  let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
+  let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
 
-      <label>حجم اللوت:</label>
-      <input type="number" id="lotSize" />
+  const form = document.getElementById('tradeForm');
+  const tbody = document.getElementById('pendingTradesBody');
+  const addTradeBtn = document.getElementById('addTradeBtn');
+  const conditionsCheck = document.getElementById('conditionsCheck');
 
-      <label>عدد النقاط:</label>
-      <input type="number" id="pips" />
+  conditionsCheck.addEventListener('change', () => {
+    addTradeBtn.disabled = !conditionsCheck.checked;
+  });
 
-      <button onclick="calculate()">احسب</button>
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const file = document.getElementById('image').files[0];
+    const reader = new FileReader();
 
-      <div id="calcResult"></div>
-    </div>
-  </div>
-
-  <script>
-    let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
-    let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
-
-    const form = document.getElementById('tradeForm');
-    const tbody = document.getElementById('pendingTradesBody');
-    const addTradeBtn = document.getElementById('addTradeBtn');
-    const conditionsCheck = document.getElementById('conditionsCheck');
-
-    conditionsCheck.addEventListener('change', () => {
-      addTradeBtn.disabled = !conditionsCheck.checked;
-    });
-
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const file = document.getElementById('image').files[0];
-      const reader = new FileReader();
-
-      reader.onload = function () {
-        const newTrade = {
-          pair: form.pair.value,
-          type: form.type.value,
-          entry: form.entry.value,
-          sl: form.sl.value,
-          tp: form.tp.value,
-          timestamp: new Date().toISOString(),
-          result: 'جارية',
-          image: reader.result
-        };
-        pendingTrades.push(newTrade);
-        sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-        renderPendingTrades();
-        form.reset();
-        addTradeBtn.disabled = true;
+    reader.onload = function () {
+      const newTrade = {
+        pair: form.pair.value,
+        type: form.type.value,
+        entry: form.entry.value,
+        sl: form.sl.value,
+        tp: form.tp.value,
+        timestamp: new Date().toISOString(),
+        result: 'جارية',
+        image: reader.result
       };
-
-      if (file) {
-        reader.readAsDataURL(file);
-      } else {
-        const newTrade = {
-          pair: form.pair.value,
-          type: form.type.value,
-          entry: form.entry.value,
-          sl: form.sl.value,
-          tp: form.tp.value,
-          timestamp: new Date().toISOString(),
-          result: 'جارية',
-          image: null
-        };
-        pendingTrades.push(newTrade);
-        sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-        renderPendingTrades();
-        form.reset();
-        addTradeBtn.disabled = true;
-      }
-    });
-
-    function renderPendingTrades() {
-      tbody.innerHTML = "";
-      pendingTrades.forEach((t, i) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${t.pair}</td>
-          <td>${t.type}</td>
-          <td>${t.entry}</td>
-          <td>${t.sl}</td>
-          <td>${t.tp}</td>
-          <td><span class="archiveIcon" onclick="archiveTrade(${i})">✔️</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function archiveTrade(index) {
-      const trade = pendingTrades[index];
-      savedTrades.push(trade);
-      pendingTrades.splice(index, 1);
+      pendingTrades.push(newTrade);
       sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
-      localStorage.setItem('trades', JSON.stringify(savedTrades));
       renderPendingTrades();
-      alert("تم أرشفة الصفقة بنجاح.");
+      form.reset();
+      addTradeBtn.disabled = true;
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    } else {
+      const newTrade = {
+        pair: form.pair.value,
+        type: form.type.value,
+        entry: form.entry.value,
+        sl: form.sl.value,
+        tp: form.tp.value,
+        timestamp: new Date().toISOString(),
+        result: 'جارية',
+        image: null
+      };
+      pendingTrades.push(newTrade);
+      sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
+      renderPendingTrades();
+      form.reset();
+      addTradeBtn.disabled = true;
     }
+  });
 
-    function goToLog() {
-      window.location.href = "cleanlog.html";
-    }
+  function renderPendingTrades() {
+    tbody.innerHTML = "";
+    pendingTrades.forEach((t, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${t.pair}</td>
+        <td>${t.type}</td>
+        <td>${t.entry}</td>
+        <td>${t.sl}</td>
+        <td>${t.tp}</td>
+        <td><span style="cursor:pointer" onclick="archiveTrade(${i})">✔️</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-    function openModal() {
-      document.getElementById("calcModal").style.display = "flex";
-    }
-
-    function closeModal() {
-      document.getElementById("calcModal").style.display = "none";
-    }
-
-    function calculate() {
-      const lot = parseFloat(document.getElementById("lotSize").value);
-      const pips = parseFloat(document.getElementById("pips").value);
-
-      if (isNaN(lot) || isNaN(pips)) {
-        document.getElementById("calcResult").innerText = "يرجى إدخال بيانات صحيحة.";
-        return;
-      }
-
-      const result = lot * pips * 10;
-      const sign = pips >= 0 ? "ربح" : "خسارة";
-      document.getElementById("calcResult").innerText = `${Math.abs(result)} ${sign}`;
-    }
-
+  function archiveTrade(index) {
+    const trade = pendingTrades[index];
+    savedTrades.push(trade);
+    pendingTrades.splice(index, 1);
+    sessionStorage.setItem('pendingTrades', JSON.stringify(pendingTrades));
+    localStorage.setItem('trades', JSON.stringify(savedTrades));
     renderPendingTrades();
-  </script>
+    alert("تم أرشفة الصفقة بنجاح.");
+  }
+
+  function goToLog() {
+    window.location.href = "cleanlog.html";
+  }
+
+  function openModal() {
+    document.getElementById("calcModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("calcModal").style.display = "none";
+  }
+
+  function calculate() {
+    const lot = parseFloat(document.getElementById("lotSize").value);
+    const pips = parseFloat(document.getElementById("pips").value);
+
+    if (isNaN(lot) || isNaN(pips)) {
+      document.getElementById("calcResult").innerText = "يرجى إدخال بيانات صحيحة.";
+      return;
+    }
+
+    const result = lot * pips * 10;
+    const sign = pips >= 0 ? "ربح" : "خسارة";
+    document.getElementById("calcResult").innerText = `${Math.abs(result)} ${sign}`;
+  }
+
+  function toggleMenu() {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("overlay").classList.toggle("show");
+  }
+
+  function closeMenu() {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("overlay").classList.remove("show");
+  }
+
+  renderPendingTrades();
+</script>
+
 </body>
 </html>
