@@ -23,6 +23,77 @@
     box-sizing: border-box;
   }
 
+  /* زر القائمة الجانبية */
+  .sidebar-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    font-size: 26px;
+    background: #fbbc04;
+    color: #202124;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background: #303134;
+    color: #fff;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar.open {
+    right: 0;
+  }
+
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #555;
+    background: #202124;
+  }
+
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #fbbc04;
+  }
+
+  .close-btn {
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-menu li {
+    padding: 15px;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .sidebar-menu li:hover {
+    background: #444;
+  }
+
   h2 {
     color: #fbbc04;
     margin-bottom: 15px;
@@ -67,12 +138,20 @@
     display: flex;
     align-items: center;
     margin-top: 20px;
+    user-select: none;
   }
+
   .checkbox-container input[type="checkbox"] {
     width: 20px;
     height: 20px;
     margin-left: 10px;
     cursor: pointer;
+  }
+
+  .checkbox-container label {
+    cursor: pointer;
+    font-weight: 700;
+    color: #e8eaed;
   }
 
   button {
@@ -86,12 +165,17 @@
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
 
   button:disabled {
     background: #5f6368;
     color: #9aa0a6;
     cursor: not-allowed;
+  }
+
+  button:hover:not(:disabled) {
+    background: #e3aa00;
   }
 
   table {
@@ -120,41 +204,52 @@
     color: #e8eaed;
   }
 
-  tr:last-child td { border-bottom: none; }
+  tr:last-child td {
+    border-bottom: none;
+  }
 
   .archiveIcon {
     cursor: pointer;
     font-size: 22px;
     color: #81c995;
+    user-select: none;
+    transition: color 0.3s ease;
   }
 
-  #fabButton {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    width: 60px;
-    height: 60px;
-    background: #fbbc04;
-    border-radius: 50%;
-    box-shadow: 0 6px 15px rgba(251, 188, 4, 0.5);
-    color: #202124;
-    font-size: 30px;
-    text-align: center;
-    line-height: 60px;
-    cursor: pointer;
-    z-index: 1000;
+  .archiveIcon:hover {
+    color: #66bb6a;
   }
-
-  #fabButton:hover { background: #e3aa00; }
 
   @media (max-width: 650px) {
-    form { padding: 15px 20px 25px; }
-    th, td { font-size: 12px; padding: 10px 8px; }
-    button { font-size: 14px; padding: 12px; }
+    form {
+      padding: 15px 20px 25px;
+    }
+    th, td {
+      font-size: 12px;
+      padding: 10px 8px;
+    }
+    button {
+      font-size: 14px;
+      padding: 12px;
+    }
   }
 </style>
 </head>
 <body>
+
+<!-- زر القائمة -->
+<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+
+<!-- القائمة الجانبية -->
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <h3>القائمة</h3>
+    <span class="close-btn" onclick="toggleSidebar()">&times;</span>
+  </div>
+  <ul class="sidebar-menu">
+    <li onclick="goToLog()">📄 سجل الصفقات</li>
+  </ul>
+</div>
 
 <h2>إضافة الصفقات</h2>
 
@@ -182,9 +277,6 @@
   <label for="tp">الهدف:</label>
   <input type="number" step="0.0001" id="tp" name="tp" required />
 
-  <label for="image">صورة الصفقة (اختياري):</label>
-  <input type="file" id="image" accept="image/*" />
-
   <div class="checkbox-container">
     <input type="checkbox" id="conditionsCheck" />
     <label for="conditionsCheck">تم توفر جميع الشروط</label>
@@ -208,16 +300,14 @@
   <tbody id="pendingTradesBody"></tbody>
 </table>
 
-<div id="fabButton" title="سجل الصفقات">&#128221;</div>
-
 <script>
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
 
-  const form = document.getElementById('tradeForm');
   const tbody = document.getElementById('pendingTradesBody');
-  const addTradeBtn = document.getElementById('addTradeBtn');
+  const form = document.getElementById('tradeForm');
   const conditionsCheck = document.getElementById('conditionsCheck');
+  const addTradeBtn = document.getElementById('addTradeBtn');
 
   conditionsCheck.addEventListener('change', () => {
     addTradeBtn.disabled = !conditionsCheck.checked;
@@ -234,24 +324,18 @@
         <td>${trade.entry}</td>
         <td>${trade.sl}</td>
         <td>${trade.tp}</td>
-        <td><span class="archiveIcon" onclick="archiveTrade(${index})">&#10003;</span></td>
+        <td><span class="archiveIcon" title="أرشفة الصفقة" onclick="archiveTrade(${index})">&#10003;</span></td>
       `;
       tbody.appendChild(tr);
     });
   }
 
-  form.addEventListener('submit', async e => {
+  form.addEventListener('submit', e => {
     e.preventDefault();
 
     if (!conditionsCheck.checked) {
-      alert("يرجى تفعيل 'تم توفر جميع الشروط'");
+      alert("يجب تفعيل 'تم توفر جميع الشروط' قبل إضافة الصفقة.");
       return;
-    }
-
-    let imageBase64 = "";
-    const file = document.getElementById("image").files[0];
-    if (file) {
-      imageBase64 = await toBase64(file);
     }
 
     const newTrade = {
@@ -261,8 +345,7 @@
       sl: form.sl.value,
       tp: form.tp.value,
       timestamp: new Date().toISOString(),
-      result: 'جارية',
-      image: imageBase64
+      result: 'جارية'
     };
 
     pendingTrades.push(newTrade);
@@ -286,17 +369,12 @@
     alert('تم أرشفة الصفقة بنجاح.');
   }
 
-  document.getElementById('fabButton').addEventListener('click', () => {
+  function goToLog() {
     window.location.href = 'cleanlog.html';
-  });
+  }
 
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
   }
 
   renderPendingTrades();
