@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تحليل الصفقات</title>
+  <style>
+    body {
+      background-color: #202124;
+      color: #e8eaed;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: #303134;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      text-align: center;
+      color: #fbbc04;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      margin: 15px 0;
+      font-size: 18px;
+      padding: 12px;
+      background: #202124;
+      border: 1px solid #5f6368;
+      border-radius: 8px;
+    }
+
+    .back-button {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      color: #fbbc04;
+      font-weight: bold;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>📊 تحليل الصفقات</h2>
+
+    <div class="stat" id="totalTrades">إجمالي الصفقات: ...</div>
+    <div class="stat" id="winningTrades">الصفقات الرابحة: ...</div>
+    <div class="stat" id="losingTrades">الصفقات الخاسرة: ...</div>
+    <div class="stat" id="winRate">نسبة النجاح: ...</div>
+
+    <a href="index.html" class="back-button">← العودة للصفحة الرئيسية</a>
+  </div>
+
+  <script>
+    const trades = JSON.parse(localStorage.getItem('trades') || '[]');
+
+    let total = trades.length;
+    let wins = trades.filter(t => t.result === 'رابحة').length;
+    let losses = trades.filter(t => t.result === 'خاسرة').length;
+    let winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : 0;
+
+    document.getElementById('totalTrades').textContent = `إجمالي الصفقات: ${total}`;
+    document.getElementById('winningTrades').textContent = `الصفقات الرابحة: ${wins}`;
+    document.getElementById('losingTrades').textContent = `الصفقات الخاسرة: ${losses}`;
+    document.getElementById('winRate').textContent = `نسبة النجاح: ${winRate}%`;
+  </script>
+
+</body>
+</html>
