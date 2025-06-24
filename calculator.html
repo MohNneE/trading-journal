@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>حاسبة التداول</title>
+  <style>
+    body {
+      background-color: #202124;
+      color: #e8eaed;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background-color: #303134;
+      padding: 25px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      text-align: center;
+      color: #fbbc04;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      background: #202124;
+      color: #e8eaed;
+      border: 1px solid #5f6368;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 14px;
+      background-color: #fbbc04;
+      color: #202124;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #e3aa00;
+    }
+
+    .result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #81c995;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-top: 30px;
+      color: #fbbc04;
+      text-decoration: none;
+      font-weight: bold;
+      text-align: center;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>حاسبة التداول</h2>
+
+    <label for="lotSize">حجم اللوت (Lot):</label>
+    <input type="number" id="lotSize" step="0.01" placeholder="مثال: 0.1" />
+
+    <label for="pipValue">عدد النقاط (Pips):</label>
+    <input type="number" id="pipValue" step="1" placeholder="مثال: 50" />
+
+    <label for="pipPrice">قيمة النقطة (لكل لوت قياسي):</label>
+    <input type="number" id="pipPrice" step="0.01" placeholder="مثال: 10" />
+
+    <button onclick="calculate()">احسب الربح أو الخسارة</button>
+
+    <div class="result" id="result"></div>
+
+    <a class="back-button" href="index.html">← العودة إلى الصفحة الرئيسية</a>
+  </div>
+
+  <script>
+    function calculate() {
+      const lotSize = parseFloat(document.getElementById("lotSize").value);
+      const pipValue = parseFloat(document.getElementById("pipValue").value);
+      const pipPrice = parseFloat(document.getElementById("pipPrice").value);
+
+      if (isNaN(lotSize) || isNaN(pipValue) || isNaN(pipPrice)) {
+        document.getElementById("result").textContent = "يرجى إدخال جميع القيم بشكل صحيح.";
+        return;
+      }
+
+      const profitLoss = lotSize * pipValue * pipPrice;
+      document.getElementById("result").textContent = `النتيجة: ${profitLoss.toFixed(2)} دولار`;
+    }
+  </script>
+
+</body>
+</html>
