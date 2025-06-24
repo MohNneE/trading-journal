@@ -251,7 +251,9 @@
 <ul class="sidebar-menu">
   <li onclick="goToLog()">📄 سجل الصفقات</li>
   <li onclick="goToCalculator()">🧮 حاسبة التداول</li>
+  <li onclick="goToAnalysis()">📊 تحليل الصفقات</li>
 </ul>
+
 
 </div>
 <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
@@ -409,6 +411,9 @@
   }
 function goToCalculator() {
   window.location.href = 'calculator.html'; // أو اسم الصفحة التي تحتوي الحاسبة
+}
+function goToAnalysis() {
+  window.location.href = 'analysis.html';
 }
 
   renderPendingTrades();
