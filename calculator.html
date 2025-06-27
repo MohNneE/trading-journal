@@ -51,7 +51,7 @@
       margin-top: 25px;
       width: 100%;
       padding: 14px;
-      background-color: #fbbc04;
+      background-color: #ffffff;
       color: #202124;
       font-weight: 700;
       border: none;
@@ -61,7 +61,7 @@
     }
 
     button:hover {
-      background-color: #e3aa00;
+      background-color: #dddddd;
     }
 
     .result {
@@ -69,7 +69,7 @@
       text-align: center;
       font-size: 18px;
       font-weight: bold;
-      color: #81c995;
+      color: #ffffff;
     }
 
     .back-button {
@@ -150,7 +150,7 @@
         profitLoss = (lotSize / 0.01) * (pipValue / 200) * pipPricePerLot;
       }
 
-      document.getElementById("result").textContent = `النتيجة: ${profitLoss.toFixed(2)} دولار`;
+      document.getElementById("result").textContent = `النتيجة: ${Math.round(profitLoss)} دولار`;
     }
   </script>
 
