@@ -39,11 +39,25 @@
 
     .back-button {
       display: block;
-      text-align: center;
       margin-top: 30px;
-      color: #fbbc04;
-      font-weight: bold;
+      width: 100%;
+      padding: 14px;
+      background-color: #fbbc04;
+      color: #202124;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
       text-decoration: none;
+      cursor: pointer;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .back-button:hover {
+      background-color: #e3aa00;
     }
   </style>
 </head>
@@ -64,9 +78,9 @@
     const trades = JSON.parse(localStorage.getItem('trades') || '[]');
 
     let total = trades.length;
-    let wins = trades.filter(t => t.result === 'رابحة').length;
-    let losses = trades.filter(t => t.result === 'خاسرة').length;
-    let winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : 0;
+    let wins = trades.filter(t => t.result === 'ربح').length;
+    let losses = trades.filter(t => t.result === 'خسارة').length;
+    let winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
 
     document.getElementById('totalTrades').textContent = `إجمالي الصفقات: ${total}`;
     document.getElementById('winningTrades').textContent = `الصفقات الرابحة: ${wins}`;
