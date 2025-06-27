@@ -24,6 +24,28 @@
     text-align: center;
   }
 
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .tab-btn {
+    background: #303134;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #e8eaed;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .tab-btn.active, .tab-btn:hover {
+    background-color: #fbbc04;
+    color: #202124;
+  }
+
   iframe {
     border: none;
     width: 100%;
@@ -58,8 +80,14 @@
 
 <h2>التقويم الاقتصادي - أهم الأحداث</h2>
 
-<!-- ويدجت تقويم Investing.com -->
-<iframe 
+<div class="tabs">
+  <button class="tab-btn active" data-caltype="day">اليوم</button>
+  <button class="tab-btn" data-caltype="tomorrow">غداً</button>
+  <button class="tab-btn" data-caltype="week">هذا الأسبوع</button>
+  <button class="tab-btn" data-caltype="nextweek">الأسبوع القادم</button>
+</div>
+
+<iframe id="econCalendar" 
   src="https://sslecal2.investing.com/?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=3&calType=day&lang=ar" 
   allowtransparency="true" 
   scrolling="yes" 
@@ -69,8 +97,23 @@
 <button id="backBtn" onclick="goBack()">العودة للصفحة الرئيسية</button>
 
 <script>
+  const tabs = document.querySelectorAll('.tab-btn');
+  const iframe = document.getElementById('econCalendar');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // إزالة التفعيل من الجميع
+      tabs.forEach(t => t.classList.remove('active'));
+      // تفعيل الزر المختار
+      tab.classList.add('active');
+      // تحديث رابط iframe حسب نوع التقويم
+      const calType = tab.getAttribute('data-caltype');
+      iframe.src = `https://sslecal2.investing.com/?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=3&calType=${calType}&lang=ar`;
+    });
+  });
+
   function goBack() {
-    window.location.href = 'index.html'; // غيّر المسار حسب اسم الصفحة الرئيسية عندك
+    window.location.href = 'index.html'; // غيّر حسب مسار صفحتك الرئيسية
   }
 </script>
 
