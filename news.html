@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>أهم الأخبار الاقتصادية</title>
+  <style>
+    body {
+      background: #202124;
+      color: #e8eaed;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #fbbc04;
+      margin-bottom: 20px;
+      font-size: 26px;
+    }
+    #newsWidget {
+      max-width: 600px;
+      margin: auto;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    #backBtn {
+      margin-top: 30px;
+      padding: 14px 28px;
+      background: #fbbc04;
+      color: #202124;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease;
+    }
+    #backBtn:hover {
+      background: #e3aa00;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📰 أبرز الأخبار اليوم (★★★)</h1>
+
+<div id="newsWidget">
+  <iframe src="https://widget.investing.com/include/real-time-news?pairs=&theme=dark&importance=3" 
+    width="100%" height="500" frameborder="0" scrolling="no"></iframe>
+</div>
+
+<button id="backBtn" onclick="goBack()">العودة للصفحة الرئيسية</button>
+
+<script>
+  function goBack() {
+    window.location.href = 'index.html';
+  }
+</script>
+
+</body>
+</html>
