@@ -1,63 +1,105 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>أهم الأخبار الاقتصادية</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>التقويم الاقتصادي</title>
   <style>
     body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
       background: #202124;
       color: #e8eaed;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      margin: 0;
-      padding: 20px;
+    }
+
+    h2 {
       text-align: center;
-    }
-    h1 {
       color: #fbbc04;
+      margin: 20px 0 10px;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-bottom: 20px;
-      font-size: 26px;
     }
-    #newsWidget {
-      max-width: 600px;
-      margin: auto;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    #backBtn {
-      margin-top: 30px;
-      padding: 14px 28px;
-      background: #fbbc04;
-      color: #202124;
-      border: none;
+
+    .tab-button {
+      padding: 10px 20px;
+      background-color: #303134;
+      border: 2px solid #fbbc04;
       border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
+      color: #fbbc04;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: background-color 0.3s ease;
+      font-weight: bold;
+      transition: background 0.3s;
     }
-    #backBtn:hover {
-      background: #e3aa00;
+
+    .tab-button.active, .tab-button:hover {
+      background-color: #fbbc04;
+      color: #202124;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;
+      margin: auto;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 768px) {
+      iframe {
+        height: 500px;
+      }
+      .tab-button {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
 
-<h1>📰 أبرز الأخبار اليوم (★★★)</h1>
+  <h2>التقويم الاقتصادي</h2>
+  <div class="tabs">
+    <button class="tab-button active" onclick="showTab('today')">اليوم</button>
+    <button class="tab-button" onclick="showTab('tomorrow')">غدًا</button>
+    <button class="tab-button" onclick="showTab('thisWeek')">هذا الأسبوع</button>
+    <button class="tab-button" onclick="showTab('nextWeek')">الأسبوع القادم</button>
+  </div>
 
-<div id="newsWidget">
-  <iframe src="https://widget.investing.com/include/real-time-news?pairs=&theme=dark&importance=3" 
-    width="100%" height="500" frameborder="0" scrolling="no"></iframe>
-</div>
+  <iframe id="calendarFrame" src="https://sslecal2.investing.com?ecoDay=today&importance=3&columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&lang=ar"></iframe>
 
-<button id="backBtn" onclick="goBack()">العودة للصفحة الرئيسية</button>
+  <script>
+    const frame = document.getElementById('calendarFrame');
+    const buttons = document.querySelectorAll('.tab-button');
 
-<script>
-  function goBack() {
-    window.location.href = 'index.html';
-  }
-</script>
+    function showTab(period) {
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      let url = "https://sslecal2.investing.com?importance=3&columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&lang=ar";
+
+      if (period === 'today') {
+        url += "&ecoDay=today";
+      } else if (period === 'tomorrow') {
+        url += "&ecoDay=tomorrow";
+      } else if (period === 'thisWeek') {
+        url += "&ecoDay=thisWeek";
+      } else if (period === 'nextWeek') {
+        url += "&ecoDay=nextWeek";
+      }
+
+      frame.src = url;
+    }
+  </script>
 
 </body>
 </html>
