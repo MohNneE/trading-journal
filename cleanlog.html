@@ -13,38 +13,46 @@
     color: #c1c1c1;
     min-height: 100vh;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-  /* زر العودة */
+
+  /* زر العودة (مطابق لصفحة الحاسبة) */
   #backBtn {
-    display: block;
-    margin: 10px auto 25px auto;
-    padding: 12px 30px;
-    font-size: 16px;
-    background: #ff8c00;
-    color: #fff;
+    margin: 20px auto;
+    padding: 14px;
+    width: 100%;
+    max-width: 300px;
+    background: #fbbc04;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
-    max-width: 300px;
-    text-align: center;
+    color: #202124;
     font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
     transition: background-color 0.3s ease;
+    text-align: center;
+    display: block;
   }
   #backBtn:hover {
-    background: #e67e22;
+    background: #e3aa00;
   }
 
   h2 {
     text-align: center;
-    color: #ff8c00;
+    color: #fbbc04;
     margin-bottom: 15px;
     font-weight: 700;
     font-size: 26px;
+    width: 100%;
+    max-width: 520px;
   }
+
   .table-wrapper {
     width: 100%;
     max-width: 520px;
-    margin: auto;
+    margin: 0 auto 40px auto;
     border-radius: 10px;
     background: #393c41;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
@@ -138,7 +146,7 @@
 <body>
 
 <!-- زر العودة -->
-<button id="backBtn" onclick="goBack()">← العودة للإضافة</button>
+<button id="backBtn" onclick="goBack()">← العودة للصفحة الرئيسية</button>
 
 <h2>سجل الصفقات</h2>
 
@@ -221,10 +229,10 @@
         renderTrades();
       }
     };
-    row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 600));
+    row.addEventListener('mousedown', () => pressTimer = setTimeout(confirmDelete, 1200));
     row.addEventListener('mouseup', () => clearTimeout(pressTimer));
     row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-    row.addEventListener('touchstart', () => pressTimer = setTimeout(confirmDelete, 600));
+    row.addEventListener('touchstart', () => pressTimer = setTimeout(confirmDelete, 1200));
     row.addEventListener('touchend', () => clearTimeout(pressTimer));
     row.addEventListener('touchcancel', () => clearTimeout(pressTimer));
   }
