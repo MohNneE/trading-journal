@@ -1,123 +1,84 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>جلسات التداول الحالية</title>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    direction: rtl;
-    background: #202124;
-    color: #e8eaed;
-    padding: 20px;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-  h2 {
-    color: #fbbc04;
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 28px;
-  }
-  #backBtn {
-    margin-bottom: 30px;
-    padding: 14px 28px;
-    background: #fbbc04;
-    color: #202124;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  #backBtn:hover {
-    background: #e3aa00;
-  }
-  .session-container {
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-  .session {
-    background: #303134;
-    border-radius: 12px;
-    padding: 20px 25px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 700;
-    font-size: 18px;
-    color: #e8eaed;
-  }
-  .session.active {
-    background: #fbbc04;
-    color: #202124;
-    box-shadow: 0 0 15px #fbbc04;
-  }
-  .session .time {
-    font-weight: 600;
-    font-size: 16px;
-    opacity: 0.8;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>جلسات التداول الآن</title>
+  <style>
+    body {
+      background: #202124;
+      color: #fbbc04;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 15px;
+    }
+
+    .session-box {
+      background: #303134;
+      border-radius: 12px;
+      padding: 20px 30px;
+      color: #e8eaed;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    #backBtn {
+      margin-top: 30px;
+      background: #fbbc04;
+      color: #202124;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    #backBtn:hover {
+      background: #e3aa00;
+    }
+  </style>
 </head>
 <body>
 
-<button id="backBtn" onclick="goBack()">← العودة للصفحة الرئيسية</button>
+<h1>الجلسة الحالية حسب توقيتك المحلي</h1>
+<div class="session-box" id="sessionNow">جارٍ التحميل...</div>
 
-<h2>جلسات التداول الحالية</h2>
-
-<div class="session-container" id="sessions">
-  <!-- الجلسات ستضاف هنا ديناميكياً -->
-</div>
+<button id="backBtn" onclick="goBack()">العودة للصفحة الرئيسية</button>
 
 <script>
-  // تعريف الجلسات مع توقيتها بالتوقيت العالمي UTC (24 ساعة)
-  const sessions = [
-    { name: 'جلسة طوكيو', start: 0, end: 9 },   // 00:00 - 09:00 UTC
-    { name: 'جلسة لندن', start: 8, end: 17 },   // 08:00 - 17:00 UTC
-    { name: 'جلسة نيويورك', start: 13, end: 22 } // 13:00 - 22:00 UTC
-  ];
-
-  function getCurrentUTC_Hour() {
+  function getCurrentSession() {
     const now = new Date();
-    return now.getUTCHours();
+    const hours = now.getHours();
+
+    // الجلسات بناءً على التوقيت المحلي UTC+3
+    if (hours >= 3 && hours < 12) {
+      return "جلسة طوكيو 🇯🇵";
+    } else if (hours >= 10 && hours < 19) {
+      return "جلسة لندن 🇬🇧";
+    } else if (hours >= 15 && hours < 24) {
+      return "جلسة نيويورك 🇺🇸";
+    } else {
+      return "الأسواق مغلقة 🌙";
+    }
   }
 
-  function renderSessions() {
-    const container = document.getElementById('sessions');
-    container.innerHTML = '';
-
-    const currentHour = getCurrentUTC_Hour();
-
-    sessions.forEach(session => {
-      const isActive = (currentHour >= session.start && currentHour < session.end);
-      const div = document.createElement('div');
-      div.className = 'session' + (isActive ? ' active' : '');
-      div.innerHTML = `
-        <span>${session.name}</span>
-        <span class="time">${session.start.toString().padStart(2, '0')}:00 - ${session.end.toString().padStart(2, '0')}:00 UTC</span>
-      `;
-      container.appendChild(div);
-    });
-  }
+  document.getElementById("sessionNow").textContent = getCurrentSession();
 
   function goBack() {
-    window.location.href = 'index.html';
+    window.location.href = "index.html";
   }
-
-  renderSessions();
-
-  // تحديث الجلسات كل دقيقة تلقائياً
-  setInterval(renderSessions, 60000);
 </script>
 
 </body>
