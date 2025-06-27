@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>تحليل الصفقات</title>
   <style>
     body {
@@ -20,10 +20,10 @@
       padding: 25px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      text-align: center;
     }
 
     h2 {
-      text-align: center;
       color: #fbbc04;
       margin-bottom: 25px;
     }
@@ -35,12 +35,19 @@
       background: #202124;
       border: 1px solid #5f6368;
       border-radius: 8px;
+      text-align: right;
+    }
+
+    #chartContainer {
+      margin-top: 30px;
+      background: #202124;
+      padding: 20px;
+      border-radius: 12px;
     }
 
     .back-button {
-      display: block;
       margin-top: 30px;
-      width: 100%;
+      width: 200px;
       padding: 14px;
       background-color: #fbbc04;
       color: #202124;
@@ -48,12 +55,9 @@
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      text-align: center;
       text-decoration: none;
       cursor: pointer;
-      max-width: 300px;
-      margin-left: auto;
-      margin-right: auto;
+      display: inline-block;
     }
 
     .back-button:hover {
@@ -71,8 +75,15 @@
     <div class="stat" id="losingTrades">الصفقات الخاسرة: ...</div>
     <div class="stat" id="winRate">نسبة النجاح: ...</div>
 
+    <div id="chartContainer">
+      <canvas id="tradesChart" width="400" height="400"></canvas>
+    </div>
+
     <a href="index.html" class="back-button">← العودة للصفحة الرئيسية</a>
   </div>
+
+  <!-- إضافة مكتبة Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
     const trades = JSON.parse(localStorage.getItem('trades') || '[]');
@@ -80,12 +91,53 @@
     let total = trades.length;
     let wins = trades.filter(t => t.result === 'ربح').length;
     let losses = trades.filter(t => t.result === 'خسارة').length;
+    let running = trades.filter(t => t.result === 'جارية').length;
     let winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
 
     document.getElementById('totalTrades').textContent = `إجمالي الصفقات: ${total}`;
     document.getElementById('winningTrades').textContent = `الصفقات الرابحة: ${wins}`;
     document.getElementById('losingTrades').textContent = `الصفقات الخاسرة: ${losses}`;
     document.getElementById('winRate').textContent = `نسبة النجاح: ${winRate}%`;
+
+    // إعداد بيانات الرسم البياني
+    const ctx = document.getElementById('tradesChart').getContext('2d');
+    const data = {
+      labels: ['رابحة', 'خاسرة', 'جارية'],
+      datasets: [{
+        data: [wins, losses, running],
+        backgroundColor: ['#27ae60', '#e74c3c', '#f1c40f'],
+        hoverOffset: 30,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#202124',
+      }]
+    };
+
+    const config = {
+      type: 'doughnut',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#e8eaed',
+              font: { size: 16 }
+            }
+          },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: ctx => `${ctx.label}: ${ctx.parsed} صفقة`
+            }
+          }
+        },
+        cutout: '60%'
+      }
+    };
+
+    new Chart(ctx, config);
   </script>
 
 </body>
