@@ -73,13 +73,20 @@
     }
 
     .back-button {
-      display: inline-block;
-      margin-top: 30px;
-      color: #fbbc04;
-      text-decoration: none;
-      font-weight: bold;
-      text-align: center;
-      display: block;
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background-color: #fbbc04;
+      color: #202124;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background-color: #e3aa00;
     }
   </style>
 </head>
@@ -88,34 +95,61 @@
   <div class="container">
     <h2>حاسبة التداول</h2>
 
+    <label for="pair">اختر زوج التداول:</label>
+    <select id="pair">
+      <option value="gold">الذهب</option>
+      <option value="forex">يورو / العملات</option>
+      <option value="silver">الفضة</option>
+    </select>
+
     <label for="lotSize">حجم اللوت (Lot):</label>
     <input type="number" id="lotSize" step="0.01" placeholder="مثال: 0.1" />
 
-    <label for="pipValue">عدد النقاط (Pips):</label>
+    <label for="pipValue">عدد النقاط (رابحة أو خاسرة):</label>
     <input type="number" id="pipValue" step="1" placeholder="مثال: 50" />
-
-    <label for="pipPrice">قيمة النقطة (لكل لوت قياسي):</label>
-    <input type="number" id="pipPrice" step="0.01" placeholder="مثال: 10" />
 
     <button onclick="calculate()">احسب الربح أو الخسارة</button>
 
     <div class="result" id="result"></div>
 
-    <a class="back-button" href="index.html">← العودة إلى الصفحة الرئيسية</a>
+    <button class="back-button" onclick="location.href='index.html'">← العودة إلى الصفحة الرئيسية</button>
   </div>
 
   <script>
     function calculate() {
+      const pair = document.getElementById("pair").value;
       const lotSize = parseFloat(document.getElementById("lotSize").value);
       const pipValue = parseFloat(document.getElementById("pipValue").value);
-      const pipPrice = parseFloat(document.getElementById("pipPrice").value);
 
-      if (isNaN(lotSize) || isNaN(pipValue) || isNaN(pipPrice)) {
+      if (isNaN(lotSize) || isNaN(pipValue)) {
         document.getElementById("result").textContent = "يرجى إدخال جميع القيم بشكل صحيح.";
         return;
       }
 
-      const profitLoss = lotSize * pipValue * pipPrice;
+      let pipPricePerLot = 0;
+
+      switch (pair) {
+        case "gold":
+          pipPricePerLot = 100; // لكل 1.00 لوت = 100 دولار للنقطة
+          break;
+        case "forex":
+          pipPricePerLot = 1; // لكل 0.01 لوت = 1 دولار لكل 100 نقطة
+          break;
+        case "silver":
+          pipPricePerLot = 1; // لكل 0.01 لوت = 1 دولار لكل 200 نقطة
+          break;
+      }
+
+      let profitLoss = 0;
+
+      if (pair === "gold") {
+        profitLoss = lotSize * pipValue * pipPricePerLot;
+      } else if (pair === "forex") {
+        profitLoss = (lotSize / 0.01) * (pipValue / 100) * pipPricePerLot;
+      } else if (pair === "silver") {
+        profitLoss = (lotSize / 0.01) * (pipValue / 200) * pipPricePerLot;
+      }
+
       document.getElementById("result").textContent = `النتيجة: ${profitLoss.toFixed(2)} دولار`;
     }
   </script>
