@@ -252,6 +252,8 @@
   <li onclick="goToLog()">📄 سجل الصفقات</li>
   <li onclick="goToCalculator()">🧮 حاسبة التداول</li>
   <li onclick="goToAnalysis()">📊 تحليل الصفقات</li>
+  <li onclick="goToSessions()">⏰ جلسات التداول الحالية</li>
+
 </ul>
 
 
@@ -311,6 +313,7 @@
 </table>
 
 <script>
+  
   let pendingTrades = JSON.parse(sessionStorage.getItem('pendingTrades') || '[]');
   let savedTrades = JSON.parse(localStorage.getItem('trades') || '[]');
 
@@ -415,6 +418,10 @@ function goToCalculator() {
 function goToAnalysis() {
   window.location.href = 'analysis.html';
 }
+  function goToSessions() {
+  window.location.href = 'sessions.html';
+}
+
 
   renderPendingTrades();
 </script>
