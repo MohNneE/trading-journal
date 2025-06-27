@@ -14,13 +14,7 @@
     min-height: 100vh;
     padding: 15px;
   }
-  h2 {
-    text-align: center;
-    color: #ff8c00;
-    margin-bottom: 15px;
-    font-weight: 700;
-    font-size: 26px;
-  }
+  /* زر العودة */
   #backBtn {
     display: block;
     margin: 10px auto 25px auto;
@@ -32,6 +26,20 @@
     border-radius: 8px;
     cursor: pointer;
     max-width: 300px;
+    text-align: center;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+  }
+  #backBtn:hover {
+    background: #e67e22;
+  }
+
+  h2 {
+    text-align: center;
+    color: #ff8c00;
+    margin-bottom: 15px;
+    font-weight: 700;
+    font-size: 26px;
   }
   .table-wrapper {
     width: 100%;
@@ -129,8 +137,10 @@
 </head>
 <body>
 
+<!-- زر العودة -->
+<button id="backBtn" onclick="goBack()">← العودة للإضافة</button>
+
 <h2>سجل الصفقات</h2>
-<button id="backBtn" onclick="goBack()">العودة للإضافة</button>
 
 <div class="table-wrapper">
   <table>
