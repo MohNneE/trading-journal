@@ -59,7 +59,7 @@
     height: 80px;
     position: relative;
     user-select: none;
-    transition: transform 0.4s ease;
+    transition: transform 0.2s ease;
   }
   .candle-body {
     width: 10px;
@@ -67,7 +67,7 @@
     left: 50%;
     transform: translateX(-50%);
     border-radius: 4px;
-    transition: height 0.4s ease, background-color 0.4s ease;
+    transition: height 0.2s ease, background-color 0.2s ease, top 0.2s ease, bottom 0.2s ease;
   }
   .wick {
     width: 3px;
@@ -76,7 +76,7 @@
     left: 50%;
     transform: translateX(-50%);
     border-radius: 2px;
-    transition: height 0.4s ease;
+    transition: height 0.2s ease, top 0.2s ease, bottom 0.2s ease;
   }
   .candle.green {
     color: #34c759;
@@ -87,7 +87,8 @@
     background-color: #34c759;
   }
   .candle.green .wick {
-    top: 0;
+    bottom: 15px; /* اجعل الذيل متصل بأسفل جسم الشمعة */
+    top: auto;
     height: 15px;
   }
   .candle.red {
@@ -99,7 +100,8 @@
     background-color: #ff3b30;
   }
   .candle.red .wick {
-    bottom: 0;
+    top: 15px; /* اجعل الذيل متصل بأعلى جسم الشمعة */
+    bottom: auto;
     height: 15px;
   }
 
@@ -109,6 +111,8 @@
   }
   .animate-up .green .wick {
     height: 20px !important;
+    bottom: 70px !important; /* الذيل يتحرك مع الجسم */
+    top: auto !important;
   }
   .animate-up .red .candle-body {
     height: 30px !important;
@@ -116,12 +120,16 @@
   }
   .animate-up .red .wick {
     height: 10px !important;
+    top: 50px !important; /* الذيل يتحرك مع الجسم */
+    bottom: auto !important;
   }
   .animate-down .green .candle-body {
     height: 30px !important;
   }
   .animate-down .green .wick {
     height: 10px !important;
+    bottom: 30px !important;
+    top: auto !important;
   }
   .animate-down .red .candle-body {
     height: 70px !important;
@@ -129,6 +137,8 @@
   }
   .animate-down .red .wick {
     height: 20px !important;
+    top: 70px !important;
+    bottom: auto !important;
   }
 
   /* زر القائمة */
@@ -294,7 +304,7 @@
 
   createCandles();
 
-  // تحريك الشموع بسلاسة
+  // تحريك الشموع بسلاسة وسرعة عالية
   function animateCandles() {
     candlesContainer.classList.toggle('animate-up');
     candlesContainer.classList.toggle('animate-down');
@@ -306,21 +316,31 @@
       if (candlesContainer.classList.contains('animate-up')) {
         if (candle.classList.contains('green')) {
           body.style.height = `${50 + i * 5}px`;
-          wick.style.height = `${15 + i * 2}px`;
+          wick.style.height = `${15 + i * 5}px`;
+          wick.style.bottom = `${50 + i * 5}px`; // الذيل متصل بالجسم
+          wick.style.top = 'auto';
         } else {
           body.style.height = `${30 + i * 4}px`;
-          wick.style.height = `${10 + i}px`;
+          wick.style.height = `${10 + i * 4}px`;
+          wick.style.top = `${30 + i * 4}px`; // الذيل متصل بالجسم
+          wick.style.bottom = 'auto';
           body.style.top = `${15 + i * 2}px`;
         }
       } else {
         if (candle.classList.contains('green')) {
-          body.style.height = `${30 + (candleCount - i) * 4}px`;
-          wick.style.height = `${10 + (candleCount - i)}px`;
+          const h = 30 + (candleCount - i) * 4;
+          body.style.height = `${h}px`;
+          wick.style.height = `${10 + (candleCount - i) * 4}px`;
+          wick.style.bottom = `${h}px`;
+          wick.style.top = 'auto';
           body.style.bottom = '15px';
           body.style.top = 'auto';
         } else {
-          body.style.height = `${50 + (candleCount - i) * 5}px`;
-          wick.style.height = `${15 + (candleCount - i) * 2}px`;
+          const h = 50 + (candleCount - i) * 5;
+          body.style.height = `${h}px`;
+          wick.style.height = `${15 + (candleCount - i) * 5}px`;
+          wick.style.top = `${h}px`;
+          wick.style.bottom = 'auto';
           body.style.top = '15px';
         }
       }
