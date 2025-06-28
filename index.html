@@ -59,7 +59,7 @@
     height: 80px;
     position: relative;
     user-select: none;
-    transition: transform 0.2s ease;
+    transition: transform 0.6s ease;
   }
   .candle-body {
     width: 10px;
@@ -67,7 +67,7 @@
     left: 50%;
     transform: translateX(-50%);
     border-radius: 4px;
-    transition: height 0.2s ease, background-color 0.2s ease, top 0.2s ease, bottom 0.2s ease;
+    transition: height 0.6s ease, background-color 0.6s ease;
   }
   .wick {
     width: 3px;
@@ -76,69 +76,13 @@
     left: 50%;
     transform: translateX(-50%);
     border-radius: 2px;
-    transition: height 0.2s ease, top 0.2s ease, bottom 0.2s ease;
+    transition: height 0.6s ease;
   }
   .candle.green {
     color: #34c759;
   }
-  .candle.green .candle-body {
-    bottom: 15px;
-    height: 50px;
-    background-color: #34c759;
-  }
-  .candle.green .wick {
-    bottom: 15px; /* اجعل الذيل متصل بأسفل جسم الشمعة */
-    top: auto;
-    height: 15px;
-  }
   .candle.red {
     color: #ff3b30;
-  }
-  .candle.red .candle-body {
-    top: 15px;
-    height: 50px;
-    background-color: #ff3b30;
-  }
-  .candle.red .wick {
-    top: 15px; /* اجعل الذيل متصل بأعلى جسم الشمعة */
-    bottom: auto;
-    height: 15px;
-  }
-
-  /* تحريك الشموع */
-  .animate-up .green .candle-body {
-    height: 70px !important;
-  }
-  .animate-up .green .wick {
-    height: 20px !important;
-    bottom: 70px !important; /* الذيل يتحرك مع الجسم */
-    top: auto !important;
-  }
-  .animate-up .red .candle-body {
-    height: 30px !important;
-    top: 50px !important;
-  }
-  .animate-up .red .wick {
-    height: 10px !important;
-    top: 50px !important; /* الذيل يتحرك مع الجسم */
-    bottom: auto !important;
-  }
-  .animate-down .green .candle-body {
-    height: 30px !important;
-  }
-  .animate-down .green .wick {
-    height: 10px !important;
-    bottom: 30px !important;
-    top: auto !important;
-  }
-  .animate-down .red .candle-body {
-    height: 70px !important;
-    top: 0 !important;
-  }
-  .animate-down .red .wick {
-    height: 20px !important;
-    top: 70px !important;
-    bottom: auto !important;
   }
 
   /* زر القائمة */
@@ -213,12 +157,21 @@
   .overlay.active {
     display: block;
   }
+
+  /* حقوق النشر */
+  footer {
+    color: #888;
+    font-size: 14px;
+    margin-top: auto;
+    padding: 10px 0;
+    user-select: none;
+  }
 </style>
 </head>
 <body>
 
 <!-- زر القائمة -->
-<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+<div class="sidebar-toggle" onclick="toggleSidebar()" aria-label="فتح القائمة الجانبية">☰</div>
 
 <!-- القائمة الجانبية -->
 <div id="sidebar" class="sidebar" aria-label="القائمة الجانبية">
@@ -226,7 +179,7 @@
     <h3>القائمة</h3>
   </div>
   <ul class="sidebar-menu">
-     <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
+    <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
     <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
     <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
     <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
@@ -249,6 +202,8 @@
 <div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع" role="img" aria-label="شموع الشارت">
   <!-- الشموع ستنشأ ديناميكياً عبر جافاسكريبت -->
 </div>
+
+<footer>All rights reserved © NnEe</footer>
 
 <script>
   // تحديث التاريخ بصيغة الأرقام والوقت 12 ساعة مع صباحًا/مساءً
@@ -284,6 +239,7 @@
 
   function createCandles() {
     candlesContainer.innerHTML = '';
+    candles = [];
     for (let i = 0; i < candleCount; i++) {
       const candle = document.createElement('div');
       candle.classList.add('candle');
@@ -304,7 +260,7 @@
 
   createCandles();
 
-  // تحريك الشموع بسلاسة وسرعة عالية
+  // تحريك الشموع بسلاسة مع أبعاد عشوائية
   function animateCandles() {
     candlesContainer.classList.toggle('animate-up');
     candlesContainer.classList.toggle('animate-down');
@@ -312,47 +268,54 @@
     candles.forEach((candle, i) => {
       const body = candle.querySelector('.candle-body');
       const wick = candle.querySelector('.wick');
-      // تعديل ارتفاعات عشوائية ضمن نطاق لتأثير طبيعي
+
+      let bodyHeight, wickHeight, wickPosition;
+
       if (candlesContainer.classList.contains('animate-up')) {
         if (candle.classList.contains('green')) {
-          body.style.height = `${50 + i * 5}px`;
-          wick.style.height = `${15 + i * 5}px`;
-          wick.style.bottom = `${50 + i * 5}px`; // الذيل متصل بالجسم
+          bodyHeight = 40 + Math.random() * 40;  // من 40 إلى 80 بكسل
+          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
+          wickPosition = bodyHeight;
+          body.style.bottom = '15px';
+          body.style.top = 'auto';
+          wick.style.bottom = `${wickPosition}px`;
           wick.style.top = 'auto';
         } else {
-          body.style.height = `${30 + i * 4}px`;
-          wick.style.height = `${10 + i * 4}px`;
-          wick.style.top = `${30 + i * 4}px`; // الذيل متصل بالجسم
+          bodyHeight = 30 + Math.random() * 40;  // من 30 إلى 70 بكسل
+          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
+          wickPosition = bodyHeight;
+          body.style.top = '15px';
+          body.style.bottom = 'auto';
+          wick.style.top = `${wickPosition}px`;
           wick.style.bottom = 'auto';
-          body.style.top = `${15 + i * 2}px`;
         }
       } else {
         if (candle.classList.contains('green')) {
-          const h = 30 + (candleCount - i) * 4;
-          body.style.height = `${h}px`;
-          wick.style.height = `${10 + (candleCount - i) * 4}px`;
-          wick.style.bottom = `${h}px`;
-          wick.style.top = 'auto';
+          bodyHeight = 30 + Math.random() * 40;  // من 30 إلى 70 بكسل
+          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
+          wickPosition = bodyHeight;
           body.style.bottom = '15px';
           body.style.top = 'auto';
+          wick.style.bottom = `${wickPosition}px`;
+          wick.style.top = 'auto';
         } else {
-          const h = 50 + (candleCount - i) * 5;
-          body.style.height = `${h}px`;
-          wick.style.height = `${15 + (candleCount - i) * 5}px`;
-          wick.style.top = `${h}px`;
-          wick.style.bottom = 'auto';
+          bodyHeight = 40 + Math.random() * 40;  // من 40 إلى 80 بكسل
+          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
+          wickPosition = bodyHeight;
           body.style.top = '15px';
+          body.style.bottom = 'auto';
+          wick.style.top = `${wickPosition}px`;
+          wick.style.bottom = 'auto';
         }
       }
+
+      body.style.height = `${bodyHeight}px`;
+      wick.style.height = `${wickHeight}px`;
     });
   }
 
-  candlesContainer.addEventListener('click', () => {
-    animateCandles();
-  });
-  window.addEventListener('scroll', () => {
-    animateCandles();
-  });
+  candlesContainer.addEventListener('click', animateCandles);
+  window.addEventListener('scroll', animateCandles);
 
   // القائمة الجانبية
   const sidebar = document.getElementById('sidebar');
