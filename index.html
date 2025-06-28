@@ -36,70 +36,79 @@
     letter-spacing: 1.2px;
     min-width: 320px;
     text-align: center;
+    line-height: 1.5;
   }
+  #datetime .date {
+    font-size: 22px;
+    font-weight: 700;
+  }
+  #datetime .time {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
   /* الشموع */
   #candles {
     display: flex;
-    gap: 30px;
+    gap: 15px;
     margin-bottom: 40px;
+    cursor: pointer;
   }
   .candle {
-    width: 40px;
-    height: 100px;
-    position: relative;
-    cursor: pointer;
-    user-select: none;
-  }
-  /* جسم الشمعة */
-  .candle-body {
     width: 20px;
+    height: 80px;
+    position: relative;
+    user-select: none;
+    transition: transform 0.4s ease;
+  }
+  .candle-body {
+    width: 10px;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 4px;
     transition: height 0.4s ease, background-color 0.4s ease;
   }
-  /* الفتيل */
   .wick {
-    width: 4px;
+    width: 3px;
     background: currentColor;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 2px;
+    transition: height 0.4s ease;
   }
-  /* شمعة صاعدة (خضراء) */
   .candle.green {
     color: #34c759;
   }
   .candle.green .candle-body {
-    bottom: 20px;
-    height: 60px;
+    bottom: 15px;
+    height: 50px;
     background-color: #34c759;
   }
   .candle.green .wick {
     top: 0;
-    height: 20px;
+    height: 15px;
   }
-  /* شمعة هابطة (حمراء) */
   .candle.red {
     color: #ff3b30;
   }
   .candle.red .candle-body {
-    top: 20px;
-    height: 60px;
+    top: 15px;
+    height: 50px;
     background-color: #ff3b30;
   }
   .candle.red .wick {
     bottom: 0;
-    height: 20px;
+    height: 15px;
   }
+
   /* تحريك الشموع */
   .animate-up .green .candle-body {
-    height: 90px !important;
+    height: 70px !important;
   }
   .animate-up .green .wick {
-    height: 30px !important;
+    height: 20px !important;
   }
   .animate-up .red .candle-body {
     height: 30px !important;
@@ -115,11 +124,11 @@
     height: 10px !important;
   }
   .animate-down .red .candle-body {
-    height: 90px !important;
+    height: 70px !important;
     top: 0 !important;
   }
   .animate-down .red .wick {
-    height: 30px !important;
+    height: 20px !important;
   }
 
   /* زر القائمة */
@@ -215,52 +224,112 @@
     <li onclick="navigateTo('news.html')">📰 أخبار اليوم</li>
     <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
     <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
-   
   </ul>
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
 <h1>مرحبًا بك في تطبيق التداول</h1>
-<div id="datetime" aria-live="polite" aria-atomic="true">...</div>
+
+<div id="datetime" aria-live="polite" aria-atomic="true">
+  <div class="date" aria-label="التاريخ"></div>
+  <div class="time" aria-label="الوقت"></div>
+</div>
 
 <div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع" role="img" aria-label="شموع الشارت">
-  <div class="candle green" aria-label="شمعة صاعدة">
-    <div class="wick"></div>
-    <div class="candle-body"></div>
-  </div>
-  <div class="candle red" aria-label="شمعة هابطة">
-    <div class="wick"></div>
-    <div class="candle-body"></div>
-  </div>
+  <!-- الشموع ستنشأ ديناميكياً عبر جافاسكريبت -->
 </div>
 
 <script>
-  // تحديث الوقت والتاريخ كل ثانية
+  // تحديث التاريخ بصيغة الأرقام والوقت 12 ساعة مع صباحًا/مساءً
   function updateDateTime() {
     const now = new Date();
-    const options = { 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-    };
-    const formatted = now.toLocaleDateString('ar-EG', options);
-    document.getElementById('datetime').textContent = formatted;
+
+    // التاريخ dd/mm/yyyy
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
+
+    // الوقت 12 ساعة مع AM/PM عربي
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'مساءً' : 'صباحًا';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // الساعة 0 تصبح 12
+
+    const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+
+    document.querySelector('#datetime .date').textContent = formattedDate;
+    document.querySelector('#datetime .time').textContent = formattedTime;
   }
   setInterval(updateDateTime, 1000);
   updateDateTime();
 
-  // حركة الشموع
-  const candles = document.getElementById('candles');
+  // إنشاء الشموع (عدد 8 شموع - خضراء وحمراء متبادلة)
+  const candlesContainer = document.getElementById('candles');
+  const candleCount = 8;
+  let candles = [];
 
-  function animateCandles() {
-    candles.classList.toggle('animate-up');
-    candles.classList.toggle('animate-down');
+  function createCandles() {
+    candlesContainer.innerHTML = '';
+    for (let i = 0; i < candleCount; i++) {
+      const candle = document.createElement('div');
+      candle.classList.add('candle');
+      candle.classList.add(i % 2 === 0 ? 'green' : 'red');
+
+      const wick = document.createElement('div');
+      wick.classList.add('wick');
+      candle.appendChild(wick);
+
+      const body = document.createElement('div');
+      body.classList.add('candle-body');
+      candle.appendChild(body);
+
+      candlesContainer.appendChild(candle);
+      candles.push(candle);
+    }
   }
 
-  candles.addEventListener('click', () => {
+  createCandles();
+
+  // تحريك الشموع بسلاسة
+  function animateCandles() {
+    candlesContainer.classList.toggle('animate-up');
+    candlesContainer.classList.toggle('animate-down');
+
+    candles.forEach((candle, i) => {
+      const body = candle.querySelector('.candle-body');
+      const wick = candle.querySelector('.wick');
+      // تعديل ارتفاعات عشوائية ضمن نطاق لتأثير طبيعي
+      if (candlesContainer.classList.contains('animate-up')) {
+        if (candle.classList.contains('green')) {
+          body.style.height = `${50 + i * 5}px`;
+          wick.style.height = `${15 + i * 2}px`;
+        } else {
+          body.style.height = `${30 + i * 4}px`;
+          wick.style.height = `${10 + i}px`;
+          body.style.top = `${15 + i * 2}px`;
+        }
+      } else {
+        if (candle.classList.contains('green')) {
+          body.style.height = `${30 + (candleCount - i) * 4}px`;
+          wick.style.height = `${10 + (candleCount - i)}px`;
+          body.style.bottom = '15px';
+          body.style.top = 'auto';
+        } else {
+          body.style.height = `${50 + (candleCount - i) * 5}px`;
+          wick.style.height = `${15 + (candleCount - i) * 2}px`;
+          body.style.top = '15px';
+        }
+      }
+    });
+  }
+
+  candlesContainer.addEventListener('click', () => {
     animateCandles();
   });
-
   window.addEventListener('scroll', () => {
     animateCandles();
   });
