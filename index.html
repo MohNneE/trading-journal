@@ -53,13 +53,13 @@
     gap: 15px;
     margin-bottom: 40px;
     cursor: pointer;
-    user-select: none;
   }
   .candle {
     width: 20px;
     height: 80px;
     position: relative;
-    transition: transform 0.6s ease;
+    user-select: none;
+    transition: transform 0.4s ease;
   }
   .candle-body {
     width: 10px;
@@ -71,18 +71,32 @@
   }
   .wick {
     width: 3px;
-    background: currentColor;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 2px;
     transition: height 0.6s ease, top 0.6s ease, bottom 0.6s ease;
   }
+  .wick.green {
+    background-color: #34c759;
+  }
+  .wick.red {
+    background-color: #ff3b30;
+  }
+
   .candle.green {
     color: #34c759;
   }
+  .candle.green .candle-body {
+    bottom: 15px;
+    background-color: #34c759;
+  }
   .candle.red {
     color: #ff3b30;
+  }
+  .candle.red .candle-body {
+    top: 15px;
+    background-color: #ff3b30;
   }
 
   /* زر القائمة */
@@ -158,12 +172,15 @@
     display: block;
   }
 
-  /* حقوق النشر */
+  /* الحقوق */
   footer {
-    color: #888;
-    font-size: 14px;
     margin-top: auto;
-    padding: 10px 0;
+    padding: 15px 0;
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+    background: rgba(255 255 255 / 0.05);
     user-select: none;
   }
 </style>
@@ -171,7 +188,7 @@
 <body>
 
 <!-- زر القائمة -->
-<div class="sidebar-toggle" onclick="toggleSidebar()" aria-label="فتح القائمة الجانبية">☰</div>
+<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
 <!-- القائمة الجانبية -->
 <div id="sidebar" class="sidebar" aria-label="القائمة الجانبية">
@@ -179,7 +196,7 @@
     <h3>القائمة</h3>
   </div>
   <ul class="sidebar-menu">
-    <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
+     <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
     <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
     <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
     <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
@@ -203,7 +220,9 @@
   <!-- الشموع ستنشأ ديناميكياً عبر جافاسكريبت -->
 </div>
 
-<footer>All rights reserved © NnEe</footer>
+<footer>
+  جميع الحقوق محفوظة لدى NnEe
+</footer>
 
 <script>
   // تحديث التاريخ بصيغة الأرقام والوقت 12 ساعة مع صباحًا/مساءً
@@ -232,9 +251,9 @@
   setInterval(updateDateTime, 1000);
   updateDateTime();
 
-  // إنشاء الشموع (عدد 8 شموع - خضراء وحمراء متبادلة)
+  // إنشاء الشموع (عدد 12 شمعة - خضراء وحمراء متبادلة)
   const candlesContainer = document.getElementById('candles');
-  const candleCount = 8;
+  const candleCount = 12;
   let candles = [];
 
   function createCandles() {
@@ -247,6 +266,7 @@
 
       const wick = document.createElement('div');
       wick.classList.add('wick');
+      wick.classList.add(i % 2 === 0 ? 'green' : 'red'); // ألوان الذيل متوافقة مع الشمعة
       candle.appendChild(wick);
 
       const body = document.createElement('div');
@@ -260,58 +280,44 @@
 
   createCandles();
 
-  // تحريك الشموع بسلاسة مع أبعاد عشوائية، وذيل متصل دائماً بجسم الشمعة
+  // تحريك الشموع بسلاسة مع أشكال عشوائية
   function animateCandles() {
-    candlesContainer.classList.toggle('animate-up');
-    candlesContainer.classList.toggle('animate-down');
-
-    candles.forEach((candle, i) => {
+    candles.forEach(candle => {
       const body = candle.querySelector('.candle-body');
       const wick = candle.querySelector('.wick');
+      const isGreen = candle.classList.contains('green');
 
-      let bodyHeight, wickHeight;
+      // ارتفاع جسم الشمعة بين 30 و 70 بكسل عشوائياً
+      const bodyHeight = Math.floor(Math.random() * 40) + 30;
+      // طول الذيل بين 10 و 20 بكسل عشوائياً
+      const wickHeight = Math.floor(Math.random() * 10) + 10;
 
-      if (candlesContainer.classList.contains('animate-up')) {
-        if (candle.classList.contains('green')) {
-          bodyHeight = 40 + Math.random() * 40;  // 40 إلى 80 بكسل
-          wickHeight = Math.max(10, (80 - bodyHeight)); // الذيل يكمل الجسم حتى 80 بكسل
-          body.style.bottom = '15px';
-          body.style.top = 'auto';
-          wick.style.bottom = `${bodyHeight + 15}px`;
-          wick.style.top = 'auto';
-        } else {
-          bodyHeight = 30 + Math.random() * 40; // 30 إلى 70 بكسل
-          wickHeight = Math.max(10, (80 - bodyHeight));
-          body.style.top = '15px';
-          body.style.bottom = 'auto';
-          wick.style.top = `${bodyHeight + 15}px`;
-          wick.style.bottom = 'auto';
-        }
+      if (isGreen) {
+        body.style.height = bodyHeight + 'px';
+        body.style.bottom = '15px';
+        body.style.top = 'auto';
+
+        wick.style.height = wickHeight + 'px';
+        wick.style.top = '0';
+        wick.style.bottom = 'auto';
       } else {
-        if (candle.classList.contains('green')) {
-          bodyHeight = 30 + Math.random() * 40; // 30 إلى 70 بكسل
-          wickHeight = Math.max(10, (80 - bodyHeight));
-          body.style.bottom = '15px';
-          body.style.top = 'auto';
-          wick.style.bottom = `${bodyHeight + 15}px`;
-          wick.style.top = 'auto';
-        } else {
-          bodyHeight = 40 + Math.random() * 40; // 40 إلى 80 بكسل
-          wickHeight = Math.max(10, (80 - bodyHeight));
-          body.style.top = '15px';
-          body.style.bottom = 'auto';
-          wick.style.top = `${bodyHeight + 15}px`;
-          wick.style.bottom = 'auto';
-        }
-      }
+        body.style.height = bodyHeight + 'px';
+        body.style.top = '15px';
+        body.style.bottom = 'auto';
 
-      body.style.height = `${bodyHeight}px`;
-      wick.style.height = `${wickHeight}px`;
+        wick.style.height = wickHeight + 'px';
+        wick.style.bottom = '0';
+        wick.style.top = 'auto';
+      }
     });
   }
 
-  candlesContainer.addEventListener('click', animateCandles);
-  window.addEventListener('scroll', animateCandles);
+  candlesContainer.addEventListener('click', () => {
+    animateCandles();
+  });
+  window.addEventListener('scroll', () => {
+    animateCandles();
+  });
 
   // القائمة الجانبية
   const sidebar = document.getElementById('sidebar');
