@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>الصفحة الرئيسية - تطبيق التداول</title>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
   <style>
     body {
       background: #202124;
       color: #e8eaed;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       direction: rtl;
-      margin: 0; padding: 40px 20px;
+      margin: 0;
+      padding: 40px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -52,17 +52,21 @@
       font-weight: 500;
     }
 
+    /* الشموع */
     #candles {
       display: flex;
       gap: 15px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
       cursor: pointer;
+      flex-wrap: nowrap;
+      overflow: hidden;
     }
 
     .candle {
       width: 20px;
+      height: 80px;
       position: relative;
-      transition: transform 0.4s ease;
+      user-select: none;
     }
 
     .candle-body {
@@ -88,26 +92,41 @@
       color: #34c759;
     }
 
+    .candle.green .candle-body {
+      bottom: 15px;
+      height: 50px;
+      background-color: #34c759;
+    }
+
+    .candle.green .wick {
+      bottom: 65px;
+      height: 15px;
+    }
+
     .candle.red {
       color: #ff3b30;
     }
 
-    #trading-quote {
-      font-family: 'Caveat', cursive;
-      font-size: 24px;
-      color: #fbbc04;
-      margin-top: 30px;
-      text-align: center;
-      min-height: 50px;
-      transition: opacity 0.5s ease;
+    .candle.red .candle-body {
+      top: 15px;
+      height: 50px;
+      background-color: #ff3b30;
     }
 
-    .footer {
-      margin-top: auto;
-      font-size: 14px;
-      color: #999;
-      padding: 20px;
+    .candle.red .wick {
+      top: 65px;
+      height: 15px;
+    }
+
+    /* العبارة */
+    #quote {
+      font-family: 'Courier New', cursive;
+      font-size: 18px;
+      color: #a2a2a2;
       text-align: center;
+      margin-bottom: 60px;
+      padding: 10px 20px;
+      max-width: 90%;
     }
 
     /* زر القائمة */
@@ -125,6 +144,7 @@
       box-shadow: 0 3px 6px rgba(0,0,0,0.3);
     }
 
+    /* القائمة الجانبية */
     .sidebar {
       position: fixed;
       top: 0;
@@ -191,142 +211,149 @@
       display: block;
     }
 
+    footer {
+      margin-top: auto;
+      font-size: 14px;
+      color: #777;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+<!-- زر القائمة -->
+<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-  <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-      <h3>القائمة</h3>
-    </div>
-    <ul class="sidebar-menu">
-      <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
-      <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
-      <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
-      <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
-      <li onclick="navigateTo('sessions.html')">🕰️ جلسات التداول الحالية</li>
-      <li onclick="navigateTo('news.html')">📰 أخبار اليوم</li>
-      <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
-      <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
-    </ul>
+<!-- القائمة الجانبية -->
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <h3>القائمة</h3>
   </div>
+  <ul class="sidebar-menu">
+    <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
+    <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
+    <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
+    <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
+    <li onclick="navigateTo('sessions.html')">🕰️ جلسات التداول الحالية</li>
+    <li onclick="navigateTo('news.html')">📰 أخبار اليوم</li>
+    <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
+    <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
+  </ul>
+</div>
 
-  <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
-  <h1>مرحبًا بك في تطبيق التداول</h1>
+<h1>مرحبًا بك في تطبيق التداول</h1>
 
-  <div id="datetime">
-    <div class="date"></div>
-    <div class="time"></div>
-  </div>
+<div id="datetime">
+  <div class="date"></div>
+  <div class="time"></div>
+</div>
 
-  <div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع"></div>
+<div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع"></div>
 
-  <div id="trading-quote"></div>
+<div id="quote"></div>
 
-  <div class="footer">© by NnEe</div>
+<footer>© by NnEe</footer>
 
-  <script>
-    // التاريخ والوقت
-    function updateDateTime() {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = now.getFullYear();
-      const hours12 = now.getHours() % 12 || 12;
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const ampm = now.getHours() >= 12 ? 'مساءً' : 'صباحًا';
+<script>
+  // التاريخ والوقت
+  function updateDateTime() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
 
-      document.querySelector('.date').textContent = `${day}/${month}/${year}`;
-      document.querySelector('.time').textContent = `${hours12}:${minutes}:${seconds} ${ampm}`;
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'مساءً' : 'صباحًا';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+
+    const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+    document.querySelector('.date').textContent = formattedDate;
+    document.querySelector('.time').textContent = formattedTime;
+  }
+  setInterval(updateDateTime, 1000);
+  updateDateTime();
+
+  // الشموع
+  const candlesContainer = document.getElementById('candles');
+  const candleCount = 6;
+  let candles = [];
+
+  function createCandles() {
+    candlesContainer.innerHTML = '';
+    for (let i = 0; i < candleCount; i++) {
+      const candle = document.createElement('div');
+      candle.classList.add('candle', i % 2 === 0 ? 'green' : 'red');
+
+      const wick = document.createElement('div');
+      wick.classList.add('wick');
+      candle.appendChild(wick);
+
+      const body = document.createElement('div');
+      body.classList.add('candle-body');
+      candle.appendChild(body);
+
+      candlesContainer.appendChild(candle);
+      candles.push(candle);
     }
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
+  }
 
-    // العبارات العشوائية
-    const quotes = [
-      "الصبر هو مفتاح الربح في الأسواق.",
-      "اتبع الخطة ولا تتبع العاطفة.",
-      "السوق لا يرحم، ولكن يكافئ المنضبط.",
-      "إدارة رأس المال أهم من التوقع.",
-      "دع أرباحك تجري واقطع خسائرك مبكرًا.",
-      "الفرصة القادمة دائمًا في الطريق.",
-      "الثقة الزائدة طريق للخسارة.",
-      "التداول بدون خطة كالإبحار بلا بوصلة.",
-      "احمِ رأس مالك، الربح يأتي لاحقًا."
-    ];
-    function showRandomQuote() {
-      const q = quotes[Math.floor(Math.random() * quotes.length)];
-      document.getElementById("trading-quote").textContent = q;
-    }
-    showRandomQuote();
+  function animateCandles() {
+    candles.forEach((candle, i) => {
+      const body = candle.querySelector('.candle-body');
+      const wick = candle.querySelector('.wick');
+      const isGreen = candle.classList.contains('green');
+      const bodyHeight = Math.floor(Math.random() * 30) + 40;
+      const wickHeight = Math.floor(Math.random() * 20) + 10;
 
-    // الشموع
-    const candlesContainer = document.getElementById('candles');
-    const candleCount = 6;
-    const candles = [];
-
-    function createCandles() {
-      for (let i = 0; i < candleCount; i++) {
-        const candle = document.createElement('div');
-        candle.className = 'candle ' + (i % 2 === 0 ? 'green' : 'red');
-
-        const wick = document.createElement('div');
-        wick.className = 'wick';
-
-        const body = document.createElement('div');
-        body.className = 'candle-body';
-
-        candle.appendChild(wick);
-        candle.appendChild(body);
-        candlesContainer.appendChild(candle);
-        candles.push({candle, wick, body});
+      if (isGreen) {
+        body.style.height = bodyHeight + 'px';
+        body.style.bottom = '15px';
+        body.style.top = 'auto';
+        wick.style.height = wickHeight + 'px';
+        wick.style.bottom = (15 + bodyHeight) + 'px';
+        wick.style.top = 'auto';
+      } else {
+        body.style.height = bodyHeight + 'px';
+        body.style.top = '15px';
+        body.style.bottom = 'auto';
+        wick.style.height = wickHeight + 'px';
+        wick.style.top = (15 + bodyHeight) + 'px';
+        wick.style.bottom = 'auto';
       }
-    }
+    });
+  }
 
-    function animateCandles() {
-      candles.forEach(({candle, wick, body}) => {
-        const isGreen = candle.classList.contains('green');
-        const bodyHeight = Math.floor(Math.random() * 40) + 30;
-        const wickHeight = Math.floor(Math.random() * 20) + 10;
+  candlesContainer.addEventListener('click', animateCandles);
+  window.addEventListener('scroll', animateCandles);
+  createCandles();
 
-        if (isGreen) {
-          body.style.height = bodyHeight + 'px';
-          body.style.bottom = '0';
-          body.style.top = 'auto';
-          wick.style.height = wickHeight + 'px';
-          wick.style.top = 'auto';
-          wick.style.bottom = bodyHeight + 'px';
-        } else {
-          body.style.height = bodyHeight + 'px';
-          body.style.top = '0';
-          body.style.bottom = 'auto';
-          wick.style.height = wickHeight + 'px';
-          wick.style.top = bodyHeight + 'px';
-          wick.style.bottom = 'auto';
-        }
-      });
-    }
+  // القائمة الجانبية
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('active');
+  }
 
-    candlesContainer.addEventListener('click', animateCandles);
-    window.addEventListener('scroll', animateCandles);
+  function navigateTo(url) {
+    window.location.href = url;
+  }
 
-    createCandles();
-    animateCandles();
+  // العبارات العشوائية
+  const quotes = [
+    "تداول بعقل لا بعاطفة.",
+    "الخسارة جزء من اللعبة، المهم أن تتعلم منها.",
+    "كن صبورًا، السوق لا يرحم المتسرعين.",
+    "استراتيجيتك أهم من توقّعاتك.",
+    "أوقف الخسارة قبل أن توقفك.",
+    "كل نقطة تُحسب، فكر بحجم المخاطرة دائمًا.",
+  ];
+  document.getElementById("quote").textContent = quotes[Math.floor(Math.random() * quotes.length)];
+</script>
 
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('active');
-    }
-
-    function navigateTo(url) {
-      window.location.href = url;
-    }
-  </script>
 </body>
 </html>
