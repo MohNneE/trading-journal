@@ -1,347 +1,332 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>الصفحة الرئيسية - تطبيق التداول</title>
-<style>
-  body {
-    background: #202124;
-    color: #e8eaed;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    direction: rtl;
-    margin: 0; padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    user-select: none;
-    overflow-x: hidden;
-  }
-  h1 {
-    color: #fbbc04;
-    font-size: 32px;
-    margin-bottom: 25px;
-    font-weight: 700;
-  }
-  #datetime {
-    background: rgba(255 255 255 / 0.05);
-    border-radius: 12px;
-    padding: 15px 30px;
-    font-size: 20px;
-    font-weight: 600;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
-    color: #fbbc04;
-    margin-bottom: 50px;
-    letter-spacing: 1.2px;
-    min-width: 320px;
-    text-align: center;
-    line-height: 1.5;
-  }
-  #datetime .date {
-    font-size: 22px;
-    font-weight: 700;
-  }
-  #datetime .time {
-    font-size: 18px;
-    font-weight: 500;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>الصفحة الرئيسية - تطبيق التداول</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #202124;
+      color: #e8eaed;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      margin: 0; padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      user-select: none;
+      overflow-x: hidden;
+    }
 
-  /* الشموع */
-  #candles {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 40px;
-    cursor: pointer;
-    max-width: calc(7 * 35px); /* 7 شموع * (عرض شمعة + gap) لتجنب السكرول */
-    overflow-x: hidden;
-  }
-  .candle {
-    width: 20px;
-    height: 80px;
-    position: relative;
-    user-select: none;
-    transition: transform 0.4s ease;
-  }
-  .candle-body {
-    width: 10px;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 4px;
-    transition: height 0.6s ease, background-color 0.6s ease, bottom 0.6s ease, top 0.6s ease;
-  }
-  .wick {
-    width: 3px;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 2px;
-    transition: height 0.6s ease, top 0.6s ease, bottom 0.6s ease;
-  }
-  .wick.green {
-    background-color: #34c759;
-  }
-  .wick.red {
-    background-color: #ff3b30;
-  }
+    h1 {
+      color: #fbbc04;
+      font-size: 32px;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
 
-  .candle.green {
-    color: #34c759;
-  }
-  .candle.green .candle-body {
-    background-color: #34c759;
-  }
-  .candle.red {
-    color: #ff3b30;
-  }
-  .candle.red .candle-body {
-    background-color: #ff3b30;
-  }
+    #datetime {
+      background: rgba(255 255 255 / 0.05);
+      border-radius: 12px;
+      padding: 15px 30px;
+      font-size: 20px;
+      font-weight: 600;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      color: #fbbc04;
+      margin-bottom: 50px;
+      letter-spacing: 1.2px;
+      min-width: 320px;
+      text-align: center;
+      line-height: 1.5;
+    }
 
-  /* زر القائمة */
-  .sidebar-toggle {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    font-size: 26px;
-    background: #fbbc04;
-    color: #202124;
-    border-radius: 8px;
-    padding: 6px 12px;
-    cursor: pointer;
-    z-index: 1001;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-  }
-  /* القائمة الجانبية */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    right: -250px;
-    width: 250px;
-    height: 100%;
-    background: #303134;
-    color: #fff;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-    transition: right 0.3s ease;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar.open {
-    right: 0;
-  }
-  .sidebar-header {
-    padding: 15px;
-    border-bottom: 1px solid #555;
-    background: #202124;
-    text-align: center;
-  }
-  .sidebar-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #fbbc04;
-  }
-  .sidebar-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    flex-grow: 1;
-  }
-  .sidebar-menu li {
-    padding: 16px 10px;
-    border-bottom: 1px solid #444;
-    cursor: pointer;
-    font-size: 17px;
-  }
-  .sidebar-menu li:hover {
-    background: #444;
-  }
-  .overlay {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.2);
-    display: none;
-    z-index: 999;
-  }
-  .overlay.active {
-    display: block;
-  }
+    #datetime .date {
+      font-size: 22px;
+      font-weight: 700;
+    }
 
-  /* الحقوق */
-  footer {
-    margin-top: auto;
-    padding: 15px 0;
-    width: 100%;
-    text-align: center;
-    font-size: 14px;
-    color: #888;
-    background: rgba(255 255 255 / 0.05);
-    user-select: none;
-  }
-</style>
+    #datetime .time {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    #candles {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    .candle {
+      width: 20px;
+      position: relative;
+      transition: transform 0.4s ease;
+    }
+
+    .candle-body {
+      width: 10px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 4px;
+      transition: all 0.4s ease;
+    }
+
+    .wick {
+      width: 3px;
+      background: currentColor;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+      transition: all 0.4s ease;
+    }
+
+    .candle.green {
+      color: #34c759;
+    }
+
+    .candle.red {
+      color: #ff3b30;
+    }
+
+    #trading-quote {
+      font-family: 'Caveat', cursive;
+      font-size: 24px;
+      color: #fbbc04;
+      margin-top: 30px;
+      text-align: center;
+      min-height: 50px;
+      transition: opacity 0.5s ease;
+    }
+
+    .footer {
+      margin-top: auto;
+      font-size: 14px;
+      color: #999;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* زر القائمة */
+    .sidebar-toggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      font-size: 26px;
+      background: #fbbc04;
+      color: #202124;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -250px;
+      width: 250px;
+      height: 100%;
+      background: #303134;
+      color: #fff;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+      transition: right 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.open {
+      right: 0;
+    }
+
+    .sidebar-header {
+      padding: 15px;
+      border-bottom: 1px solid #555;
+      background: #202124;
+      text-align: center;
+    }
+
+    .sidebar-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #fbbc04;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li {
+      padding: 16px 10px;
+      border-bottom: 1px solid #444;
+      cursor: pointer;
+      font-size: 17px;
+    }
+
+    .sidebar-menu li:hover {
+      background: #444;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.2);
+      display: none;
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+  </style>
 </head>
 <body>
 
-<!-- زر القائمة -->
-<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+  <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-<!-- القائمة الجانبية -->
-<div id="sidebar" class="sidebar" aria-label="القائمة الجانبية">
-  <div class="sidebar-header">
-    <h3>القائمة</h3>
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h3>القائمة</h3>
+    </div>
+    <ul class="sidebar-menu">
+      <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
+      <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
+      <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
+      <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
+      <li onclick="navigateTo('sessions.html')">🕰️ جلسات التداول الحالية</li>
+      <li onclick="navigateTo('news.html')">📰 أخبار اليوم</li>
+      <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
+      <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
+    </ul>
   </div>
-  <ul class="sidebar-menu">
-     <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
-    <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
-    <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
-    <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
-    <li onclick="navigateTo('sessions.html')">🕰️ جلسات التداول الحالية</li>
-    <li onclick="navigateTo('news.html')">📰 أخبار اليوم</li>
-    <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
-    <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
-  </ul>
-</div>
 
-<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+  <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
-<h1>مرحبًا بك في تطبيق التداول</h1>
+  <h1>مرحبًا بك في تطبيق التداول</h1>
 
-<div id="datetime" aria-live="polite" aria-atomic="true">
-  <div class="date" aria-label="التاريخ"></div>
-  <div class="time" aria-label="الوقت"></div>
-</div>
+  <div id="datetime">
+    <div class="date"></div>
+    <div class="time"></div>
+  </div>
 
-<div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع" role="img" aria-label="شموع الشارت">
-  <!-- الشموع ستنشأ ديناميكياً عبر جافاسكريبت -->
-</div>
+  <div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع"></div>
 
-<footer>
- © All rights reserved by NnEe
+  <div id="trading-quote"></div>
 
+  <div class="footer">© by NnEe</div>
 
+  <script>
+    // التاريخ والوقت
+    function updateDateTime() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      const hours12 = now.getHours() % 12 || 12;
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const ampm = now.getHours() >= 12 ? 'مساءً' : 'صباحًا';
 
-
-</footer>
-
-<script>
-  // تحديث التاريخ بصيغة الأرقام والوقت 12 ساعة مع صباحًا/مساءً
-  function updateDateTime() {
-    const now = new Date();
-
-    // التاريخ dd/mm/yyyy
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const formattedDate = `${day}/${month}/${year}`;
-
-    // الوقت 12 ساعة مع AM/PM عربي
-    let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'مساءً' : 'صباحًا';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // الساعة 0 تصبح 12
-
-    const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
-
-    document.querySelector('#datetime .date').textContent = formattedDate;
-    document.querySelector('#datetime .time').textContent = formattedTime;
-  }
-  setInterval(updateDateTime, 1000);
-  updateDateTime();
-
-  // إنشاء الشموع (عدد 7 شموع - خضراء وحمراء متبادلة)
-  const candlesContainer = document.getElementById('candles');
-  const candleCount = 7;
-  let candles = [];
-
-  function createCandles() {
-    candlesContainer.innerHTML = '';
-    candles = [];
-    for (let i = 0; i < candleCount; i++) {
-      const candle = document.createElement('div');
-      candle.classList.add('candle');
-      candle.classList.add(i % 2 === 0 ? 'green' : 'red');
-
-      const wick = document.createElement('div');
-      wick.classList.add('wick');
-      wick.classList.add(i % 2 === 0 ? 'green' : 'red'); // ألوان الذيل متوافقة مع الشمعة
-      candle.appendChild(wick);
-
-      const body = document.createElement('div');
-      body.classList.add('candle-body');
-      candle.appendChild(body);
-
-      candlesContainer.appendChild(candle);
-      candles.push(candle);
+      document.querySelector('.date').textContent = `${day}/${month}/${year}`;
+      document.querySelector('.time').textContent = `${hours12}:${minutes}:${seconds} ${ampm}`;
     }
-  }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
 
-  createCandles();
+    // العبارات العشوائية
+    const quotes = [
+      "الصبر هو مفتاح الربح في الأسواق.",
+      "اتبع الخطة ولا تتبع العاطفة.",
+      "السوق لا يرحم، ولكن يكافئ المنضبط.",
+      "إدارة رأس المال أهم من التوقع.",
+      "دع أرباحك تجري واقطع خسائرك مبكرًا.",
+      "الفرصة القادمة دائمًا في الطريق.",
+      "الثقة الزائدة طريق للخسارة.",
+      "التداول بدون خطة كالإبحار بلا بوصلة.",
+      "احمِ رأس مالك، الربح يأتي لاحقًا."
+    ];
+    function showRandomQuote() {
+      const q = quotes[Math.floor(Math.random() * quotes.length)];
+      document.getElementById("trading-quote").textContent = q;
+    }
+    showRandomQuote();
 
-  // تحريك الشموع بسلاسة مع أشكال عشوائية والذيل يبقى متصل بجسم الشمعة
-  function animateCandles() {
-    candles.forEach(candle => {
-      const body = candle.querySelector('.candle-body');
-      const wick = candle.querySelector('.wick');
-      const isGreen = candle.classList.contains('green');
+    // الشموع
+    const candlesContainer = document.getElementById('candles');
+    const candleCount = 6;
+    const candles = [];
 
-      // ارتفاع جسم الشمعة بين 30 و 70 بكسل عشوائياً
-      const bodyHeight = Math.floor(Math.random() * 40) + 30;
-      // طول الذيل يعتمد على ارتفاع الجسم ليبقى متصل بشكل صحيح
-      const wickHeight = 80 - bodyHeight;
+    function createCandles() {
+      for (let i = 0; i < candleCount; i++) {
+        const candle = document.createElement('div');
+        candle.className = 'candle ' + (i % 2 === 0 ? 'green' : 'red');
 
-      if (isGreen) {
-        body.style.height = bodyHeight + 'px';
-        body.style.bottom = '15px';
-        body.style.top = 'auto';
+        const wick = document.createElement('div');
+        wick.className = 'wick';
 
-        wick.style.height = wickHeight + 'px';
-        wick.style.top = '0';
-        wick.style.bottom = 'auto';
-      } else {
-        body.style.height = bodyHeight + 'px';
-        body.style.top = '15px';
-        body.style.bottom = 'auto';
+        const body = document.createElement('div');
+        body.className = 'candle-body';
 
-        wick.style.height = wickHeight + 'px';
-        wick.style.bottom = '0';
-        wick.style.top = 'auto';
+        candle.appendChild(wick);
+        candle.appendChild(body);
+        candlesContainer.appendChild(candle);
+        candles.push({candle, wick, body});
       }
-    });
-  }
-
-  candlesContainer.addEventListener('click', () => {
-    animateCandles();
-  });
-  window.addEventListener('scroll', () => {
-    animateCandles();
-  });
-
-  // القائمة الجانبية
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
-
-  function toggleSidebar() {
-    const isOpen = sidebar.classList.contains('open');
-    if (isOpen) {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('active');
-    } else {
-      sidebar.classList.add('open');
-      overlay.classList.add('active');
     }
-  }
 
-  function navigateTo(url) {
-    window.location.href = url;
-  }
-</script>
+    function animateCandles() {
+      candles.forEach(({candle, wick, body}) => {
+        const isGreen = candle.classList.contains('green');
+        const bodyHeight = Math.floor(Math.random() * 40) + 30;
+        const wickHeight = Math.floor(Math.random() * 20) + 10;
 
+        if (isGreen) {
+          body.style.height = bodyHeight + 'px';
+          body.style.bottom = '0';
+          body.style.top = 'auto';
+          wick.style.height = wickHeight + 'px';
+          wick.style.top = 'auto';
+          wick.style.bottom = bodyHeight + 'px';
+        } else {
+          body.style.height = bodyHeight + 'px';
+          body.style.top = '0';
+          body.style.bottom = 'auto';
+          wick.style.height = wickHeight + 'px';
+          wick.style.top = bodyHeight + 'px';
+          wick.style.bottom = 'auto';
+        }
+      });
+    }
+
+    candlesContainer.addEventListener('click', animateCandles);
+    window.addEventListener('scroll', animateCandles);
+
+    createCandles();
+    animateCandles();
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    function navigateTo(url) {
+      window.location.href = url;
+    }
+  </script>
 </body>
 </html>
