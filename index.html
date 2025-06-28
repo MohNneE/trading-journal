@@ -10,52 +10,230 @@
     color: #e8eaed;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
-    margin: 0; padding: 0;
+    margin: 0; padding: 40px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    padding: 40px 20px;
     user-select: none;
+    overflow-x: hidden;
   }
   h1 {
     color: #fbbc04;
     font-size: 32px;
-    margin-bottom: 10px;
+    margin-bottom: 25px;
+    font-weight: 700;
   }
   #datetime {
-    color: #9aa0a6;
-    font-size: 18px;
+    background: rgba(255 255 255 / 0.05);
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+    color: #fbbc04;
+    margin-bottom: 50px;
+    letter-spacing: 1.2px;
+    min-width: 320px;
+    text-align: center;
+  }
+  /* الشموع */
+  #candles {
+    display: flex;
+    gap: 30px;
     margin-bottom: 40px;
   }
-  #bearBullContainer {
-    font-size: 100px;
+  .candle {
+    width: 40px;
+    height: 100px;
+    position: relative;
     cursor: pointer;
-    display: flex;
-    gap: 40px;
     user-select: none;
   }
-  #bear, #bull {
-    transition: transform 0.4s ease;
+  /* جسم الشمعة */
+  .candle-body {
+    width: 20px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 4px;
+    transition: height 0.4s ease, background-color 0.4s ease;
   }
-  /* تصادم بسيط */
-  .collision #bear {
-    transform: translateX(40px) rotate(-20deg);
+  /* الفتيل */
+  .wick {
+    width: 4px;
+    background: currentColor;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
   }
-  .collision #bull {
-    transform: translateX(-40px) rotate(20deg);
+  /* شمعة صاعدة (خضراء) */
+  .candle.green {
+    color: #34c759;
+  }
+  .candle.green .candle-body {
+    bottom: 20px;
+    height: 60px;
+    background-color: #34c759;
+  }
+  .candle.green .wick {
+    top: 0;
+    height: 20px;
+  }
+  /* شمعة هابطة (حمراء) */
+  .candle.red {
+    color: #ff3b30;
+  }
+  .candle.red .candle-body {
+    top: 20px;
+    height: 60px;
+    background-color: #ff3b30;
+  }
+  .candle.red .wick {
+    bottom: 0;
+    height: 20px;
+  }
+  /* تحريك الشموع */
+  .animate-up .green .candle-body {
+    height: 90px !important;
+  }
+  .animate-up .green .wick {
+    height: 30px !important;
+  }
+  .animate-up .red .candle-body {
+    height: 30px !important;
+    top: 50px !important;
+  }
+  .animate-up .red .wick {
+    height: 10px !important;
+  }
+  .animate-down .green .candle-body {
+    height: 30px !important;
+  }
+  .animate-down .green .wick {
+    height: 10px !important;
+  }
+  .animate-down .red .candle-body {
+    height: 90px !important;
+    top: 0 !important;
+  }
+  .animate-down .red .wick {
+    height: 30px !important;
+  }
+
+  /* زر القائمة */
+  .sidebar-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    font-size: 26px;
+    background: #fbbc04;
+    color: #202124;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  }
+  /* القائمة الجانبية */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background: #303134;
+    color: #fff;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar.open {
+    right: 0;
+  }
+  .sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid #555;
+    background: #202124;
+    text-align: center;
+  }
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #fbbc04;
+  }
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+  }
+  .sidebar-menu li {
+    padding: 16px 10px;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+    font-size: 17px;
+  }
+  .sidebar-menu li:hover {
+    background: #444;
+  }
+  .overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.2);
+    display: none;
+    z-index: 999;
+  }
+  .overlay.active {
+    display: block;
   }
 </style>
 </head>
 <body>
 
-  <h1>مرحبًا بك في تطبيق التداول</h1>
-  <div id="datetime">...</div>
+<!-- زر القائمة -->
+<div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
 
-  <div id="bearBullContainer" title="اضغط لرؤية تصادم الدببة والثيران">
-    <div id="bear" aria-label="دببة">🐻</div>
-    <div id="bull" aria-label="ثيران">🐂</div>
+<!-- القائمة الجانبية -->
+<div id="sidebar" class="sidebar" aria-label="القائمة الجانبية">
+  <div class="sidebar-header">
+    <h3>القائمة</h3>
   </div>
+  <ul class="sidebar-menu">
+     <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
+    <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
+    <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
+    <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
+    <li onclick="navigateTo('sessions.html')">🕰️ جلسات التداول الحالية</li>
+    <li onclick="navigateTo('news.html')">📰 أخبار اليوم</li>
+    <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
+    <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
+   
+  </ul>
+</div>
+
+<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+<h1>مرحبًا بك في تطبيق التداول</h1>
+<div id="datetime" aria-live="polite" aria-atomic="true">...</div>
+
+<div id="candles" title="اضغط أو حرك الصفحة لتحريك الشموع" role="img" aria-label="شموع الشارت">
+  <div class="candle green" aria-label="شمعة صاعدة">
+    <div class="wick"></div>
+    <div class="candle-body"></div>
+  </div>
+  <div class="candle red" aria-label="شمعة هابطة">
+    <div class="wick"></div>
+    <div class="candle-body"></div>
+  </div>
+</div>
 
 <script>
   // تحديث الوقت والتاريخ كل ثانية
@@ -71,12 +249,40 @@
   setInterval(updateDateTime, 1000);
   updateDateTime();
 
-  // حركة التصادم عند الضغط على الرموز
-  const container = document.getElementById('bearBullContainer');
-  container.addEventListener('click', () => {
-    container.classList.add('collision');
-    setTimeout(() => container.classList.remove('collision'), 800);
+  // حركة الشموع
+  const candles = document.getElementById('candles');
+
+  function animateCandles() {
+    candles.classList.toggle('animate-up');
+    candles.classList.toggle('animate-down');
+  }
+
+  candles.addEventListener('click', () => {
+    animateCandles();
   });
+
+  window.addEventListener('scroll', () => {
+    animateCandles();
+  });
+
+  // القائمة الجانبية
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  function toggleSidebar() {
+    const isOpen = sidebar.classList.contains('open');
+    if (isOpen) {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    } else {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+    }
+  }
+
+  function navigateTo(url) {
+    window.location.href = url;
+  }
 </script>
 
 </body>
