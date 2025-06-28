@@ -1,158 +1,83 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>الصفحة الرئيسية</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      direction: rtl;
-      background: #202124;
-      color: #e8eaed;
-      text-align: center;
-      padding: 20px;
-    }
-    .sidebar-toggle {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      font-size: 26px;
-      background: #fbbc04;
-      color: #202124;
-      border-radius: 8px;
-      padding: 6px 12px;
-      cursor: pointer;
-      z-index: 1001;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    }
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: -250px;
-      width: 250px;
-      height: 100%;
-      background: #303134;
-      color: #fff;
-      box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-      transition: right 0.3s ease;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar.open {
-      right: 0;
-    }
-    .sidebar-header {
-      padding: 15px;
-      border-bottom: 1px solid #555;
-      background: #202124;
-      text-align: center;
-    }
-    .sidebar-header h3 {
-      margin: 0;
-      font-size: 18px;
-      color: #fbbc04;
-    }
-    .sidebar-menu {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      text-align: center;
-    }
-    .sidebar-menu li {
-      padding: 16px 10px;
-      border-bottom: 1px solid #444;
-      cursor: pointer;
-      font-size: 17px;
-    }
-    .sidebar-menu li:hover {
-      background: #444;
-    }
-    .overlay {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.2);
-      display: none;
-      z-index: 999;
-    }
-    .overlay.active {
-      display: block;
-    }
-    h1 {
-      color: #fbbc04;
-      margin-top: 80px;
-    }
-    .cards {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 30px;
-    }
-    .card {
-      background: #303134;
-      padding: 20px;
-      border-radius: 12px;
-      width: 200px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: scale(1.05);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الصفحة الرئيسية - تطبيق التداول</title>
+<style>
+  body {
+    background: #202124;
+    color: #e8eaed;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    user-select: none;
+  }
+  h1 {
+    color: #fbbc04;
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+  #datetime {
+    color: #9aa0a6;
+    font-size: 18px;
+    margin-bottom: 40px;
+  }
+  #bearBullContainer {
+    font-size: 100px;
+    cursor: pointer;
+    display: flex;
+    gap: 40px;
+    user-select: none;
+  }
+  #bear, #bull {
+    transition: transform 0.4s ease;
+  }
+  /* تصادم بسيط */
+  .collision #bear {
+    transform: translateX(40px) rotate(-20deg);
+  }
+  .collision #bull {
+    transform: translateX(-40px) rotate(20deg);
+  }
+</style>
 </head>
 <body>
 
-  <div class="sidebar-toggle" onclick="toggleSidebar()">☰</div>
+  <h1>مرحبًا بك في تطبيق التداول</h1>
+  <div id="datetime">...</div>
 
-  <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-      <h3>القائمة</h3>
-    </div>
-    <ul class="sidebar-menu">
-      <li onclick="navigateTo('addtrades.html')">➕ إضافة الصفقات</li>
-      <li onclick="navigateTo('cleanlog.html')">📝 سجل الصفقات</li>
-      <li onclick="navigateTo('calculator.html')">🧮 حاسبة التداول</li>
-      <li onclick="navigateTo('analysis.html')">📊 تحليل الصفقات</li>
-      <li onclick="navigateTo('sessions.html')">🕰️ جلسات التداول</li>
-      <li onclick="navigateTo('news.html')">📰 التقويم الاقتصادي</li>
-      <li onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</li>
-      <li onclick="navigateTo('moghazafa.html')">🎲 مجازفة</li>
-    </ul>
-  </div>
-  <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
-
-  <h1>👋 مرحبًا بك في تطبيق إدارة الصفقات</h1>
-
-  <div class="cards">
-    <div class="card" onclick="navigateTo('addtrades.html')">➕ إضافة صفقة جديدة</div>
-    <div class="card" onclick="navigateTo('cleanlog.html')">📝 عرض سجل الصفقات</div>
-    <div class="card" onclick="navigateTo('calculator.html')">🧮 الحاسبة</div>
-    <div class="card" onclick="navigateTo('news.html')">📰 أخبار اليوم</div>
-    <div class="card" onclick="navigateTo('sessions.html')">🕰️ الجلسات الآن</div>
-    <div class="card" onclick="navigateTo('tikitaka.html')">⚽ تيكي تاكا</div>
-    <div class="card" onclick="navigateTo('moghazafa.html')">🎲 مجازفة</div>
+  <div id="bearBullContainer" title="اضغط لرؤية تصادم الدببة والثيران">
+    <div id="bear" aria-label="دببة">🐻</div>
+    <div id="bull" aria-label="ثيران">🐂</div>
   </div>
 
-  <script>
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('overlay');
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('active');
-    }
+<script>
+  // تحديث الوقت والتاريخ كل ثانية
+  function updateDateTime() {
+    const now = new Date();
+    const options = { 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+    };
+    const formatted = now.toLocaleDateString('ar-EG', options);
+    document.getElementById('datetime').textContent = formatted;
+  }
+  setInterval(updateDateTime, 1000);
+  updateDateTime();
 
-    function navigateTo(page) {
-      window.location.href = page;
-    }
-  </script>
+  // حركة التصادم عند الضغط على الرموز
+  const container = document.getElementById('bearBullContainer');
+  container.addEventListener('click', () => {
+    container.classList.add('collision');
+    setTimeout(() => container.classList.remove('collision'), 800);
+  });
+</script>
 
 </body>
 </html>
