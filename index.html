@@ -53,6 +53,8 @@
     gap: 15px;
     margin-bottom: 40px;
     cursor: pointer;
+    max-width: calc(7 * 35px); /* 7 شموع * (عرض شمعة + gap) لتجنب السكرول */
+    overflow-x: hidden;
   }
   .candle {
     width: 20px;
@@ -88,14 +90,12 @@
     color: #34c759;
   }
   .candle.green .candle-body {
-    bottom: 15px;
     background-color: #34c759;
   }
   .candle.red {
     color: #ff3b30;
   }
   .candle.red .candle-body {
-    top: 15px;
     background-color: #ff3b30;
   }
 
@@ -251,9 +251,9 @@
   setInterval(updateDateTime, 1000);
   updateDateTime();
 
-  // إنشاء الشموع (عدد 12 شمعة - خضراء وحمراء متبادلة)
+  // إنشاء الشموع (عدد 7 شموع - خضراء وحمراء متبادلة)
   const candlesContainer = document.getElementById('candles');
-  const candleCount = 12;
+  const candleCount = 7;
   let candles = [];
 
   function createCandles() {
@@ -280,7 +280,7 @@
 
   createCandles();
 
-  // تحريك الشموع بسلاسة مع أشكال عشوائية
+  // تحريك الشموع بسلاسة مع أشكال عشوائية والذيل يبقى متصل بجسم الشمعة
   function animateCandles() {
     candles.forEach(candle => {
       const body = candle.querySelector('.candle-body');
@@ -289,8 +289,8 @@
 
       // ارتفاع جسم الشمعة بين 30 و 70 بكسل عشوائياً
       const bodyHeight = Math.floor(Math.random() * 40) + 30;
-      // طول الذيل بين 10 و 20 بكسل عشوائياً
-      const wickHeight = Math.floor(Math.random() * 10) + 10;
+      // طول الذيل يعتمد على ارتفاع الجسم ليبقى متصل بشكل صحيح
+      const wickHeight = 80 - bodyHeight;
 
       if (isGreen) {
         body.style.height = bodyHeight + 'px';
