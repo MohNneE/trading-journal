@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تيكي تاكا - حساب اللوت</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      direction: rtl;
+      background: #202124;
+      color: #e8eaed;
+      text-align: center;
+      padding: 20px;
+    }
+    h2 {
+      color: #fbbc04;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 6px;
+      border: 1px solid #5f6368;
+      background: #303134;
+      color: #e8eaed;
+      text-align: center;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #fbbc04;
+      color: #202124;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 30px;
+      font-size: 18px;
+    }
+    #backBtn {
+      margin-top: 40px;
+      padding: 10px 20px;
+      background: #fbbc04;
+      color: #202124;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>تيكي تاكا ⚽ - حساب اللوت الذكي</h2>
+
+  <label for="capital">رأس المال ($):</label>
+  <input type="number" id="capital" placeholder="أدخل رأس المال" />
+
+  <label for="reflection">نقاط الانعكاس:</label>
+  <input type="number" id="reflection" placeholder="أدخل عدد النقاط" />
+
+  <button onclick="calculateLot()">احسب اللوت المناسب</button>
+
+  <div class="result" id="result"></div>
+
+  <button id="backBtn" onclick="window.location.href='index.html'">العودة للصفحة الرئيسية</button>
+
+  <script>
+    function calculateLot() {
+      const capital = parseFloat(document.getElementById('capital').value);
+      const reflection = parseFloat(document.getElementById('reflection').value);
+
+      if (!capital || !reflection || reflection === 0) {
+        document.getElementById('result').innerHTML = "يرجى إدخال القيم بشكل صحيح.";
+        return;
+      }
+
+      const riskPerTrade = capital / 6;
+      const dollarsPerPoint = riskPerTrade / reflection;
+      const rawLot = dollarsPerPoint / 100;  // كل 0.01 لوت = 1$ لكل 100 نقطة
+      const finalLot = Math.floor(rawLot * 100) / 100;
+
+      const profit10pips = finalLot * 10 * 100;
+      const lossAtReflection = finalLot * reflection * 100;
+
+      document.getElementById('result').innerHTML = `
+        <p>🔢 حجم اللوت المناسب: <strong>${finalLot.toFixed(2)}</strong></p>
+        <p>✅ الربح في حال 10 نقاط: <strong>$${profit10pips.toFixed(2)}</strong></p>
+        <p>❌ الخسارة في حال انعكاس ${reflection} نقطة: <strong>$${lossAtReflection.toFixed(2)}</strong></p>
+      `;
+    }
+  </script>
+
+</body>
+</html>
