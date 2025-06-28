@@ -53,12 +53,12 @@
     gap: 15px;
     margin-bottom: 40px;
     cursor: pointer;
+    user-select: none;
   }
   .candle {
     width: 20px;
     height: 80px;
     position: relative;
-    user-select: none;
     transition: transform 0.6s ease;
   }
   .candle-body {
@@ -67,7 +67,7 @@
     left: 50%;
     transform: translateX(-50%);
     border-radius: 4px;
-    transition: height 0.6s ease, background-color 0.6s ease;
+    transition: height 0.6s ease, background-color 0.6s ease, bottom 0.6s ease, top 0.6s ease;
   }
   .wick {
     width: 3px;
@@ -76,7 +76,7 @@
     left: 50%;
     transform: translateX(-50%);
     border-radius: 2px;
-    transition: height 0.6s ease;
+    transition: height 0.6s ease, top 0.6s ease, bottom 0.6s ease;
   }
   .candle.green {
     color: #34c759;
@@ -260,7 +260,7 @@
 
   createCandles();
 
-  // تحريك الشموع بسلاسة مع أبعاد عشوائية
+  // تحريك الشموع بسلاسة مع أبعاد عشوائية، وذيل متصل دائماً بجسم الشمعة
   function animateCandles() {
     candlesContainer.classList.toggle('animate-up');
     candlesContainer.classList.toggle('animate-down');
@@ -269,42 +269,38 @@
       const body = candle.querySelector('.candle-body');
       const wick = candle.querySelector('.wick');
 
-      let bodyHeight, wickHeight, wickPosition;
+      let bodyHeight, wickHeight;
 
       if (candlesContainer.classList.contains('animate-up')) {
         if (candle.classList.contains('green')) {
-          bodyHeight = 40 + Math.random() * 40;  // من 40 إلى 80 بكسل
-          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
-          wickPosition = bodyHeight;
+          bodyHeight = 40 + Math.random() * 40;  // 40 إلى 80 بكسل
+          wickHeight = Math.max(10, (80 - bodyHeight)); // الذيل يكمل الجسم حتى 80 بكسل
           body.style.bottom = '15px';
           body.style.top = 'auto';
-          wick.style.bottom = `${wickPosition}px`;
+          wick.style.bottom = `${bodyHeight + 15}px`;
           wick.style.top = 'auto';
         } else {
-          bodyHeight = 30 + Math.random() * 40;  // من 30 إلى 70 بكسل
-          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
-          wickPosition = bodyHeight;
+          bodyHeight = 30 + Math.random() * 40; // 30 إلى 70 بكسل
+          wickHeight = Math.max(10, (80 - bodyHeight));
           body.style.top = '15px';
           body.style.bottom = 'auto';
-          wick.style.top = `${wickPosition}px`;
+          wick.style.top = `${bodyHeight + 15}px`;
           wick.style.bottom = 'auto';
         }
       } else {
         if (candle.classList.contains('green')) {
-          bodyHeight = 30 + Math.random() * 40;  // من 30 إلى 70 بكسل
-          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
-          wickPosition = bodyHeight;
+          bodyHeight = 30 + Math.random() * 40; // 30 إلى 70 بكسل
+          wickHeight = Math.max(10, (80 - bodyHeight));
           body.style.bottom = '15px';
           body.style.top = 'auto';
-          wick.style.bottom = `${wickPosition}px`;
+          wick.style.bottom = `${bodyHeight + 15}px`;
           wick.style.top = 'auto';
         } else {
-          bodyHeight = 40 + Math.random() * 40;  // من 40 إلى 80 بكسل
-          wickHeight = bodyHeight * 0.3 + Math.random() * 10;
-          wickPosition = bodyHeight;
+          bodyHeight = 40 + Math.random() * 40; // 40 إلى 80 بكسل
+          wickHeight = Math.max(10, (80 - bodyHeight));
           body.style.top = '15px';
           body.style.bottom = 'auto';
-          wick.style.top = `${wickPosition}px`;
+          wick.style.top = `${bodyHeight + 15}px`;
           wick.style.bottom = 'auto';
         }
       }
