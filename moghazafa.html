@@ -112,12 +112,12 @@
       const rawLot = dollarsPerPoint / 100;
       const finalLot = Math.floor(rawLot * 100) / 100;
 
-      const profit10pips = finalLot * 10 * 100;
+      const profit10pips = finalLot * 15 * 100;
       const lossAtReflection = finalLot * reflection * 100;
 
       document.getElementById('result').innerHTML = `
         <p>🔢 حجم اللوت المناسب: <strong>${finalLot.toFixed(2)}</strong></p>
-        <p>✅ الربح في حال 10 نقاط: <strong>$${profit10pips.toFixed(2)}</strong></p>
+        <p>✅ الربح في حال 15 نقاط: <strong>$${profit10pips.toFixed(2)}</strong></p>
         <p>❌ الخسارة في حال انعكاس ${reflection} نقطة: <strong>$${lossAtReflection.toFixed(2)}</strong></p>
       `;
     }
