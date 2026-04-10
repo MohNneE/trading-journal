@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محلل التحيز اليومي للذهب</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #D4A843;
+    --gold-light: #F0C96B;
+    --gold-dark: #A07828;
+    --bg-deep: #080A0F;
+    --bg-card: #0D1117;
+    --bg-panel: #111820;
+    --border: rgba(212,168,67,0.2);
+    --border-bright: rgba(212,168,67,0.6);
+    --text: #E8E4D8;
+    --text-dim: #7A7060;
+    --bull: #22C55E;
+    --bear: #EF4444;
+    --bull-dim: rgba(34,197,94,0.15);
+    --bear-dim: rgba(239,68,68,0.15);
+    --neutral: #6B7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(212,168,67,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,168,67,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .logo-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .logo-icon {
+    font-size: 2.4rem;
+    filter: drop-shadow(0 0 12px var(--gold));
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  header::after {
+    content: '';
+    display: block;
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 18px auto 0;
+  }
+
+  /* API Connection Panel */
+  .api-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .api-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .api-panel-title {
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .api-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .input-group {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .input-group input {
+    width: 100%;
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Cairo', monospace;
+    font-size: 0.88rem;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-group input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212,168,67,0.1);
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-check {
+    background: var(--bg-deep);
+    border: 1px solid var(--border-bright);
+    color: var(--gold);
+  }
+
+  .btn-check:hover {
+    background: rgba(212,168,67,0.1);
+    box-shadow: 0 0 12px rgba(212,168,67,0.2);
+  }
+
+  .btn-analyze {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #080A0F;
+    font-weight: 700;
+    padding: 10px 28px;
+  }
+
+  .btn-analyze:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212,168,67,0.35);
+  }
+
+  .btn-analyze:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .status-idle { background: rgba(107,114,128,0.15); color: var(--neutral); border: 1px solid rgba(107,114,128,0.3); }
+  .status-ok   { background: var(--bull-dim); color: var(--bull); border: 1px solid rgba(34,197,94,0.3); }
+  .status-err  { background: var(--bear-dim); color: var(--bear); border: 1px solid rgba(239,68,68,0.3); }
+  .status-loading { background: rgba(212,168,67,0.1); color: var(--gold); border: 1px solid var(--border-bright); }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .dot.pulse { animation: pulse 1.2s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Symbol selector */
+  .sym-panel {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+
+  .sym-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-left: 4px;
+  }
+
+  .sym-btn {
+    padding: 7px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .sym-btn.active, .sym-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(212,168,67,0.08);
+  }
+
+  /* Error message */
+  #error-msg {
+    display: none;
+    background: var(--bear-dim);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    padding: 14px 20px;
+    color: var(--bear);
+    font-size: 0.88rem;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+
+  /* Warning message - incomplete day */
+  #warn-msg {
+    display: none;
+    background: rgba(212,168,67,0.08);
+    border: 1px solid rgba(212,168,67,0.45);
+    border-radius: 10px;
+    padding: 13px 20px;
+    color: var(--gold-light);
+    font-size: 0.86rem;
+    margin-bottom: 24px;
+    text-align: center;
+    line-height: 1.8;
+  }
+  #warn-msg strong { color: var(--gold); font-size: 0.95rem; }
+  /* Results area */
+  #results { display: none; }
+
+  /* Bias Gauge */
+  .gauge-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 28px 28px;
+    margin-bottom: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gauge-card.bull { border-color: rgba(34,197,94,0.4); }
+  .gauge-card.bear { border-color: rgba(239,68,68,0.4); }
+  .gauge-card.neutral-card { border-color: rgba(107,114,128,0.4); }
+
+  .gauge-glow {
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 150px;
+    border-radius: 50%;
+    filter: blur(50px);
+    opacity: 0.2;
+    transition: background 0.5s;
+  }
+
+  .gauge-card.bull .gauge-glow   { background: var(--bull); }
+  .gauge-card.bear .gauge-glow   { background: var(--bear); }
+  .gauge-card.neutral-card .gauge-glow { background: var(--neutral); }
+
+  .bias-label {
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .bias-percent {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 6.5rem);
+    letter-spacing: 2px;
+    line-height: 1;
+    transition: color 0.5s;
+  }
+
+  .bull .bias-percent  { color: var(--bull); text-shadow: 0 0 40px rgba(34,197,94,0.4); }
+  .bear .bias-percent  { color: var(--bear); text-shadow: 0 0 40px rgba(239,68,68,0.4); }
+  .neutral-card .bias-percent { color: var(--neutral); }
+
+  .bias-direction {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  .bull .bias-direction  { color: var(--bull); }
+  .bear .bias-direction  { color: var(--bear); }
+  .neutral-card .bias-direction { color: var(--neutral); }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    margin: 22px auto 0;
+    max-width: 500px;
+    height: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+    position: relative;
+  }
+
+  .bull .progress-fill  { background: linear-gradient(90deg, #166534, var(--bull)); }
+  .bear .progress-fill  { background: linear-gradient(90deg, #7f1d1d, var(--bear)); }
+  .neutral-card .progress-fill { background: linear-gradient(90deg, #374151, var(--neutral)); }
+
+  /* Criteria grid */
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .criterion-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 18px;
+    position: relative;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+
+  .criterion-card:hover { transform: translateY(-2px); }
+  .criterion-card.bull-c  { border-color: rgba(34,197,94,0.35); }
+  .criterion-card.bear-c  { border-color: rgba(239,68,68,0.35); }
+  .criterion-card.neutral-c { border-color: rgba(107,114,128,0.25); }
+
+  .crit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .crit-name {
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .crit-weight {
+    font-size: 0.68rem;
+    color: var(--gold);
+    background: rgba(212,168,67,0.1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+
+  .crit-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.9rem;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .bull-c .crit-value  { color: var(--bull); }
+  .bear-c .crit-value  { color: var(--bear); }
+  .neutral-c .crit-value { color: var(--neutral); }
+
+  .crit-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .crit-points {
+    position: absolute;
+    bottom: 14px; left: 18px;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+  }
+
+  .crit-points span {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* Raw data panel */
+  .raw-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 24px;
+  }
+
+  .raw-panel-title {
+    font-size: 0.72rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .raw-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .raw-item {
+    background: var(--bg-deep);
+    border-radius: 8px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .raw-item-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .raw-item-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+  }
+
+  /* Timestamp */
+  .timestamp {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    margin-top: 8px;
+  }
+
+  /* Spinner */
+  .spinner {
+    display: none;
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Loading overlay */
+  #loading {
+    display: none;
+    text-align: center;
+    padding: 60px 0;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+  }
+
+  #loading .big-spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 18px;
+  }
+
+  /* Responsive */
+  @media(max-width:600px) {
+    .api-row { flex-direction: column; }
+    .input-group { min-width: 100%; }
+    .btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-line">
+      <span class="logo-icon">⚡</span>
+      <h1>GOLD BIAS</h1>
+      <span class="logo-icon">⚡</span>
+    </div>
+    <p class="subtitle">محلل التحيز اليومي — XAU/USD</p>
+  </header>
+
+  <!-- API Connection -->
+  <div class="api-panel">
+    <div class="api-panel-title">
+      <span>⬡</span> ربط مفتاح API — Twelve Data
+    </div>
+    <div class="api-row">
+      <div class="input-group">
+        <label>مفتاح API Key</label>
+        <input type="password" id="api-key" placeholder="أدخل مفتاحك من twelvedata.com" autocomplete="off">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end; padding-top:18px;">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div class="spinner" id="check-spinner"></div>
+          <span class="status-badge status-idle" id="conn-status">
+            <span class="dot"></span> غير متصل
+          </span>
+        </div>
+        <button class="btn btn-check" onclick="checkConnection()">⬡ فحص الاتصال</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Symbol + Analyze -->
+  <div class="sym-panel">
+    <span class="sym-label">الزوج:</span>
+    <button class="sym-btn active" data-sym="XAU/USD" onclick="selectSym(this)">XAU/USD — الذهب</button>
+    <button class="sym-btn" data-sym="EUR/USD" onclick="selectSym(this)">EUR/USD — اليورو دولار</button>
+    <button class="sym-btn" data-sym="USD/JPY" onclick="selectSym(this)">USD/JPY — الدولار ين</button>
+    <div style="flex:1"></div>
+    <button class="btn btn-analyze" id="analyze-btn" onclick="runAnalysis()" disabled>
+      ⬡ تحليل التحيز اليومي
+    </button>
+  </div>
+
+  <!-- Error -->
+  <!-- Warning - incomplete day -->
+  <div id="warn-msg"></div>
+
+  <!-- Error -->
+  <div id="error-msg"></div>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="big-spinner"></div>
+    <div>جارٍ جلب البيانات وحساب التحيز...</div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- Main gauge -->
+    <div class="gauge-card" id="gauge-card">
+      <div class="gauge-glow"></div>
+      <div class="bias-label">التحيز اليومي المحسوب</div>
+      <div class="bias-percent" id="bias-pct">—</div>
+      <div class="bias-direction" id="bias-dir">—</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Criteria -->
+    <div class="criteria-grid" id="criteria-grid"></div>
+
+    <!-- Raw data -->
+    <div class="raw-panel">
+      <div class="raw-panel-title"><span>◈</span> البيانات الخام المُستخدمة</div>
+      <div class="raw-grid" id="raw-grid"></div>
+    </div>
+
+    <div class="timestamp" id="timestamp"></div>
+  </div>
+
+</div>
+
+<script>
+let connOk = false;
+let selectedSym = 'XAU/USD';
+
+function selectSym(btn) {
+  document.querySelectorAll('.sym-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedSym = btn.dataset.sym;
+}
+
+function setStatus(state, msg) {
+  const el = document.getElementById('conn-status');
+  el.className = 'status-badge';
+  if (state === 'ok')      { el.classList.add('status-ok');      el.innerHTML = `<span class="dot"></span> ${msg}`; }
+  else if (state === 'err'){ el.classList.add('status-err');     el.innerHTML = `<span class="dot"></span> ${msg}`; }
+  else if (state === 'loading'){ el.classList.add('status-loading'); el.innerHTML = `<span class="dot pulse"></span> ${msg}`; }
+  else                     { el.classList.add('status-idle');    el.innerHTML = `<span class="dot"></span> ${msg}`; }
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('loading').style.display = 'none';
+}
+
+function clearError() {
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+function showWarning(msg) {
+  const el = document.getElementById('warn-msg');
+  el.innerHTML = msg;
+  el.style.display = 'block';
+}
+
+function clearWarning() {
+  document.getElementById('warn-msg').style.display = 'none';
+}
+
+// Returns true if markets are likely still open (before 22:00 UTC = NY close)
+function isMarketOpen() {
+  const now = new Date();
+  const utcHour = now.getUTCHours();
+  const utcMin  = now.getUTCMinutes();
+  // Forex daily candle closes at 22:00 UTC (NY 5PM)
+  return (utcHour < 22);
+}
+
+async function fetchCandles(sym, apiKey, count = 5) {
+  const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym)}&interval=1day&outputsize=${count}&apikey=${apiKey}&format=JSON`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if (d.status === 'error' || !d.values) throw new Error(d.message || 'فشل جلب البيانات');
+  return d.values; // newest first
+}
+
+async function fetchRSI(sym, apiKey) {
+  const url = `https://api.twelvedata.com/rsi?symbol=${encodeURIComponent(sym)}&interval=1day&time_period=14&outputsize=1&apikey=${apiKey}&format=JSON`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if (d.status === 'error' || !d.values) throw new Error(d.message || 'فشل جلب RSI');
+  return parseFloat(d.values[0].rsi);
+}
+
+async function fetchEMA9(sym, apiKey) {
+  const url = `https://api.twelvedata.com/ema?symbol=${encodeURIComponent(sym)}&interval=1day&time_period=9&outputsize=1&apikey=${apiKey}&format=JSON`;
+  const r = await fetch(url);
+  const d = await r.json();
+  if (d.status === 'error' || !d.values) throw new Error(d.message || 'فشل جلب EMA');
+  return parseFloat(d.values[0].ema);
+}
+
+async function checkConnection() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showError('الرجاء إدخال مفتاح API أولاً.'); return; }
+  clearError();
+  document.getElementById('check-spinner').style.display = 'block';
+  setStatus('loading', 'جارٍ الفحص...');
+  connOk = false;
+  document.getElementById('analyze-btn').disabled = true;
+
+  try {
+    const url = `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=1day&outputsize=1&apikey=${key}&format=JSON`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if (d.status === 'error' || !d.values) throw new Error(d.message || 'مفتاح غير صحيح');
+    setStatus('ok', 'متصل بنجاح');
+    connOk = true;
+    document.getElementById('analyze-btn').disabled = false;
+  } catch(e) {
+    setStatus('err', 'فشل الاتصال');
+    showError('❌ فشل الاتصال: ' + e.message);
+  } finally {
+    document.getElementById('check-spinner').style.display = 'none';
+  }
+}
+
+async function runAnalysis() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key || !connOk) { showError('يرجى فحص الاتصال أولاً.'); return; }
+  clearError();
+  clearWarning();
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('analyze-btn').disabled = true;
+
+  const isGold  = selectedSym === 'XAU/USD';
+  const isUSDJPY = selectedSym === 'USD/JPY';
+  const isEURUSD = selectedSym === 'EUR/USD';
+
+  // Proxy logic per pair:
+  // XAU/USD  → EUR/USD (inverse: EUR/USD↑ = Dollar↓ = Gold↑)
+  // EUR/USD  → USD/JPY (direct:  USD/JPY↓ = Dollar↓ = EUR/USD↑)
+  // USD/JPY  → EUR/USD (inverse: EUR/USD↑ = Dollar↓ = USD/JPY↓ = Bearish USD/JPY)
+  const proxySym   = isEURUSD ? 'USD/JPY' : 'EUR/USD';
+  const proxyLabel = isEURUSD ? 'USD/JPY' : 'EUR/USD';
+  const dp         = isUSDJPY ? 3 : 4;
+  const priceDpProxy = isEURUSD ? 3 : 4;
+
+  try {
+    const [mainCandles, proxyCandles, rsiVal, ema9Val] = await Promise.all([
+      fetchCandles(selectedSym, key, 5),
+      fetchCandles(proxySym, key, 2),
+      fetchRSI(selectedSym, key),
+      fetchEMA9(selectedSym, key)
+    ]);
+
+    const today   = mainCandles[0];
+    const prevDay = mainCandles[1];
+    const close   = parseFloat(today.close);
+    const pdh     = parseFloat(prevDay.high);
+    const pdl     = parseFloat(prevDay.low);
+
+    const proxyToday = parseFloat(proxyCandles[0].close);
+    const proxyPrev  = parseFloat(proxyCandles[1].close);
+
+    // XAU/USD: EUR/USD UP   → Dollar DOWN → Bullish Gold
+    // EUR/USD: USD/JPY DOWN → Dollar DOWN → Bullish EUR/USD
+    // USD/JPY: EUR/USD UP   → Dollar DOWN → Bearish USD/JPY (same as bearish dollar)
+    const dollarWeak = isEURUSD
+      ? (proxyToday < proxyPrev)   // USD/JPY fell = dollar fell = EUR/USD bullish
+      : (proxyToday > proxyPrev);  // EUR/USD rose = dollar fell = bullish for Gold & bearish for USD/JPY
+
+    // ─── Scoring ───────────────────────────────────────────────
+    let bullPoints = 0;
+    let bearPoints = 0;
+
+    // A: Market Structure [40 pts]
+    let msScore = 0; let msDir = 'neutral'; let msDesc = '';
+    const priceDp = isGold ? 2 : (isUSDJPY ? 3 : 5);
+    if (close > pdh) {
+      bullPoints += 40; msScore = 40; msDir = 'bull';
+      msDesc = `الإغلاق (${close.toFixed(priceDp)}) فوق PDH (${pdh.toFixed(priceDp)})`;
+    } else if (close < pdl) {
+      bearPoints += 40; msScore = 40; msDir = 'bear';
+      msDesc = `الإغلاق (${close.toFixed(priceDp)}) تحت PDL (${pdl.toFixed(priceDp)})`;
+    } else {
+      msDesc = `الإغلاق داخل نطاق اليوم السابق (Inside Bar)`;
+    }
+
+    // B: EMA9 [20 pts]
+    let emaScore = 0; let emaDir = 'neutral'; let emaDesc = '';
+    if (close > ema9Val) {
+      bullPoints += 20; emaScore = 20; emaDir = 'bull';
+      emaDesc = `الإغلاق (${close.toFixed(priceDp)}) فوق EMA9 (${ema9Val.toFixed(priceDp)})`;
+    } else {
+      bearPoints += 20; emaScore = 20; emaDir = 'bear';
+      emaDesc = `الإغلاق (${close.toFixed(priceDp)}) تحت EMA9 (${ema9Val.toFixed(priceDp)})`;
+    }
+
+    // C: RSI [20 pts]
+    let rsiScore = 0; let rsiDir = 'neutral'; let rsiDesc = '';
+    const rsiRounded = rsiVal.toFixed(1);
+    if (rsiVal > 60) {
+      bullPoints += 20; rsiScore = 20; rsiDir = 'bull';
+      rsiDesc = `RSI = ${rsiRounded} (أعلى من 60 — زخم صاعد)`;
+    } else if (rsiVal < 40) {
+      bearPoints += 20; rsiScore = 20; rsiDir = 'bear';
+      rsiDesc = `RSI = ${rsiRounded} (أقل من 40 — زخم هابط)`;
+    } else {
+      rsiScore = 10; rsiDir = 'neutral';
+      rsiDesc = `RSI = ${rsiRounded} (بين 40-60 — حياد نسبي)`;
+      if (bullPoints >= bearPoints) bullPoints += 10; else bearPoints += 10;
+    }
+
+    // D: Dollar Strength [20 pts]
+    let dxyDir = 'neutral'; let dxyDesc = '';
+    if (dollarWeak) {
+      bullPoints += 20; dxyDir = 'bull';
+      if (isEURUSD)
+        dxyDesc = `USD/JPY هبط (${proxyPrev.toFixed(priceDpProxy)} → ${proxyToday.toFixed(priceDpProxy)}) = الدولار ضعيف ← دعم لـ EUR/USD`;
+      else if (isUSDJPY)
+        dxyDesc = `EUR/USD صعد (${proxyPrev.toFixed(priceDpProxy)} → ${proxyToday.toFixed(priceDpProxy)}) = الدولار هبط ← ضغط هابط على USD/JPY`;
+      else
+        dxyDesc = `EUR/USD صعد (${proxyPrev.toFixed(priceDpProxy)} → ${proxyToday.toFixed(priceDpProxy)}) = الدولار هبط ← دعم للذهب`;
+    } else {
+      bearPoints += 20; dxyDir = 'bear';
+      if (isEURUSD)
+        dxyDesc = `USD/JPY صعد (${proxyPrev.toFixed(priceDpProxy)} → ${proxyToday.toFixed(priceDpProxy)}) = الدولار قوي ← ضغط على EUR/USD`;
+      else if (isUSDJPY)
+        dxyDesc = `EUR/USD هبط (${proxyPrev.toFixed(priceDpProxy)} → ${proxyToday.toFixed(priceDpProxy)}) = الدولار صعد ← دعم صاعد لـ USD/JPY`;
+      else
+        dxyDesc = `EUR/USD هبط (${proxyPrev.toFixed(priceDpProxy)} → ${proxyToday.toFixed(priceDpProxy)}) = الدولار صعد ← ضغط على الذهب`;
+    }
+
+    // ─── Final bias ────────────────────────────────────────────
+    const total = bullPoints + bearPoints;
+    const bullPct = total > 0 ? Math.round((bullPoints / total) * 100) : 50;
+    const bearPct = 100 - bullPct;
+
+    const overallDir = bullPoints > bearPoints ? 'bull' : (bearPoints > bullPoints ? 'bear' : 'neutral');
+    const displayPct = overallDir === 'bull' ? bullPct : (overallDir === 'bear' ? bearPct : 50);
+    const dirLabel   = overallDir === 'bull' ? '▲ صاعد (Bullish)' : (overallDir === 'bear' ? '▼ هابط (Bearish)' : '◆ محايد');
+
+    // ─── Render ────────────────────────────────────────────────
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+
+    // Update subtitle
+    document.querySelector('.subtitle').textContent =
+      `محلل التحيز اليومي — ${selectedSym}`;
+
+    // Gauge
+    const gc = document.getElementById('gauge-card');
+    gc.className = 'gauge-card ' + (overallDir === 'neutral' ? 'neutral-card' : overallDir);
+    document.getElementById('bias-pct').textContent = displayPct + '%';
+    document.getElementById('bias-dir').textContent = dirLabel;
+    setTimeout(() => {
+      document.getElementById('progress-fill').style.width = displayPct + '%';
+    }, 100);
+
+    // Criteria cards
+    const dxyCardLabel = isEURUSD
+      ? `قوة الدولار\nUSD/JPY (DXY Proxy)`
+      : `قوة الدولار\nEUR/USD (DXY Proxy)`;
+
+    const criteria = [
+      { name: 'هيكل السعر\nMarket Structure', weight: '40 نقطة', value: msScore + ' pts', dir: msDir, desc: msDesc, pts: msDir === 'bull' ? `+${msScore} صعود` : msDir === 'bear' ? `+${msScore} هبوط` : '0 حياد' },
+      { name: 'المتوسط القيادي\nEMA 9', weight: '20 نقطة', value: ema9Val.toFixed(priceDp), dir: emaDir, desc: emaDesc, pts: emaDir === 'bull' ? '+20 صعود' : '+20 هبوط' },
+      { name: 'قوة الزخم\nRSI 14', weight: '20 نقطة', value: rsiRounded, dir: rsiDir, desc: rsiDesc, pts: rsiDir === 'neutral' ? '+10 حياد' : rsiDir === 'bull' ? '+20 صعود' : '+20 هبوط' },
+      { name: dxyCardLabel, weight: '20 نقطة', value: proxyToday.toFixed(dp), dir: dxyDir, desc: dxyDesc, pts: dxyDir === 'bull' ? '+20 صعود' : '+20 هبوط' },
+    ];
+
+    const cg = document.getElementById('criteria-grid');
+    cg.innerHTML = criteria.map(c => `
+      <div class="criterion-card ${c.dir === 'bull' ? 'bull-c' : c.dir === 'bear' ? 'bear-c' : 'neutral-c'}">
+        <div class="crit-header">
+          <div class="crit-name" style="white-space:pre-line">${c.name}</div>
+          <div class="crit-weight">${c.weight}</div>
+        </div>
+        <div class="crit-value">${c.value}</div>
+        <div class="crit-desc">${c.desc}</div>
+        <div class="crit-points">النقاط: <span>${c.pts}</span></div>
+      </div>
+    `).join('');
+
+    // Raw data
+    const rg = document.getElementById('raw-grid');
+    rg.innerHTML = [
+      { label: 'إغلاق اليوم', val: close.toFixed(priceDp) },
+      { label: 'PDH', val: pdh.toFixed(priceDp) },
+      { label: 'PDL', val: pdl.toFixed(priceDp) },
+      { label: 'EMA 9', val: ema9Val.toFixed(priceDp) },
+      { label: 'RSI 14', val: rsiVal.toFixed(2) },
+      { label: `${proxyLabel} اليوم`, val: proxyToday.toFixed(dp) },
+      { label: `${proxyLabel} أمس`,  val: proxyPrev.toFixed(dp) },
+      { label: 'نقاط صعود', val: bullPoints },
+      { label: 'نقاط هبوط', val: bearPoints },
+    ].map(i => `
+      <div class="raw-item">
+        <div class="raw-item-label">${i.label}</div>
+        <div class="raw-item-value">${i.val}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('timestamp').textContent =
+      '⬡ آخر تحديث: ' + new Date().toLocaleString('ar-SA') + ' · ' + selectedSym;
+
+    // Warn if day candle is not yet closed
+    if (isMarketOpen()) {
+      const utcNow = new Date();
+      const utcStr = utcNow.toUTCString().replace('GMT','UTC');
+      showWarning(
+        `⚠️ <strong>تحذير: اليوم لم يُغلق بعد</strong><br>` +
+        `الشمعة اليومية تُغلق عند الساعة 22:00 UTC (5 مساءً بتوقيت نيويورك).<br>` +
+        `الوقت الحالي: <strong>${utcStr}</strong> — النتائج قد تتغير قبل الإغلاق الرسمي.`
+      );
+    }
+
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    showError('❌ خطأ في جلب البيانات: ' + e.message);
+  } finally {
+    document.getElementById('analyze-btn').disabled = false;
+  }
+}
+</script>
+</body>
+</html>
