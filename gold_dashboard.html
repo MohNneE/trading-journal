@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥇 Gold Pro Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<style>
+:root {
+  --gold:#F5C842; --gold2:#E8A020; --gold-glow:rgba(245,200,66,0.18);
+  --bg:#080B10; --bg2:#0E1218; --bg3:#141921; --bg4:#1C2230;
+  --border:#1E2736; --border2:#263040;
+  --text:#D8E0EE; --text2:#8A9BB5; --text3:#4A5870;
+  --green:#0FD67A; --green2:rgba(15,214,122,0.12);
+  --red:#F0404A; --red2:rgba(240,64,74,0.12);
+  --blue:#3B82F6; --cyan:#06B6D4; --purple:#A855F7;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(245,200,66,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(245,200,66,0.015) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;}
+body::after{content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 60% 40% at 10% 0%,rgba(245,200,66,0.07) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 60% at 90% 100%,rgba(59,130,246,0.04) 0%,transparent 60%);
+  pointer-events:none;}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:16px;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border2);
+  border-radius:14px;margin-bottom:14px;gap:12px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;
+  box-shadow:0 0 32px var(--gold-glow);flex-shrink:0;}
+.brand-name{font-size:18px;font-weight:900;color:var(--gold);letter-spacing:-0.3px;line-height:1;}
+.brand-sub{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.badge{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
+  font-size:10px;font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+.badge-live{background:rgba(15,214,122,0.1);border:1px solid rgba(15,214,122,0.25);color:var(--green);}
+.badge-live .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+#topApiStatus{background:var(--bg4);border:1px solid var(--border2);color:var(--text3);}
+
+/* API PANEL */
+.api-panel{background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border:1px solid rgba(245,200,66,0.3);border-radius:12px;padding:16px 20px;
+  margin-bottom:14px;display:flex;flex-direction:column;gap:10px;}
+.api-panel-title{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--gold);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.api-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.api-input-wrap{flex:1;min-width:200px;position:relative;}
+.api-input-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:8px;color:var(--text);font-family:'IBM Plex Mono',monospace;
+  font-size:13px;padding:10px 42px 10px 14px;outline:none;
+  transition:border-color .2s,box-shadow .2s;letter-spacing:1px;}
+.api-input-wrap input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow);}
+.eye-btn{position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;
+  border:none;color:var(--text3);cursor:pointer;font-size:16px;transition:color .2s;}
+.eye-btn:hover{color:var(--gold);}
+.api-status{font-size:10px;font-family:'IBM Plex Mono',monospace;padding:6px 14px;
+  border-radius:20px;white-space:nowrap;}
+.api-status.ok{background:rgba(15,214,122,0.1);border:1px solid rgba(15,214,122,0.25);color:var(--green);}
+.api-status.err{background:rgba(240,64,74,0.1);border:1px solid rgba(240,64,74,0.25);color:var(--red);}
+.api-status.idle{background:var(--bg4);border:1px solid var(--border2);color:var(--text3);}
+.btn-save{background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;
+  border-radius:8px;color:#080B10;font-family:'IBM Plex Mono',monospace;font-size:12px;
+  font-weight:700;padding:10px 20px;cursor:pointer;transition:all .2s;white-space:nowrap;
+  box-shadow:0 2px 12px var(--gold-glow);}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,200,66,0.4);}
+.api-hint{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.api-hint a{color:var(--gold);text-decoration:none;}
+.api-hint a:hover{text-decoration:underline;}
+#apiDiag{display:none;border:1px solid;border-radius:8px;padding:10px 14px;
+  font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:4px;}
+
+/* CONTROLS */
+.controls-bar{display:flex;gap:10px;margin-bottom:14px;align-items:flex-end;flex-wrap:wrap;}
+.ctrl-group{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;transition:border-color .2s;}
+.ctrl-group:hover{border-color:var(--border2);}
+.ctrl-group label{display:block;font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.ctrl-group select,.ctrl-group input{background:var(--bg3);border:1px solid var(--border);
+  border-radius:6px;color:var(--text);font-family:'IBM Plex Mono',monospace;
+  font-size:13px;padding:7px 10px;outline:none;transition:border-color .2s;cursor:pointer;width:100%;}
+.ctrl-group select:focus,.ctrl-group input:focus{border-color:var(--gold);}
+.ctrl-group input[type=number]{width:90px;}
+.btn-run{background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;
+  border-radius:10px;color:#080B10;font-family:'Tajawal',sans-serif;font-size:16px;
+  font-weight:900;padding:12px 28px;cursor:pointer;transition:all .2s;white-space:nowrap;
+  box-shadow:0 4px 20px var(--gold-glow);display:flex;align-items:center;gap:6px;}
+.btn-run:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(245,200,66,0.4);}
+.btn-run:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:10px;padding:4px;flex-wrap:wrap;}
+.tab-btn{flex:1;min-width:80px;padding:8px 12px;border:none;border-radius:7px;
+  background:transparent;color:var(--text2);font-family:'IBM Plex Mono',monospace;
+  font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tab-btn:hover{color:var(--text);background:var(--bg3);}
+.tab-btn.active{background:var(--bg4);color:var(--gold);border:1px solid rgba(245,200,66,0.2);box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+
+/* PANELS */
+.panel{display:none;}.panel.active{display:block;}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;
+  position:relative;overflow:hidden;transition:border-color .25s,transform .25s;animation:fadeUp .4s ease both;}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.c-gold::after{background:linear-gradient(90deg,var(--gold),transparent);}
+.stat-card.c-blue::after{background:linear-gradient(90deg,var(--blue),transparent);}
+.stat-card.c-green::after{background:linear-gradient(90deg,var(--green),transparent);}
+.stat-card.c-red::after{background:linear-gradient(90deg,var(--red),transparent);}
+.stat-card.c-purple::after{background:linear-gradient(90deg,var(--purple),transparent);}
+.stat-card.c-cyan::after{background:linear-gradient(90deg,var(--cyan),transparent);}
+.stat-lbl{font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.stat-val{font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace;line-height:1;}
+.stat-card.c-gold .stat-val{color:var(--gold);}
+.stat-card.c-blue .stat-val{color:var(--blue);}
+.stat-card.c-green .stat-val{color:var(--green);}
+.stat-card.c-red .stat-val{color:var(--red);}
+.stat-card.c-purple .stat-val{color:var(--purple);}
+.stat-card.c-cyan .stat-val{color:var(--cyan);}
+.stat-sub{font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:4px;}
+.tg{color:var(--green)!important;}.tr{color:var(--red)!important;}.tgold{color:var(--gold)!important;}
+
+/* ADVANCED SIGNAL */
+.adv-signal-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;animation:fadeUp .4s ease .1s both;}
+.adv-signal-top{display:flex;align-items:stretch;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.verdict-box{flex:0 0 auto;min-width:180px;background:var(--bg3);border-radius:12px;padding:16px 20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  border:1px solid var(--border2);position:relative;overflow:hidden;}
+.verdict-box::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:0.07;pointer-events:none;}
+.verdict-box.v-bull::before{background:var(--green);}
+.verdict-box.v-bear::before{background:var(--red);}
+.verdict-box.v-neut::before{background:var(--gold);}
+.verdict-emoji{font-size:32px;line-height:1;}
+.verdict-label{font-size:16px;font-weight:900;font-family:'Tajawal',sans-serif;}
+.verdict-box.v-bull .verdict-label{color:var(--green);}
+.verdict-box.v-bear .verdict-label{color:var(--red);}
+.verdict-box.v-neut .verdict-label{color:var(--gold);}
+.pct-ring-wrap{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.pct-ring{position:relative;width:90px;height:90px;}
+.pct-ring svg{transform:rotate(-90deg);}
+.pct-ring-track{fill:none;stroke:var(--border2);stroke-width:8;}
+.pct-ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .8s ease;}
+.pct-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.pct-ring-num{font-size:18px;font-weight:900;font-family:'IBM Plex Mono',monospace;}
+.pct-ring-sub{font-size:8px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.trend-box{flex:1;min-width:200px;background:var(--bg3);border-radius:12px;padding:16px;border:1px solid var(--border2);display:flex;flex-direction:column;gap:10px;}
+.trend-title{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.5px;}
+.trend-label{font-size:15px;font-weight:700;font-family:'Tajawal',sans-serif;}
+.trend-bar-track{height:8px;background:var(--border2);border-radius:4px;overflow:hidden;}
+.trend-bar-fill{height:100%;border-radius:4px;transition:width .8s ease;}
+.trend-desc{font-size:11px;color:var(--text2);}
+.ind-pills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;}
+.ind-pill-v2{background:var(--bg3);border-radius:10px;padding:10px 12px;border:1px solid var(--border);text-align:center;position:relative;overflow:hidden;}
+.ind-pill-v2::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.ind-pill-v2.ip-bull{border-color:rgba(15,214,122,0.25);}.ind-pill-v2.ip-bull::after{background:var(--green);}
+.ind-pill-v2.ip-bear{border-color:rgba(240,64,74,0.25);}.ind-pill-v2.ip-bear::after{background:var(--red);}
+.ind-pill-v2.ip-neut{border-color:rgba(245,200,66,0.2);}.ind-pill-v2.ip-neut::after{background:var(--gold);}
+.ip-name{font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;margin-bottom:4px;}
+.ip-val{font-size:13px;font-weight:700;font-family:'IBM Plex Mono',monospace;}
+.ip-bull .ip-val{color:var(--green);}.ip-bear .ip-val{color:var(--red);}.ip-neut .ip-val{color:var(--gold);}
+.ip-sig{font-size:9px;color:var(--text2);margin-top:3px;}
+.ip-score-bar{height:3px;background:var(--border2);border-radius:2px;margin-top:5px;overflow:hidden;}
+.ip-score-fill{height:100%;border-radius:2px;}
+.ip-bull .ip-score-fill{background:var(--green);}.ip-bear .ip-score-fill{background:var(--red);}.ip-neut .ip-score-fill{background:var(--gold);}
+
+/* CHART */
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;animation:fadeUp .4s ease .15s both;}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.chart-title{font-size:12px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text);display:flex;align-items:center;gap:7px;}
+.chart-badge{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:400;}
+.cb-gold{background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.2);color:var(--gold);}
+.cb-blue{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--blue);}
+.cb-purple{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:var(--purple);}
+.cb-green{background:rgba(15,214,122,0.1);border:1px solid rgba(15,214,122,0.2);color:var(--green);}
+.cb-cyan{background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);color:var(--cyan);}
+.charts-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:700px){.charts-2col{grid-template-columns:1fr;}}
+.chart-legend{display:flex;gap:10px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+.leg-dot{width:8px;height:8px;border-radius:50%;}
+.leg-line{width:16px;height:2px;border-radius:1px;}
+
+/* DATA TABLE */
+.data-table-wrap{overflow-x:auto;}
+table.data{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+table.data th{color:var(--text3);font-weight:400;padding:8px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;}
+table.data td{padding:7px 10px;border-bottom:1px solid rgba(30,39,54,0.5);color:var(--text);white-space:nowrap;}
+table.data tr:hover td{background:rgba(255,255,255,0.02);}
+
+/* LOADER */
+.loader{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:16px;}
+.loader.show{display:flex;}
+.loader-ring{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader p{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+
+/* EMPTY */
+.empty{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:12px;}
+.empty-icon{font-size:48px;opacity:.3;}
+.empty p{font-size:13px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">🥇</div>
+    <div>
+      <div class="brand-name">Gold Pro Dashboard</div>
+      <div class="brand-sub">XAU/USD · Twelve Data · AI Signal Engine</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="badge badge-live"><div class="dot"></div>LIVE</div>
+    <div id="topApiStatus" class="badge" style="font-size:10px;font-family:'IBM Plex Mono',monospace;">⬤ غير متصل</div>
+  </div>
+</div>
+
+<div class="api-panel">
+  <div class="api-panel-title">🔑 مفتاح Twelve Data API</div>
+  <div class="api-row">
+    <div class="api-input-wrap">
+      <input type="password" id="apiKeyIn"
+        placeholder="الصق مفتاحك هنا... (من twelvedata.com)"
+        autocomplete="off"
+        oninput="onKeyChange()"
+        onkeydown="if(event.key==='Enter') saveKey()">
+      <button class="eye-btn" onclick="toggleEye()" title="إظهار/إخفاء">👁</button>
+    </div>
+    <div class="api-status idle" id="apiSt">⬤ بانتظار المفتاح</div>
+    <button class="btn-save" onclick="saveKey()">🔍 تحقق وحفظ</button>
+  </div>
+  <div id="apiDiag"></div>
+  <div class="api-hint">
+    💡 احصل على مفتاح مجاني من <a href="https://twelvedata.com" target="_blank">twelvedata.com</a>
+    — المفتاح المجاني يدعم XAU/USD بشكل كامل
+  </div>
+</div>
+
+<div class="controls-bar">
+  <div class="ctrl-group">
+    <label>⏱ الفترة</label>
+    <select id="period">
+      <option value="30">شهر</option>
+      <option value="90" selected>3 أشهر</option>
+      <option value="180">6 أشهر</option>
+      <option value="365">سنة</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>📊 MA (يوم)</label>
+    <input type="number" id="maPeriod" value="20" min="5" max="200">
+  </div>
+  <div class="ctrl-group">
+    <label>📈 RSI (يوم)</label>
+    <input type="number" id="rsiPeriod" value="14" min="5" max="50">
+  </div>
+  <div class="ctrl-group">
+    <label>🗂 Tail (صفوف)</label>
+    <input type="number" id="tailN" value="10" min="5" max="50">
+  </div>
+  <button class="btn-run" id="runBtn" onclick="runAll()">▶ تحليل الذهب</button>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('overview')">📊 نظرة عامة</button>
+  <button class="tab-btn" onclick="switchTab('candle')">🕯 شموع + MA</button>
+  <button class="tab-btn" onclick="switchTab('indicators')">📡 المؤشرات</button>
+  <button class="tab-btn" onclick="switchTab('data')">🗂 البيانات</button>
+</div>
+
+<div class="loader" id="loader">
+  <div class="loader-ring"></div>
+  <p id="loaderMsg">جاري جلب بيانات الذهب...</p>
+</div>
+
+<div class="empty" id="emptyState" style="display:flex;">
+  <div class="empty-icon">🥇</div>
+  <p>أدخل API Key واضغط "تحليل الذهب" لبدء التحليل</p>
+</div>
+
+<div class="panel" id="panel-overview">
+  <div class="stats-row" id="statsRow"></div>
+  <div id="advSignalWrap"></div>
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">📈 سعر الذهب XAU/USD <span class="chart-badge cb-gold" id="maLabel">MA20</span></div>
+      <div class="chart-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--gold)"></div>Close</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div><span id="maLegLabel">MA20</span></div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(6,182,212,0.6)"></div>BB Bands</div>
+      </div>
+    </div>
+    <canvas id="priceChart" height="220"></canvas>
+  </div>
+  <div class="charts-2col">
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">📊 Volume <span class="chart-badge cb-blue">حجم التداول</span></div></div>
+      <canvas id="volChart" height="120"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head"><div class="chart-title">📉 MA Slope <span class="chart-badge cb-purple">الميل</span></div></div>
+      <canvas id="slopeChart" height="120"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-candle">
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">🕯 شموع يابانية + Bollinger Bands <span class="chart-badge cb-gold">XAU/USD</span></div>
+      <div class="chart-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>صاعدة</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>هابطة</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--cyan)"></div>BB Bands</div>
+      </div>
+    </div>
+    <canvas id="candleChart" height="300"></canvas>
+  </div>
+</div>
+
+<div class="panel" id="panel-indicators">
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">📈 RSI <span class="chart-badge cb-purple">Relative Strength Index</span></div>
+      <div class="chart-legend">
+        <div class="leg-item" style="color:var(--red)">▬ ذروة شراء (70)</div>
+        <div class="leg-item" style="color:var(--green)">▬ ذروة بيع (30)</div>
+      </div>
+    </div>
+    <canvas id="rsiChart" height="150"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">📊 MACD <span class="chart-badge cb-cyan">Moving Average Convergence Divergence</span></div>
+      <div class="chart-legend">
+        <div class="leg-item"><div class="leg-line" style="background:var(--blue)"></div>MACD</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--red)"></div>Signal</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--text3)"></div>Histogram</div>
+      </div>
+    </div>
+    <canvas id="macdChart" height="150"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-head"><div class="chart-title">📉 Bollinger Bands Width <span class="chart-badge cb-green">التقلب</span></div></div>
+    <canvas id="bbwChart" height="120"></canvas>
+  </div>
+</div>
+
+<div class="panel" id="panel-data">
+  <div class="chart-card">
+    <div class="chart-head">
+      <div class="chart-title">🗂 آخر البيانات — XAU/USD</div>
+      <button onclick="exportCSV()"
+        style="background:var(--bg4);border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:5px 12px;font-size:11px;font-family:'IBM Plex Mono',monospace;cursor:pointer;"
+        onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+        onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">⬇ CSV</button>
+    </div>
+    <div class="data-table-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>التاريخ</th><th>Open</th><th>High</th><th>Low</th>
+            <th>Close</th><th>Volume</th><th id="maCol">MA20</th>
+            <th>BB Upper</th><th>BB Lower</th><th>RSI</th>
+            <th>MACD</th><th>Signal</th><th>الميل</th><th>PCT%</th>
+          </tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><script>
+let apiKey = '';
+let goldData = null;
+let charts = {};
+const SYM = 'XAU/USD';
+
+window.onload = () => {
+  const k = localStorage.getItem('td_api_key_gold');
+  if (k) {
+    apiKey = k;
+    document.getElementById('apiKeyIn').value = k;
+    setApiStatus('ok', '✓ محفوظ — جاهز للتحليل');
+  }
+};
+
+function toggleEye() {
+  const inp = document.getElementById('apiKeyIn');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function onKeyChange() {
+  setApiStatus('idle', '⬤ اضغط "تحقق وحفظ"');
+}
+async function saveKey() {
+  const v = document.getElementById('apiKeyIn').value.trim();
+  if (!v) { setApiStatus('err', '⚠ المفتاح فارغ'); return; }
+  setApiStatus('idle', '⏳ جاري التحقق...');
+  showDiag('', '');
+  try {
+    const url = `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=1day&outputsize=5&apikey=${v}`;
+    const r = await fetch(url);
+    const j = await r.json();
+    if (j.code === 401 || (j.status === 'error' && j.message?.includes('apikey'))) {
+      setApiStatus('err', '✗ مفتاح غير صحيح');
+      showDiag('err', '❌ المفتاح غير صحيح\n' + (j.message || ''));
+      return;
+    }
+    if (j.code === 429) {
+      setApiStatus('err', '⚠ تجاوزت حد الطلبات');
+      showDiag('err', '⚠️ تجاوزت الحد المسموح للمفتاح المجاني.');
+      return;
+    }
+    apiKey = v;
+    localStorage.setItem('td_api_key_gold', v);
+    setApiStatus('ok', '✓ مفتاح صحيح ✅ — اضغط تحليل');
+    showDiag('ok', '✅ تم التحقق بنجاح!');
+    setTimeout(() => showDiag('', ''), 5000);
+  } catch(e) {
+    setApiStatus('err', '✗ خطأ في الاتصال');
+    showDiag('err', '🌐 تعذّر الوصول للخادم.');
+  }
+}
+function showDiag(type, msg) {
+  const d = document.getElementById('apiDiag');
+  if (!type || !msg) { d.style.display = 'none'; return; }
+  d.style.display = 'block';
+  d.style.background = type === 'ok' ? 'rgba(15,214,122,0.08)' : 'rgba(240,64,74,0.08)';
+  d.innerHTML = `<div style="color:${type==='ok'?'var(--green)':'var(--red)'};white-space:pre-wrap;">${msg}</div>`;
+}
+function setApiStatus(type, text) {
+  const el = document.getElementById('apiSt');
+  el.className = `api-status ${type}`;
+  el.textContent = text;
+  const top = document.getElementById('topApiStatus');
+  if (type === 'ok') {
+    top.style.cssText = 'background:rgba(15,214,122,0.1);color:var(--green);';
+    top.textContent = '⬤ متصل';
+  } else {
+    top.style.cssText = 'background:var(--bg4);color:var(--text3);';
+    top.textContent = '⬤ غير متصل';
+  }
+}
+
+function switchTab(name) {
+  const names = ['overview','candle','indicators','data'];
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', names[i] === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+async function fetchGold(outputsize) {
+  const url = `https://api.twelvedata.com/time_series?symbol=XAU%2FUSD&interval=1day&outputsize=${outputsize}&apikey=${apiKey}`;
+  const r = await fetch(url);
+  const j = await r.json();
+  if (j.status === 'error') throw new Error(j.message);
+  return [...j.values].reverse();
+}
+
+function calcMA(arr, n) {
+  return arr.map((_,i) => i < n-1 ? null : arr.slice(i-n+1,i+1).reduce((a,b)=>a+b,0)/n);
+}
+function calcRSI(closes, n) {
+  const rsi = Array(closes.length).fill(null);
+  if (closes.length < n+1) return rsi;
+  let gains=0, losses=0;
+  for (let i=1;i<=n;i++) { const d=closes[i]-closes[i-1]; if(d>0) gains+=d; else losses-=d; }
+  let avgG=gains/n, avgL=losses/n;
+  rsi[n] = avgL===0 ? 100 : 100-(100/(1+avgG/avgL));
+  for (let i=n+1;i<closes.length;i++) {
+    const d=closes[i]-closes[i-1], g=d>0?d:0, l=d<0?-d:0;
+    avgG=(avgG*(n-1)+g)/n; avgL=(avgL*(n-1)+l)/n;
+    rsi[i] = avgL===0 ? 100 : 100-(100/(1+avgG/avgL));
+  }
+  return rsi;
+}
+function calcEMA(arr, n) {
+  const k=2/(n+1), res=Array(arr.length).fill(null);
+  let started=false, prev=0;
+  for (let i=0;i<arr.length;i++) {
+    if (!started && i>=n-1) { prev=arr.slice(i-n+1,i+1).reduce((a,b)=>a+b,0)/n; res[i]=prev; started=true; }
+    else if (started) { prev=arr[i]*k+prev*(1-k); res[i]=prev; }
+  }
+  return res;
+}
+function calcMACD(closes) {
+  const emaF=calcEMA(closes,12), emaS=calcEMA(closes,26);
+  const macd=closes.map((_,i)=>(emaF[i]!==null&&emaS[i]!==null)?emaF[i]-emaS[i]:null);
+  const validMacd = macd.filter(v => v !== null);
+  const signal = Array(closes.length).fill(null);
+  if(validMacd.length >= 9) {
+      const sigRaw = calcEMA(validMacd, 9);
+      let sigIdx = 0;
+      macd.forEach((v, i) => { if(v !== null) signal[i] = sigRaw[sigIdx++]; });
+  }
+  const hist=macd.map((v,i)=>(v!==null&&signal[i]!==null)?v-signal[i]:null);
+  return {macd,signal,hist};
+}
+function calcBB(closes, ma, n=20) {
+  const upper=[], lower=[], width=[];
+  closes.forEach((_,i)=>{
+    if (i<n-1) { upper.push(null); lower.push(null); width.push(null); return; }
+    const sl=closes.slice(i-n+1,i+1), mean=sl.reduce((a,b)=>a+b,0)/n;
+    const std=Math.sqrt(sl.reduce((a,b)=>a+(b-mean)**2,0)/n);
+    const u=mean+2*std, l=mean-2*std;
+    upper.push(u); lower.push(l);
+    width.push(ma[i] ? ((u-l)/ma[i])*100 : null);
+  });
+  return {upper,lower,width};
+}
+
+function processRaw(raw, maN, rsiN) {
+  const dates=raw.map(v=>v.datetime), opens=raw.map(v=>parseFloat(v.open)), highs=raw.map(v=>parseFloat(v.high)), lows=raw.map(v=>parseFloat(v.low)), closes=raw.map(v=>parseFloat(v.close)), volumes=raw.map(v=>parseFloat(v.volume||0));
+  const ma=calcMA(closes,maN), slope=ma.map((v,i)=>(v!==null&&i>0&&ma[i-1]!==null)?v-ma[i-1]:null), pct=ma.map((v,i)=>(v!==null&&i>0&&ma[i-1]!==null)?((v-ma[i-1])/ma[i-1])*100:null);
+  const rsi=calcRSI(closes,rsiN), {macd,signal:macdSig,hist}=calcMACD(closes), {upper:bbU,lower:bbL,width:bbW}=calcBB(closes,ma,maN);
+  return {dates,opens,highs,lows,closes,volumes,ma,slope,pct,rsi,macd,macdSig,hist,bbU,bbL,bbW};
+}
+
+function calcAdvancedSignal(d, n) {
+  const close=d.closes[n], ma=d.ma[n], slope=d.slope[n], rsi=d.rsi[n], macd=d.macd[n], macdSig=d.macdSig[n], bbU=d.bbU[n], bbL=d.bbL[n], bbW=d.bbW[n];
+  let indicators = [];
+  if (ma) indicators.push({name:'MA',score:close>ma?1:-1,weight:20,sig:close>ma?'فوق':'تحت',val:fmt(ma)});
+  if (slope!==null) indicators.push({name:'Slope',score:slope>0?1:-1,weight:15,sig:slope>0?'صاعد':'هابط',val:slope.toFixed(2)});
+  if (rsi) indicators.push({name:'RSI',score:rsi>70?-1:rsi<30?1:0.2,weight:20,sig:rsi>70?'تشبع شراء':rsi<30?'تشبع بيع':'محايد',val:rsi.toFixed(1)});
+  if (macd&&macdSig) indicators.push({name:'MACD',score:macd>macdSig?1:-1,weight:20,sig:macd>macdSig?'إيجابي':'سلبي',val:macd.toFixed(2)});
+  
+  const totalW=indicators.reduce((a,x)=>a+x.weight,0);
+  const weightedScore=indicators.reduce((a,x)=>a+(x.score*x.weight),0)/totalW;
+  const bullPct=Math.round(((weightedScore+1)/2)*100);
+  const bearPct=100-bullPct;
+  return {indicators,bullPct,bearPct,verdict:bullPct>60?'شراء':bullPct<40?'بيع':'محايد',verdictClass:bullPct>60?'v-bull':bullPct<40?'v-bear':'v-neut'};
+}
+
+async function runAll() {
+  if (!apiKey) { saveKey(); return; }
+  const outputsize=document.getElementById('period').value, maN=parseInt(document.getElementById('maPeriod').value), rsiN=parseInt(document.getElementById('rsiPeriod').value);
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('loader').classList.add('show');
+  try {
+    const raw = await fetchGold(outputsize);
+    goldData = processRaw(raw, maN, rsiN);
+    renderOverview(maN, rsiN);
+    renderCandle();
+    renderIndicators(rsiN);
+    renderDataTable(parseInt(document.getElementById('tailN').value), maN);
+    switchTab('overview');
+  } catch(e) {
+    alert(e.message);
+  } finally {
+    document.getElementById('loader').classList.remove('show');
+  }
+}
+
+function renderOverview(maN, rsiN) {
+  const d=goldData, n=d.closes.length-1;
+  const sig=calcAdvancedSignal(d,n);
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat-card c-gold"><div class="stat-lbl">السعر الحالي</div><div class="stat-val">$${fmt(d.closes[n])}</div></div>
+    <div class="stat-card c-blue"><div class="stat-lbl">MA${maN}</div><div class="stat-val">$${fmt(d.ma[n])}</div></div>
+    <div class="stat-card c-purple"><div class="stat-lbl">RSI</div><div class="stat-val">${d.rsi[n]?.toFixed(1)}</div></div>
+  `;
+  renderAdvancedSignalUI(sig);
+  renderPriceChart();
+  renderVolChart();
+  renderSlopeChart();
+}
+
+function renderAdvancedSignalUI(sig) {
+  document.getElementById('advSignalWrap').innerHTML=`
+    <div class="adv-signal-card">
+      <div class="adv-signal-top">
+        <div class="verdict-box ${sig.verdictClass}"><div class="verdict-label">${sig.verdict}</div></div>
+        <div class="trend-box"><div class="trend-label">قوة الإشارة: ${sig.bullPct}% شراء / ${sig.bearPct}% بيع</div></div>
+      </div>
+    </div>`;
+}
+
+function renderPriceChart() {
+  if(charts.price) charts.price.destroy();
+  charts.price=new Chart(document.getElementById('priceChart'),{
+    type:'line',data:{labels:goldData.dates,datasets:[{label:'Price',data:goldData.closes,borderColor:'#F5C842',fill:false},{label:'MA',data:goldData.ma,borderColor:'#3B82F6',pointRadius:0}]},
+    options:{responsive:true,scales:{x:xSc(),y:ySc()}}
+  });
+}
+function renderVolChart() {
+  if(charts.vol) charts.vol.destroy();
+  charts.vol=new Chart(document.getElementById('volChart'),{
+    type:'bar',data:{labels:goldData.dates,datasets:[{data:goldData.volumes,backgroundColor:'#3B82F6'}]},
+    options:{responsive:true,scales:{x:xSc(),y:ySc()}}
+  });
+}
+function renderSlopeChart() {
+  if(charts.slope) charts.slope.destroy();
+  charts.slope=new Chart(document.getElementById('slopeChart'),{
+    type:'bar',data:{labels:goldData.dates,datasets:[{data:goldData.slope,backgroundColor:'#0FD67A'}]},
+    options:{responsive:true,scales:{x:xSc(),y:ySc()}}
+  });
+}
+function renderCandle() {
+    if(charts.candle) charts.candle.destroy();
+    charts.candle=new Chart(document.getElementById('candleChart'),{
+        type:'line',data:{labels:goldData.dates,datasets:[{label:'Close',data:goldData.closes,borderColor:'#F5C842'}]},
+        options:{responsive:true,scales:{x:xSc(),y:ySc()}}
+    });
+}
+function renderIndicators(rsiN) {
+  if(charts.rsi) charts.rsi.destroy();
+  charts.rsi=new Chart(document.getElementById('rsiChart'),{
+    type:'line',data:{labels:goldData.dates,datasets:[{data:goldData.rsi,borderColor:'#A855F7'}]},
+    options:{responsive:true,scales:{x:xSc(),y:{min:0,max:100}}}
+  });
+}
+
+function renderDataTable(tailN, maN) {
+  const d=goldData, n=d.dates.length, start=Math.max(0,n-tailN), tbody=document.getElementById('dataBody');
+  tbody.innerHTML='';
+  for(let i=n-1;i>=start;i--){
+    tbody.innerHTML+=`<tr><td>${d.dates[i]}</td><td>$${fmt(d.opens[i])}</td><td>$${fmt(d.highs[i])}</td><td>$${fmt(d.lows[i])}</td><td>$${fmt(d.closes[i])}</td><td>${fmtVol(d.volumes[i])}</td><td>${fmt(d.ma[i])}</td><td>${fmt(d.bbU[i])}</td><td>${fmt(d.bbL[i])}</td><td>${d.rsi[i]?.toFixed(1)}</td><td>${d.macd[i]?.toFixed(2)}</td><td>${d.macdSig[i]?.toFixed(2)}</td><td>${d.slope[i]?.toFixed(2)}</td><td>${d.pct[i]?.toFixed(2)}%</td></tr>`;
+  }
+}
+
+function exportCSV() {
+  let csv = 'Date,Close\n' + goldData.dates.map((d,i)=>`${d},${goldData.closes[i]}`).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURI(csv); a.download='gold.csv'; a.click();
+}
+
+function xSc(){return{ticks:{color:'#4A5870',font:{size:9}}};}
+function ySc(){return{ticks:{color:'#4A5870',font:{size:9}}};}
+function fmt(n){return n?n.toLocaleString():'—';}
+function fmtVol(n){return n>1e6?(n/1e6).toFixed(1)+'M':n>1e3?(n/1e3).toFixed(1)+'K':n;}
+</script>
+</body>
+</html>
