@@ -22,7 +22,7 @@
     --font-mono: 'IBM Plex Mono', monospace;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 
   body {
     background: var(--bg);
@@ -391,31 +391,16 @@
     border-radius: 8px;
     margin-bottom: 8px;
     border-right: 3px solid transparent;
-    transition: background 0.2s;
     position: relative;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-  }
-
-  .zone-row::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .zone-row.resistance { border-right-color: var(--red); }
-  .zone-row.resistance::before { background: linear-gradient(90deg, transparent, rgba(239,35,60,0.05)); }
-
   .zone-row.support { border-right-color: var(--green); }
-  .zone-row.support::before { background: linear-gradient(90deg, transparent, rgba(6,214,160,0.05)); }
-
   .zone-row.liquidity-high { border-right-color: var(--gold); }
-  .zone-row.liquidity-high::before { background: linear-gradient(90deg, transparent, rgba(255,209,102,0.07)); }
-
-  .zone-row:hover::before { opacity: 1; }
 
   /* Selectable price input — works on mobile without clipboard API */
   .price-copy-input {
@@ -488,28 +473,22 @@
     gap: 4px;
   }
 
-  .price-field {
-    font-family: var(--font-mono);
-    font-size: 15px;
+  .copy-price-btn {
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 6px;
+    color: var(--accent);
+    font-size: 11px;
+    font-family: var(--font-ar);
     font-weight: 700;
-    color: var(--text);
-    background: transparent;
-    border: none;
-    border-bottom: 1px dashed var(--border);
-    width: 105px;
-    text-align: center;
-    padding: 3px 4px;
-    outline: none;
-    cursor: text;
-    -webkit-user-select: text !important;
-    user-select: text !important;
+    padding: 3px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .price-field:focus {
-    border-bottom-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,212,255,0.06);
-    border-radius: 4px;
+  .copy-price-btn:active {
+    background: rgba(0,212,255,0.25);
   }
 
   .zone-strength {
@@ -1164,6 +1143,20 @@
     el.setSelectionRange(0, el.value.length);
     try { el.select(); } catch(e) {}
     showToast('✓ تم التحديد — اضغط نسخ');
+  }
+
+  function promptCopy(price) {
+    // Try modern clipboard first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(price).then(() => {
+        showToast('✅ تم النسخ: ' + price);
+      }).catch(() => {
+        window.prompt('انسخ السعر (اختر الكل ← نسخ):', price);
+      });
+    } else {
+      // Universal fallback: prompt dialog — works on ALL mobile browsers
+      window.prompt('انسخ السعر (اختر الكل ← نسخ):', price);
+    }
   }
 
   function copyPrice(price, label) {
