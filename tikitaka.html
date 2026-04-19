@@ -447,6 +447,10 @@
   .badge-liq { background: rgba(255,209,102,0.15); color: var(--gold); }
   .badge-eqh { background: rgba(255,107,53,0.15); color: var(--accent2); }
   .badge-eql { background: rgba(0,102,255,0.15); color: #6699ff; }
+  .badge-pdh { background: rgba(239,35,60,0.25); color: #ff4466; border: 1px solid rgba(239,35,60,0.4); }
+  .badge-pdl { background: rgba(6,214,160,0.25); color: #00ffbb; border: 1px solid rgba(6,214,160,0.4); }
+  .badge-pwh { background: rgba(255,209,102,0.25); color: var(--gold); border: 1px solid rgba(255,209,102,0.4); }
+  .badge-pwl { background: rgba(180,100,255,0.25); color: #cc88ff; border: 1px solid rgba(180,100,255,0.4); }
 
   .zone-desc {
     font-size: 12px;
@@ -827,11 +831,11 @@
       </div>
       <div class="summary-item">
         <div class="s-val" style="color:var(--gold)" id="sum-liq">—</div>
-        <div class="s-label">مناطق سيولة عالية</div>
+        <div class="s-label">EQH / EQL</div>
       </div>
       <div class="summary-item">
         <div class="s-val" style="color:var(--accent2)" id="sum-eq">—</div>
-        <div class="s-label">قمم/قيعان متساوية</div>
+        <div class="s-label">PDH/PDL · PWH/PWL</div>
       </div>
     </div>
 
@@ -931,16 +935,22 @@
   }
 
   async function fetchAsset(symbol, id) {
-    // Fetch time series
-    const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${currentTF}&outputsize=50&apikey=${API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const decimals = id === 'xauusd' ? 2 : 5;
 
-    if (data.status === 'error' || data.code) {
-      throw new Error(`خطأ API: ${data.message || 'تحقق من صحة المفتاح أو حد الطلبات'}`);
+    // Fetch current timeframe (200 candles)
+    const urlTF = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${currentTF}&outputsize=200&apikey=${API_KEY}`;
+    // Fetch daily (30 candles) for PDH/PDL/PWH/PWL — always needed
+    const urlDaily = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=30&apikey=${API_KEY}`;
+
+    const [resTF, resDaily] = await Promise.all([fetch(urlTF), fetch(urlDaily)]);
+    const [dataTF, dataDaily] = await Promise.all([resTF.json(), resDaily.json()]);
+
+    if (dataTF.status === 'error' || dataTF.code) {
+      throw new Error(`خطأ API: ${dataTF.message || 'تحقق من صحة المفتاح أو حد الطلبات'}`);
     }
 
-    const candles = data.values;
+    const candles = dataTF.values;
+    const dailyCandles = dataDaily.values || [];
     if (!candles || candles.length < 10) throw new Error(`بيانات غير كافية لـ ${symbol}`);
 
     // Latest price
@@ -949,104 +959,140 @@
     const change = ((latest - prevClose) / prevClose * 100).toFixed(3);
     const isUp = latest >= prevClose;
 
-    const decimals = id === 'xauusd' ? 2 : 5;
-
     document.getElementById(`${id}-price`).textContent = latest.toFixed(decimals);
     document.getElementById(`${id}-price`).title = 'اضغط لنسخ السعر';
-    document.getElementById(`${id}-price`).onclick = () => copyPrice(latest.toFixed(decimals), `${symbol}`);
+    document.getElementById(`${id}-price`).onclick = () => promptCopy(latest.toFixed(decimals));
     const changeEl = document.getElementById(`${id}-change`);
     changeEl.textContent = `${isUp ? '▲' : '▼'} ${Math.abs(change)}%`;
     changeEl.className = `price-change ${isUp ? 'up' : 'down'}`;
 
     // Calculate zones
-    const zones = calculateLiquidityZones(candles, latest, decimals);
+    const zones = calculateLiquidityZones(candles, dailyCandles, latest, decimals);
     allZonesData[id] = zones;
     renderZones(id, zones, latest, decimals);
     updateBias(id, zones, latest, candles);
   }
 
-  function calculateLiquidityZones(candles, currentPrice, decimals) {
+  function calculateLiquidityZones(candles, dailyCandles, currentPrice, decimals) {
     const zones = [];
-    const highs = candles.map(c => parseFloat(c.high));
-    const lows  = candles.map(c => parseFloat(c.low));
+    const highs  = candles.map(c => parseFloat(c.high));
+    const lows   = candles.map(c => parseFloat(c.low));
     const closes = candles.map(c => parseFloat(c.close));
 
-    // Recent swing highs (resistance)
-    for (let i = 2; i < Math.min(20, candles.length - 2); i++) {
-      if (highs[i] > highs[i-1] && highs[i] > highs[i-2] &&
-          highs[i] > highs[i+1] && highs[i] > highs[i+2]) {
-        const strength = calcStrength(highs, i, 'high');
+    // ── PDH / PDL (Previous Day High / Low) ──────────────────────────
+    if (dailyCandles.length >= 2) {
+      const pd = dailyCandles[1]; // index 0 = today (incomplete), index 1 = yesterday
+      const pdh = parseFloat(pd.high);
+      const pdl = parseFloat(pd.low);
+      zones.push({
+        price: pdh, type: 'resistance', label: 'PDH',
+        badgeClass: 'badge-pdh',
+        desc: 'قمة اليوم السابق — سيولة عالية', strength: 3, priority: 1
+      });
+      zones.push({
+        price: pdl, type: 'support', label: 'PDL',
+        badgeClass: 'badge-pdl',
+        desc: 'قاع اليوم السابق — سيولة عالية', strength: 3, priority: 1
+      });
+    }
+
+    // ── PWH / PWL (Previous Week High / Low) ─────────────────────────
+    if (dailyCandles.length >= 7) {
+      // Find the 5 candles that represent last week (days 1-5 skipping today)
+      const weekSlice = dailyCandles.slice(1, 6);
+      const pwh = Math.max(...weekSlice.map(c => parseFloat(c.high)));
+      const pwl = Math.min(...weekSlice.map(c => parseFloat(c.low)));
+      zones.push({
+        price: pwh, type: 'resistance', label: 'PWH',
+        badgeClass: 'badge-pwh',
+        desc: 'قمة الأسبوع السابق — سيولة أسبوعية', strength: 3, priority: 2
+      });
+      zones.push({
+        price: pwl, type: 'support', label: 'PWL',
+        badgeClass: 'badge-pwl',
+        desc: 'قاع الأسبوع السابق — سيولة أسبوعية', strength: 3, priority: 2
+      });
+    }
+
+    // ── Swing Highs (Resistance) ──────────────────────────────────────
+    for (let i = 3; i < Math.min(60, candles.length - 3); i++) {
+      if (highs[i] > highs[i-1] && highs[i] > highs[i-2] && highs[i] > highs[i-3] &&
+          highs[i] > highs[i+1] && highs[i] > highs[i+2] && highs[i] > highs[i+3]) {
         zones.push({
-          price: highs[i],
-          type: 'resistance',
-          label: 'RES',
+          price: highs[i], type: 'resistance', label: 'RES',
           badgeClass: 'badge-res',
           desc: `مقاومة سوينغ (${i} شمعة)`,
-          strength
+          strength: calcStrength(highs, i), priority: 3
         });
       }
     }
 
-    // Recent swing lows (support)
-    for (let i = 2; i < Math.min(20, candles.length - 2); i++) {
-      if (lows[i] < lows[i-1] && lows[i] < lows[i-2] &&
-          lows[i] < lows[i+1] && lows[i] < lows[i+2]) {
-        const strength = calcStrength(lows, i, 'low');
+    // ── Swing Lows (Support) ──────────────────────────────────────────
+    for (let i = 3; i < Math.min(60, candles.length - 3); i++) {
+      if (lows[i] < lows[i-1] && lows[i] < lows[i-2] && lows[i] < lows[i-3] &&
+          lows[i] < lows[i+1] && lows[i] < lows[i+2] && lows[i] < lows[i+3]) {
         zones.push({
-          price: lows[i],
-          type: 'support',
-          label: 'SUP',
+          price: lows[i], type: 'support', label: 'SUP',
           badgeClass: 'badge-sup',
           desc: `دعم سوينغ (${i} شمعة)`,
-          strength
+          strength: calcStrength(lows, i), priority: 3
         });
       }
     }
 
-    // Equal Highs (EQH) — liquidity pools above
-    const eqhTolerance = currentPrice * 0.0003;
-    for (let i = 0; i < Math.min(30, highs.length); i++) {
-      for (let j = i+2; j < Math.min(30, highs.length); j++) {
-        if (Math.abs(highs[i] - highs[j]) <= eqhTolerance && highs[i] > currentPrice) {
-          zones.push({
-            price: (highs[i] + highs[j]) / 2,
-            type: 'liquidity-high',
-            label: 'EQH',
-            badgeClass: 'badge-eqh',
-            desc: `قمم متساوية — سيولة مستهدفة`,
-            strength: 3
-          });
+    // ── Equal Highs EQH ───────────────────────────────────────────────
+    const eqTol = currentPrice * 0.0008; // wider tolerance
+    const seen = new Set();
+    for (let i = 0; i < Math.min(80, highs.length); i++) {
+      for (let j = i + 2; j < Math.min(80, highs.length); j++) {
+        if (Math.abs(highs[i] - highs[j]) <= eqTol) {
+          const avg = ((highs[i] + highs[j]) / 2).toFixed(decimals);
+          if (!seen.has('H' + avg)) {
+            seen.add('H' + avg);
+            zones.push({
+              price: parseFloat(avg),
+              type: highs[i] > currentPrice ? 'resistance' : 'support',
+              label: 'EQH', badgeClass: 'badge-eqh',
+              desc: 'قمم متساوية — سيولة مستهدفة', strength: 3, priority: 2
+            });
+          }
           break;
         }
       }
     }
 
-    // Equal Lows (EQL) — liquidity pools below
-    const eqlTolerance = currentPrice * 0.0003;
-    for (let i = 0; i < Math.min(30, lows.length); i++) {
-      for (let j = i+2; j < Math.min(30, lows.length); j++) {
-        if (Math.abs(lows[i] - lows[j]) <= eqlTolerance && lows[i] < currentPrice) {
-          zones.push({
-            price: (lows[i] + lows[j]) / 2,
-            type: 'liquidity-high',
-            label: 'EQL',
-            badgeClass: 'badge-eql',
-            desc: `قيعان متساوية — سيولة مستهدفة`,
-            strength: 3
-          });
+    // ── Equal Lows EQL ────────────────────────────────────────────────
+    for (let i = 0; i < Math.min(80, lows.length); i++) {
+      for (let j = i + 2; j < Math.min(80, lows.length); j++) {
+        if (Math.abs(lows[i] - lows[j]) <= eqTol) {
+          const avg = ((lows[i] + lows[j]) / 2).toFixed(decimals);
+          if (!seen.has('L' + avg)) {
+            seen.add('L' + avg);
+            zones.push({
+              price: parseFloat(avg),
+              type: lows[i] < currentPrice ? 'support' : 'resistance',
+              label: 'EQL', badgeClass: 'badge-eql',
+              desc: 'قيعان متساوية — سيولة مستهدفة', strength: 3, priority: 2
+            });
+          }
           break;
         }
       }
     }
 
-    // Deduplicate & sort by proximity to current price
-    const unique = deduplicateZones(zones, currentPrice * 0.0005);
-    unique.sort((a, b) => Math.abs(a.price - currentPrice) - Math.abs(b.price - currentPrice));
+    // ── Deduplicate ───────────────────────────────────────────────────
+    const unique = deduplicateZones(zones, currentPrice * 0.0004);
 
-    return unique.slice(0, 8);
+    // Sort: priority first, then by distance to current price
+    unique.sort((a, b) => {
+      if ((a.priority || 9) !== (b.priority || 9)) return (a.priority || 9) - (b.priority || 9);
+      return Math.abs(a.price - currentPrice) - Math.abs(b.price - currentPrice);
+    });
+
+    return unique.slice(0, 12);
   }
 
-  function calcStrength(arr, idx, type) {
+  function calcStrength(arr, idx) {
     let touches = 0;
     const tolerance = arr[idx] * 0.001;
     for (let i = 0; i < arr.length; i++) {
@@ -1134,8 +1180,8 @@
     const all = [...allZonesData.eurusd, ...allZonesData.xauusd];
     document.getElementById('sum-res').textContent = all.filter(z => z.type === 'resistance').length;
     document.getElementById('sum-sup').textContent = all.filter(z => z.type === 'support').length;
-    document.getElementById('sum-liq').textContent = all.filter(z => z.type === 'liquidity-high' && z.label !== 'EQH' && z.label !== 'EQL').length;
-    document.getElementById('sum-eq').textContent  = all.filter(z => z.label === 'EQH' || z.label === 'EQL').length;
+    document.getElementById('sum-liq').textContent = all.filter(z => z.label === 'EQH' || z.label === 'EQL').length;
+    document.getElementById('sum-eq').textContent  = all.filter(z => z.label === 'PDH' || z.label === 'PDL' || z.label === 'PWH' || z.label === 'PWL').length;
   }
 
   function selectInput(el) {
