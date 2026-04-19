@@ -1,127 +1,1229 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>تيكي تاكا - حساب اللوت</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      direction: rtl;
-      background: #202124;
-      color: #e8eaed;
-      text-align: center;
-      padding: 20px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liquidity Zone Detector</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060a0f;
+    --surface: #0d1520;
+    --surface2: #111d2e;
+    --border: #1a2e45;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --gold: #ffd166;
+    --green: #06d6a0;
+    --red: #ef233c;
+    --text: #e0eaf5;
+    --muted: #4a6a8a;
+    --font-ar: 'Tajawal', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
 
-    h2 {
-      color: #fbbc04;
-      margin-bottom: 20px;
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .container {
-      background: #303134;
-      border-radius: 12px;
-      padding: 25px 20px 30px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-    }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ar);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      text-align: right;
-    }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 40% at 20% 10%, rgba(0,212,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 30% at 80% 80%, rgba(255,107,53,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-    input {
-      padding: 10px;
-      width: 100%;
-      border-radius: 6px;
-      border: 1px solid #5f6368;
-      background: #202124;
-      color: #e8eaed;
-      text-align: center;
-      box-sizing: border-box;
-    }
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-    button {
-      margin-top: 20px;
-      padding: 12px;
-      width: 100%;
-      background: #fbbc04;
-      color: #202124;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
 
-    button:hover {
-      background: #e3aa00;
-    }
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
 
-    .result {
-      margin-top: 25px;
-      font-size: 17px;
-    }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 
-    #backBtn {
-      margin-top: 30px;
-      padding: 10px 20px;
-      background: #fbbc04;
-      color: #202124;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-  </style>
+  .logo-icon {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--accent), #0066ff);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .logo-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+
+  .logo-text p {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .status-dot.live {
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* API Setup */
+  .api-setup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .api-setup.hidden { display: none; }
+
+  .api-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+
+  .api-content { flex: 1; }
+
+  .api-content h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
+  .api-content p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .api-input-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  input[type="text"], input[type="password"] {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: var(--font-ar);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0066ff);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0,212,255,0.3);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Controls Bar */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .controls-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+
+  .timeframe-group {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .tf-btn {
+    padding: 7px 14px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-right: 1px solid var(--border);
+  }
+
+  .tf-btn:last-child { border-right: none; }
+
+  .tf-btn.active {
+    background: rgba(0,212,255,0.1);
+    color: var(--accent);
+  }
+
+  .tf-btn:hover:not(.active) {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .refresh-btn {
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Assets Grid */
+  .assets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 700px) {
+    .assets-grid { grid-template-columns: 1fr; }
+  }
+
+  .asset-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .asset-card:hover {
+    border-color: rgba(0,212,255,0.3);
+  }
+
+  .asset-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .asset-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .asset-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .eurusd .asset-icon { background: rgba(0,212,255,0.15); color: var(--accent); }
+  .xauusd .asset-icon { background: rgba(255,209,102,0.15); color: var(--gold); }
+
+  .asset-name h3 {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+
+  .asset-name p {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .asset-price {
+    text-align: left;
+  }
+
+  .price-value {
+    font-size: 20px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    color: var(--text);
+  }
+
+  .price-change {
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+
+  .price-change.up { color: var(--green); }
+  .price-change.down { color: var(--red); }
+
+  /* Zones Section */
+  .zones-section {
+    padding: 16px 20px;
+  }
+
+  .zones-title {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .zone-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border-right: 3px solid transparent;
+    transition: background 0.2s;
+    position: relative;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .zone-row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .zone-row.resistance { border-right-color: var(--red); }
+  .zone-row.resistance::before { background: linear-gradient(90deg, transparent, rgba(239,35,60,0.05)); }
+
+  .zone-row.support { border-right-color: var(--green); }
+  .zone-row.support::before { background: linear-gradient(90deg, transparent, rgba(6,214,160,0.05)); }
+
+  .zone-row.liquidity-high { border-right-color: var(--gold); }
+  .zone-row.liquidity-high::before { background: linear-gradient(90deg, transparent, rgba(255,209,102,0.07)); }
+
+  .zone-row:hover::before { opacity: 1; }
+
+  /* Selectable price input — works on mobile without clipboard API */
+  .price-copy-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 8px;
+    width: 108px;
+    text-align: center;
+    cursor: pointer;
+    -webkit-user-select: all;
+    user-select: all;
+    transition: border-color 0.2s, background 0.2s;
+    display: block;
+    caret-color: transparent;
+  }
+  .price-copy-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    box-shadow: 0 0 0 2px rgba(0,212,255,0.15);
+  }
+
+  .zone-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .zone-badge {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .badge-res { background: rgba(239,35,60,0.15); color: var(--red); }
+  .badge-sup { background: rgba(6,214,160,0.15); color: var(--green); }
+  .badge-liq { background: rgba(255,209,102,0.15); color: var(--gold); }
+  .badge-eqh { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .badge-eql { background: rgba(0,102,255,0.15); color: #6699ff; }
+
+  .zone-desc {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .zone-price-val {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+    cursor: text;
+    display: inline-block;
+    padding: 2px 0;
+  }
+
+  .price-field-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .price-field {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--border);
+    width: 105px;
+    text-align: center;
+    padding: 3px 4px;
+    outline: none;
+    cursor: text;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+
+  .price-field:focus {
+    border-bottom-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.06);
+    border-radius: 4px;
+  }
+
+  .zone-strength {
+    display: flex;
+    gap: 3px;
+    margin-top: 2px;
+    justify-content: flex-end;
+  }
+
+  .strength-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .strength-dot.filled { background: var(--gold); }
+
+  /* Summary Panel */
+  .summary-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .summary-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 700px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .summary-item {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .summary-item .s-val {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+  }
+
+  .summary-item .s-label {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Bias section */
+  .bias-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .bias-card {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+
+  .bias-card .b-symbol {
+    font-size: 13px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .bias-card .b-direction {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+
+  .bias-card .b-reason {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .bullish { color: var(--green); }
+  .bearish { color: var(--red); }
+  .neutral { color: var(--gold); }
+
+  /* Loading */
+  .loading-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+  }
+
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* Error */
+  .error-msg {
+    background: rgba(239,35,60,0.1);
+    border: 1px solid rgba(239,35,60,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--red);
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+
+  /* Placeholder */
+  .placeholder-zones {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .last-update {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+
+  /* Copy button */
+  .copy-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 5px;
+    color: var(--muted);
+    font-size: 13px;
+    transition: all 0.15s;
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  .copy-btn:hover {
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+  }
+
+  .copy-btn.copied {
+    color: var(--green);
+    background: rgba(6,214,160,0.1);
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Current price copyable */
+  .price-value {
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .price-value:hover {
+    color: var(--accent);
+  }
+</style>
 </head>
 <body>
+<div class="grid-bg"></div>
+<div class="toast" id="toast">✓ تم النسخ</div>
 
-  <h2>تيكي تاكا ⚽ - حساب اللوت الذكي</h2>
+<div class="container">
 
-  <div class="container">
-    <label for="capital">رأس المال ($):</label>
-    <input type="number" id="capital" placeholder="أدخل رأس المال" />
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🎯</div>
+      <div class="logo-text">
+        <h1>LIQUIDITY RADAR</h1>
+        <p>Powered by Twelve Data API</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">غير متصل</span>
+    </div>
+  </header>
 
-    <label for="reflection">نقاط الانعكاس:</label>
-    <input type="number" id="reflection" placeholder="أدخل عدد النقاط" />
-
-    <button onclick="calculateLot()">احسب اللوت المناسب</button>
-
-    <div class="result" id="result"></div>
+  <!-- API Setup -->
+  <div class="api-setup" id="apiSetup">
+    <div class="api-icon">🔑</div>
+    <div class="api-content">
+      <h3>أدخل مفتاح Twelve Data API</h3>
+      <p>احصل على مفتاح مجاني من <strong>twelvedata.com</strong> ← قم بالتسجيل ← انسخ API Key</p>
+      <div class="api-input-row">
+        <input type="password" id="apiKeyInput" placeholder="أدخل API Key هنا..." />
+        <button class="btn btn-primary" onclick="connectAPI()">اتصال 🚀</button>
+      </div>
+    </div>
   </div>
 
-  <button id="backBtn" onclick="window.location.href='index.html'">العودة للصفحة الرئيسية</button>
+  <div class="error-msg" id="errorMsg"></div>
 
-  <script>
-    function calculateLot() {
-      const capital = parseFloat(document.getElementById('capital').value);
-      const reflection = parseFloat(document.getElementById('reflection').value);
+  <!-- Controls -->
+  <div class="controls" id="mainControls" style="display:none">
+    <span class="controls-label">الفريم:</span>
+    <div class="timeframe-group">
+      <button class="tf-btn" onclick="setTF('1day')" data-tf="1day">Daily</button>
+      <button class="tf-btn active" onclick="setTF('4h')" data-tf="4h">4H</button>
+      <button class="tf-btn" onclick="setTF('1h')" data-tf="1h">1H</button>
+      <button class="tf-btn" onclick="setTF('15min')" data-tf="15min">15M</button>
+    </div>
+    <button class="btn btn-primary btn-sm refresh-btn" id="refreshBtn" onclick="loadAllData()">
+      <span id="refreshIcon">↻</span> تحديث
+    </button>
+    <span class="last-update" id="lastUpdate"></span>
+    <button class="btn btn-ghost btn-sm" onclick="resetAPI()">تغيير المفتاح</button>
+  </div>
 
-      if (!capital || !reflection || reflection === 0) {
-        document.getElementById('result').innerHTML = "يرجى إدخال القيم بشكل صحيح.";
-        return;
-      }
+  <!-- Assets Grid -->
+  <div class="assets-grid" id="assetsGrid" style="display:none">
 
-      const riskPerTrade = capital / 6;
-      const dollarsPerPoint = riskPerTrade / reflection;
-      const rawLot = dollarsPerPoint / 100;
-      const finalLot = Math.floor(rawLot * 100) / 100;
+    <!-- EUR/USD Card -->
+    <div class="asset-card eurusd">
+      <div class="asset-header">
+        <div class="asset-name">
+          <div class="asset-icon">€/$</div>
+          <div>
+            <h3>EUR/USD</h3>
+            <p>اليورو / الدولار</p>
+          </div>
+        </div>
+        <div class="asset-price">
+          <div class="price-value" id="eurusd-price">—</div>
+          <div class="price-change" id="eurusd-change">—</div>
+        </div>
+      </div>
+      <div class="zones-section">
+        <div class="zones-title">🎯 مناطق السيولة المستهدفة</div>
+        <div id="eurusd-zones"><div class="placeholder-zones">⏳ جاري جلب البيانات...</div></div>
+      </div>
+    </div>
 
-      const profit10pips = finalLot * 10 * 100;
-      const lossAtReflection = finalLot * reflection * 100;
+    <!-- XAU/USD Card -->
+    <div class="asset-card xauusd">
+      <div class="asset-header">
+        <div class="asset-name">
+          <div class="asset-icon">Au</div>
+          <div>
+            <h3>XAU/USD</h3>
+            <p>الذهب / الدولار</p>
+          </div>
+        </div>
+        <div class="asset-price">
+          <div class="price-value" id="xauusd-price">—</div>
+          <div class="price-change" id="xauusd-change">—</div>
+        </div>
+      </div>
+      <div class="zones-section">
+        <div class="zones-title">🎯 مناطق السيولة المستهدفة</div>
+        <div id="xauusd-zones"><div class="placeholder-zones">⏳ جاري جلب البيانات...</div></div>
+      </div>
+    </div>
 
-      document.getElementById('result').innerHTML = `
-        <p>🔢 حجم اللوت المناسب: <strong>${finalLot.toFixed(2)}</strong></p>
-        <p>✅ الربح في حال 10 نقاط: <strong>$${profit10pips.toFixed(2)}</strong></p>
-        <p>❌ الخسارة في حال انعكاس ${reflection} نقطة: <strong>$${lossAtReflection.toFixed(2)}</strong></p>
-      `;
+  </div>
+
+  <!-- Summary Panel -->
+  <div class="summary-panel" id="summaryPanel" style="display:none">
+    <div class="summary-header">
+      <h2>📊 ملخص اليوم</h2>
+      <span class="last-update" id="summaryTime"></span>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="s-val" style="color:var(--red)" id="sum-res">—</div>
+        <div class="s-label">مناطق مقاومة</div>
+      </div>
+      <div class="summary-item">
+        <div class="s-val" style="color:var(--green)" id="sum-sup">—</div>
+        <div class="s-label">مناطق دعم</div>
+      </div>
+      <div class="summary-item">
+        <div class="s-val" style="color:var(--gold)" id="sum-liq">—</div>
+        <div class="s-label">مناطق سيولة عالية</div>
+      </div>
+      <div class="summary-item">
+        <div class="s-val" style="color:var(--accent2)" id="sum-eq">—</div>
+        <div class="s-label">قمم/قيعان متساوية</div>
+      </div>
+    </div>
+
+    <div class="bias-row">
+      <div class="bias-card" id="bias-eurusd">
+        <div class="b-symbol">EUR/USD</div>
+        <div class="b-direction">—</div>
+        <div class="b-reason">—</div>
+      </div>
+      <div class="bias-card" id="bias-xauusd">
+        <div class="b-symbol">XAU/USD</div>
+        <div class="b-direction">—</div>
+        <div class="b-reason">—</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    LIQUIDITY RADAR v1.0 · بيانات حقيقية من Twelve Data · للأغراض التعليمية فقط · ليس توصية مالية
+  </footer>
+
+</div>
+
+<script>
+  let API_KEY = localStorage.getItem('td_api_key') || '';
+  let currentTF = '4h';
+  let allZonesData = { eurusd: [], xauusd: [] };
+
+  // Init
+  if (API_KEY) {
+    showMainUI();
+    loadAllData();
+  }
+
+  function connectAPI() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) { showError('أدخل مفتاح API صالح'); return; }
+    API_KEY = key;
+    localStorage.setItem('td_api_key', key);
+    hideError();
+    showMainUI();
+    loadAllData();
+  }
+
+  function resetAPI() {
+    API_KEY = '';
+    localStorage.removeItem('td_api_key');
+    document.getElementById('apiSetup').classList.remove('hidden');
+    document.getElementById('mainControls').style.display = 'none';
+    document.getElementById('assetsGrid').style.display = 'none';
+    document.getElementById('summaryPanel').style.display = 'none';
+    document.getElementById('statusDot').className = 'status-dot';
+    document.getElementById('statusText').textContent = 'غير متصل';
+  }
+
+  function showMainUI() {
+    document.getElementById('apiSetup').classList.add('hidden');
+    document.getElementById('mainControls').style.display = 'flex';
+    document.getElementById('assetsGrid').style.display = 'grid';
+    document.getElementById('summaryPanel').style.display = 'block';
+  }
+
+  function setTF(tf) {
+    currentTF = tf;
+    document.querySelectorAll('.tf-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tf === tf);
+    });
+    loadAllData();
+  }
+
+  async function loadAllData() {
+    const btn = document.getElementById('refreshBtn');
+    const icon = document.getElementById('refreshIcon');
+    btn.disabled = true;
+    icon.classList.add('spin');
+    hideError();
+
+    try {
+      await Promise.all([
+        fetchAsset('EUR/USD', 'eurusd'),
+        fetchAsset('XAU/USD', 'xauusd')
+      ]);
+      updateSummary();
+      document.getElementById('statusDot').className = 'status-dot live';
+      document.getElementById('statusText').textContent = 'متصل · بيانات حية';
+      const now = new Date();
+      document.getElementById('lastUpdate').textContent = `آخر تحديث: ${now.toLocaleTimeString('ar')}`;
+      document.getElementById('summaryTime').textContent = now.toLocaleDateString('ar', { weekday:'long', day:'numeric', month:'long' });
+    } catch(e) {
+      showError(e.message || 'خطأ في جلب البيانات');
+      document.getElementById('statusDot').className = 'status-dot';
+      document.getElementById('statusText').textContent = 'خطأ في الاتصال';
     }
-  </script>
 
+    btn.disabled = false;
+    icon.classList.remove('spin');
+  }
+
+  async function fetchAsset(symbol, id) {
+    // Fetch time series
+    const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=${currentTF}&outputsize=50&apikey=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'error' || data.code) {
+      throw new Error(`خطأ API: ${data.message || 'تحقق من صحة المفتاح أو حد الطلبات'}`);
+    }
+
+    const candles = data.values;
+    if (!candles || candles.length < 10) throw new Error(`بيانات غير كافية لـ ${symbol}`);
+
+    // Latest price
+    const latest = parseFloat(candles[0].close);
+    const prevClose = parseFloat(candles[1].close);
+    const change = ((latest - prevClose) / prevClose * 100).toFixed(3);
+    const isUp = latest >= prevClose;
+
+    const decimals = id === 'xauusd' ? 2 : 5;
+
+    document.getElementById(`${id}-price`).textContent = latest.toFixed(decimals);
+    document.getElementById(`${id}-price`).title = 'اضغط لنسخ السعر';
+    document.getElementById(`${id}-price`).onclick = () => copyPrice(latest.toFixed(decimals), `${symbol}`);
+    const changeEl = document.getElementById(`${id}-change`);
+    changeEl.textContent = `${isUp ? '▲' : '▼'} ${Math.abs(change)}%`;
+    changeEl.className = `price-change ${isUp ? 'up' : 'down'}`;
+
+    // Calculate zones
+    const zones = calculateLiquidityZones(candles, latest, decimals);
+    allZonesData[id] = zones;
+    renderZones(id, zones, latest, decimals);
+    updateBias(id, zones, latest, candles);
+  }
+
+  function calculateLiquidityZones(candles, currentPrice, decimals) {
+    const zones = [];
+    const highs = candles.map(c => parseFloat(c.high));
+    const lows  = candles.map(c => parseFloat(c.low));
+    const closes = candles.map(c => parseFloat(c.close));
+
+    // Recent swing highs (resistance)
+    for (let i = 2; i < Math.min(20, candles.length - 2); i++) {
+      if (highs[i] > highs[i-1] && highs[i] > highs[i-2] &&
+          highs[i] > highs[i+1] && highs[i] > highs[i+2]) {
+        const strength = calcStrength(highs, i, 'high');
+        zones.push({
+          price: highs[i],
+          type: 'resistance',
+          label: 'RES',
+          badgeClass: 'badge-res',
+          desc: `مقاومة سوينغ (${i} شمعة)`,
+          strength
+        });
+      }
+    }
+
+    // Recent swing lows (support)
+    for (let i = 2; i < Math.min(20, candles.length - 2); i++) {
+      if (lows[i] < lows[i-1] && lows[i] < lows[i-2] &&
+          lows[i] < lows[i+1] && lows[i] < lows[i+2]) {
+        const strength = calcStrength(lows, i, 'low');
+        zones.push({
+          price: lows[i],
+          type: 'support',
+          label: 'SUP',
+          badgeClass: 'badge-sup',
+          desc: `دعم سوينغ (${i} شمعة)`,
+          strength
+        });
+      }
+    }
+
+    // Equal Highs (EQH) — liquidity pools above
+    const eqhTolerance = currentPrice * 0.0003;
+    for (let i = 0; i < Math.min(30, highs.length); i++) {
+      for (let j = i+2; j < Math.min(30, highs.length); j++) {
+        if (Math.abs(highs[i] - highs[j]) <= eqhTolerance && highs[i] > currentPrice) {
+          zones.push({
+            price: (highs[i] + highs[j]) / 2,
+            type: 'liquidity-high',
+            label: 'EQH',
+            badgeClass: 'badge-eqh',
+            desc: `قمم متساوية — سيولة مستهدفة`,
+            strength: 3
+          });
+          break;
+        }
+      }
+    }
+
+    // Equal Lows (EQL) — liquidity pools below
+    const eqlTolerance = currentPrice * 0.0003;
+    for (let i = 0; i < Math.min(30, lows.length); i++) {
+      for (let j = i+2; j < Math.min(30, lows.length); j++) {
+        if (Math.abs(lows[i] - lows[j]) <= eqlTolerance && lows[i] < currentPrice) {
+          zones.push({
+            price: (lows[i] + lows[j]) / 2,
+            type: 'liquidity-high',
+            label: 'EQL',
+            badgeClass: 'badge-eql',
+            desc: `قيعان متساوية — سيولة مستهدفة`,
+            strength: 3
+          });
+          break;
+        }
+      }
+    }
+
+    // Deduplicate & sort by proximity to current price
+    const unique = deduplicateZones(zones, currentPrice * 0.0005);
+    unique.sort((a, b) => Math.abs(a.price - currentPrice) - Math.abs(b.price - currentPrice));
+
+    return unique.slice(0, 8);
+  }
+
+  function calcStrength(arr, idx, type) {
+    let touches = 0;
+    const tolerance = arr[idx] * 0.001;
+    for (let i = 0; i < arr.length; i++) {
+      if (Math.abs(arr[i] - arr[idx]) <= tolerance) touches++;
+    }
+    return Math.min(touches, 3);
+  }
+
+  function deduplicateZones(zones, tolerance) {
+    const result = [];
+    for (const z of zones) {
+      if (!result.some(r => Math.abs(r.price - z.price) < tolerance)) {
+        result.push(z);
+      }
+    }
+    return result;
+  }
+
+  function renderZones(id, zones, currentPrice, decimals) {
+    const container = document.getElementById(`${id}-zones`);
+    if (!zones.length) {
+      container.innerHTML = '<div class="placeholder-zones">لم يتم العثور على مناطق واضحة</div>';
+      return;
+    }
+
+    container.innerHTML = zones.map(z => {
+      const above = z.price > currentPrice;
+      const distance = Math.abs(z.price - currentPrice);
+      const distPct = (distance / currentPrice * 100).toFixed(3);
+      const direction = above ? '↑' : '↓';
+
+      const dots = [1,2,3].map(i =>
+        `<div class="strength-dot ${i <= z.strength ? 'filled' : ''}"></div>`
+      ).join('');
+
+      return `
+        <div class="zone-row ${z.type}">
+          <div class="zone-info">
+            <span class="zone-badge ${z.badgeClass}">${z.label}</span>
+            <div>
+              <div style="font-size:12px;color:var(--text)">${z.desc}</div>
+              <div class="zone-desc">${direction} ${distPct}% من السعر الحالي</div>
+            </div>
+          </div>
+          <div class="price-field-wrap">
+            <div class="zone-price-val">${z.price.toFixed(decimals)}</div>
+            <button class="copy-price-btn" onclick="promptCopy('${z.price.toFixed(decimals)}')">📋 انسخ</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateBias(id, zones, currentPrice, candles) {
+    const card = document.getElementById(`bias-${id}`);
+    const closes = candles.map(c => parseFloat(c.close));
+
+    // Simple bias: count zones above vs below
+    const above = zones.filter(z => z.price > currentPrice).length;
+    const below = zones.filter(z => z.price < currentPrice).length;
+
+    // Trend: is price above 20-period average?
+    const avg20 = closes.slice(0, 20).reduce((a,b)=>a+b,0) / 20;
+    const aboveMA = currentPrice > avg20;
+
+    let direction, cssClass, reason;
+
+    if (above > below && aboveMA) {
+      direction = '📈 BULLISH'; cssClass = 'bullish';
+      reason = 'السعر فوق المتوسط · مناطق سيولة أعلى مستهدفة';
+    } else if (below > above && !aboveMA) {
+      direction = '📉 BEARISH'; cssClass = 'bearish';
+      reason = 'السعر تحت المتوسط · مناطق سيولة أدنى مستهدفة';
+    } else {
+      direction = '↔ NEUTRAL'; cssClass = 'neutral';
+      reason = 'السوق في منطقة توازن · انتظر كسر المستوى';
+    }
+
+    card.querySelector('.b-direction').textContent = direction;
+    card.querySelector('.b-direction').className = `b-direction ${cssClass}`;
+    card.querySelector('.b-reason').textContent = reason;
+  }
+
+  function updateSummary() {
+    const all = [...allZonesData.eurusd, ...allZonesData.xauusd];
+    document.getElementById('sum-res').textContent = all.filter(z => z.type === 'resistance').length;
+    document.getElementById('sum-sup').textContent = all.filter(z => z.type === 'support').length;
+    document.getElementById('sum-liq').textContent = all.filter(z => z.type === 'liquidity-high' && z.label !== 'EQH' && z.label !== 'EQL').length;
+    document.getElementById('sum-eq').textContent  = all.filter(z => z.label === 'EQH' || z.label === 'EQL').length;
+  }
+
+  function selectInput(el) {
+    el.focus();
+    el.setSelectionRange(0, el.value.length);
+    try { el.select(); } catch(e) {}
+    showToast('✓ تم التحديد — اضغط نسخ');
+  }
+
+  function copyPrice(price, label) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(price).then(() => {
+        showToast(`✓ تم نسخ ${label}: ${price}`);
+      }).catch(() => fallbackCopy(price, label));
+      return;
+    }
+    fallbackCopy(price, label);
+  }
+
+  function fallbackCopy(price, label) {
+    try {
+      const el = document.createElement('input');
+      el.value = price;
+      el.setAttribute('readonly', '');
+      el.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;opacity:0;';
+      document.body.appendChild(el);
+      if (navigator.userAgent.match(/ipad|iphone/i)) {
+        el.contentEditable = true;
+        el.readOnly = false;
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        el.setSelectionRange(0, 999999);
+      } else {
+        el.select();
+      }
+      const ok = document.execCommand('copy');
+      document.body.removeChild(el);
+      if (ok) {
+        showToast(`✓ تم نسخ ${label}: ${price}`);
+      } else {
+        showToast(`📋 ${price} — اضغط مطولاً للنسخ`);
+      }
+    } catch(e) {
+      showToast(`📋 ${price} — اضغط مطولاً للنسخ`);
+    }
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '⚠️ ' + msg;
+    el.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+</script>
 </body>
 </html>
